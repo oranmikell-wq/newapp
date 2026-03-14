@@ -11,10 +11,30 @@ This file provides guidance to Claude Code when working with code in this reposi
 
 ## Tech Stack
 
-- Single HTML file (`index.html`) — ללא build system, ללא npm
-- Vanilla JS + CSS — הכל inline
+- מבנה מרובה קבצים — ללא build system, ללא npm
+- Vanilla JS + CSS
 - localStorage לאחסון (watchlist, היסטוריית חיפושים)
 - GitHub Pages לדפלוי
+
+## מבנה קבצים
+
+```
+buyornot/
+├── index.html        # מבנה HTML בלבד
+├── css/
+│   ├── main.css      # עיצוב כללי, משתני צבע, light/dark
+│   ├── home.css      # דף הבית
+│   ├── results.css   # דף תוצאות
+│   └── compare.css   # דף השוואה
+└── js/
+    ├── app.js        # ניהול ניווט בין דפים, אתחול
+    ├── api.js        # כל קריאות ה-API + corsproxy
+    ├── scoring.js    # מנוע הציון המשוקלל
+    ├── chart.js      # TradingView Lightweight Charts
+    ├── watchlist.js  # watchlist + התראות
+    ├── compare.js    # השוואת מניות
+    └── i18n.js       # תרגומים עברית/אנגלית
+```
 
 ## Architecture
 
