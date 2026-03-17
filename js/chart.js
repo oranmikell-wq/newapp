@@ -33,7 +33,7 @@ function initChart() {
     handleScale: true,
   });
 
-  mainSeries = mainChart.addAreaSeries({
+  mainSeries = mainChart.addSeries(LightweightCharts.AreaSeries, {
     lineColor:       '#16a34a',
     topColor:        'rgba(22,163,74,0.2)',
     bottomColor:     'rgba(22,163,74,0)',
@@ -133,7 +133,7 @@ async function initCompareChart(symbols) {
       const base = data[0].value;
       const relData = data.map(p => ({ time: p.time, value: ((p.value - base) / base) * 100 }));
 
-      const series = compareChart.addLineSeries({
+      const series = compareChart.addSeries(LightweightCharts.LineSeries, {
         color:     COLORS[i % COLORS.length],
         lineWidth: 2,
         title:     symbols[i],

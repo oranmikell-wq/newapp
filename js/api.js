@@ -12,7 +12,7 @@ function cacheGet(symbol) {
     const raw = localStorage.getItem(`bon-cache-${symbol}`);
     if (!raw) return null;
     const { data, ts } = JSON.parse(raw);
-    if (Date.now() - ts < 15 * 60 * 1000) return data; // 15 min
+    if (Date.now() - ts < 15 * 60 * 1000) return data;
     return null;
   } catch { return null; }
 }
@@ -37,28 +37,29 @@ async function fetchProxy(url) {
   try {
     const res = await fetch(PROXY1 + encodeURIComponent(url));
     if (!res.ok) throw new Error(res.status);
-    return await res.json();
+    const text = await res.text();
+    return JSON.parse(text);
   } catch {
     const res = await fetch(PROXY2 + encodeURIComponent(url));
     if (!res.ok) throw new Error(res.status);
-    return await res.json();
+    return res.json();
   }
 }
 
 async function fetchDirect(url) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(res.status);
-  return await res.json();
+  return res.json();
 }
 
-// ── Yahoo Finance ──────────────────────────────────────
-async function yahooQuote(symbol) {
-  const url = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${symbol}?modules=summaryDetail,defaultKeyStatistics,financialData,recommendationTrend,calendarEvents,assetProfile,price`;
+// ── Yahoo Finance v8 chart (no crumb needed) ───────────
+async function yahooChart(symbol, range = '1d', interval = '1d') {
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=${range}&interval=${interval}&includePrePost=false`;
   return fetchProxy(url);
 }
 
 async function yahooHistory(symbol, period1, period2, interval = '1d') {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?period1=${period1}&period2=${period2}&interval=${interval}`;
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?period1=${period1}&period2=${period2}&interval=${interval}&includePrePost=false`;
   return fetchProxy(url);
 }
 
@@ -67,12 +68,32 @@ async function finnhubGet(endpoint) {
   return fetchDirect(`https://finnhub.io/api/v1/${endpoint}&token=${FINNHUB_KEY}`);
 }
 
+async function getFinnhubQuote(symbol) {
+  return finnhubGet(`quote?symbol=${symbol}`);
+}
+
+async function getFinnhubProfile(symbol) {
+  return finnhubGet(`stock/profile2?symbol=${symbol}`);
+}
+
+async function getFinnhubMetrics(symbol) {
+  return finnhubGet(`stock/metric?symbol=${symbol}&metric=all`);
+}
+
 async function getFinnhubRecommendations(symbol) {
   return finnhubGet(`stock/recommendation?symbol=${symbol}`);
 }
 
+async function getFinnhubPriceTarget(symbol) {
+  return finnhubGet(`stock/price-target?symbol=${symbol}`);
+}
+
+async function getFinnhubEarnings(symbol) {
+  return finnhubGet(`stock/earnings?symbol=${symbol}&limit=8`);
+}
+
 async function getFinnhubInstitutional(symbol) {
-  return finnhubGet(`institutional/ownership?symbol=${symbol}&limit=10`);
+  return finnhubGet(`institutional/ownership?symbol=${symbol}&limit=5`);
 }
 
 async function getFinnhubNews(symbol) {
@@ -81,62 +102,69 @@ async function getFinnhubNews(symbol) {
   return finnhubGet(`company-news?symbol=${symbol}&from=${from}&to=${to}`);
 }
 
-async function getFinnhubTrending() {
-  // Top active symbols
-  return finnhubGet('stock/market-status?exchange=US');
-}
-
 // ── Financial Modeling Prep ────────────────────────────
 async function fmpGet(endpoint) {
   return fetchDirect(`https://financialmodelingprep.com/stable/${endpoint}&apikey=${FMP_KEY}`);
 }
 
-async function getFmpEPS(symbol) {
-  return fmpGet(`earnings?symbol=${symbol}&limit=8`);
-}
-
 async function getFmpRevenue(symbol) {
-  return fmpGet(`income-statement?symbol=${symbol}&limit=4&period=annual`);
+  return fmpGet(`income-statement?symbol=${symbol}&limit=3&period=annual`);
 }
 
-async function getFmpBalanceSheet(symbol) {
-  return fmpGet(`balance-sheet-statement?symbol=${symbol}&limit=2&period=annual`);
+async function getFmpEarningsCalendar(symbol) {
+  return fmpGet(`earnings-confirmed?symbol=${symbol}&limit=1`);
+}
+
+// ── Trending symbols ───────────────────────────────────
+const TRENDING_DEFAULTS = ['AAPL', 'TSLA', 'NVDA', 'AMZN', 'MSFT'];
+
+async function fetchTrending() {
+  return TRENDING_DEFAULTS;
 }
 
 // ── Master fetch: all data for a symbol ───────────────
 async function fetchAllData(symbol) {
-  // Check cache first
   const cached = cacheGet(symbol);
-  if (cached) return { data: cached, fromCache: false };
+  if (cached) return { data: cached, fromCache: false, offline: false };
 
-  let offline = false;
   const stale = cacheGetStale(symbol);
 
   try {
-    const [yahooRaw, recommendations, institutional, news, epsRaw, revenueRaw, balanceRaw] =
+    const [chartRaw, quoteRaw, profileRaw, metricsRaw, recRaw, targetRaw,
+           earningsRaw, instRaw, newsRaw, revenueRaw, calendarRaw] =
       await Promise.allSettled([
-        yahooQuote(symbol),
+        yahooChart(symbol, '1d', '1d'),
+        getFinnhubQuote(symbol),
+        getFinnhubProfile(symbol),
+        getFinnhubMetrics(symbol),
         getFinnhubRecommendations(symbol),
+        getFinnhubPriceTarget(symbol),
+        getFinnhubEarnings(symbol),
         getFinnhubInstitutional(symbol),
         getFinnhubNews(symbol),
-        getFmpEPS(symbol),
         getFmpRevenue(symbol),
-        getFmpBalanceSheet(symbol),
+        getFmpEarningsCalendar(symbol),
       ]);
 
-    const yahoo = yahooRaw.status === 'fulfilled' ? yahooRaw.value : null;
-    const result = yahooRaw.value?.quoteSummary?.result?.[0];
+    const chart   = chartRaw.status   === 'fulfilled' ? chartRaw.value   : null;
+    const quote   = quoteRaw.status   === 'fulfilled' ? quoteRaw.value   : null;
+    const profile = profileRaw.status === 'fulfilled' ? profileRaw.value : null;
+    const metrics = metricsRaw.status === 'fulfilled' ? metricsRaw.value : null;
 
-    if (!result && !yahoo) throw new Error('no_data');
+    // Validate symbol exists
+    const meta = chart?.chart?.result?.[0]?.meta;
+    if (!meta && !quote) throw new Error('no_data');
+    if (quote && quote.c === 0 && !meta) throw new Error('no_data');
 
     const data = parseAllData({
-      result,
-      recommendations: recommendations.status === 'fulfilled' ? recommendations.value : [],
-      institutional:   institutional.status   === 'fulfilled' ? institutional.value   : null,
-      news:            news.status            === 'fulfilled' ? news.value            : [],
-      eps:             epsRaw.status          === 'fulfilled' ? epsRaw.value          : [],
-      revenue:         revenueRaw.status      === 'fulfilled' ? revenueRaw.value      : [],
-      balance:         balanceRaw.status      === 'fulfilled' ? balanceRaw.value      : [],
+      meta, quote, profile, metrics,
+      recommendations: recRaw.status    === 'fulfilled' ? recRaw.value    : [],
+      target:          targetRaw.status === 'fulfilled' ? targetRaw.value : null,
+      earnings:        earningsRaw.status === 'fulfilled' ? earningsRaw.value : [],
+      institutional:   instRaw.status   === 'fulfilled' ? instRaw.value   : null,
+      news:            newsRaw.status   === 'fulfilled' ? newsRaw.value   : [],
+      revenue:         revenueRaw.status === 'fulfilled' ? revenueRaw.value : [],
+      calendar:        calendarRaw.status === 'fulfilled' ? calendarRaw.value : [],
     }, symbol);
 
     cacheSet(symbol, data);
@@ -151,71 +179,56 @@ async function fetchAllData(symbol) {
 }
 
 // ── Parse all raw data into clean object ──────────────
-function parseAllData({ result, recommendations, institutional, news, eps, revenue, balance }, symbol) {
-  const sd  = result?.summaryDetail     || {};
-  const ks  = result?.defaultKeyStatistics || {};
-  const fd  = result?.financialData     || {};
-  const pr  = result?.price             || {};
-  const ap  = result?.assetProfile      || {};
-  const cal = result?.calendarEvents    || {};
+function parseAllData({ meta, quote, profile, metrics, recommendations,
+                         target, earnings, institutional, news, revenue, calendar }, symbol) {
+  const m  = metrics?.metric || {};
 
-  // Price
-  const price       = pr.regularMarketPrice?.raw ?? sd.regularMarketPrice?.raw ?? null;
-  const prevClose   = pr.regularMarketPreviousClose?.raw ?? null;
-  const change      = price && prevClose ? price - prevClose : null;
-  const changePct   = change && prevClose ? (change / prevClose) * 100 : null;
-  const currency    = pr.currency || 'USD';
+  // Price from Finnhub quote (most accurate) or Yahoo meta
+  const price       = quote?.c    ?? meta?.regularMarketPrice    ?? null;
+  const prevClose   = quote?.pc   ?? meta?.chartPreviousClose    ?? null;
+  const change      = quote?.d    ?? (price && prevClose ? price - prevClose : null);
+  const changePct   = quote?.dp   ?? (change && prevClose ? (change / prevClose) * 100 : null);
+  const currency    = meta?.currency   || profile?.currency || 'USD';
   const isTASE      = symbol.endsWith('.TA');
-  const marketState = pr.marketState || 'CLOSED';
+  const marketState = meta?.marketState || 'CLOSED';
 
   // Basic info
-  const name        = pr.longName || pr.shortName || symbol;
-  const sector      = ap.sector || null;
-  const industry    = ap.industry || null;
-  const exchange    = pr.exchangeName || null;
+  const name        = profile?.name     || meta?.longName    || meta?.shortName || symbol;
+  const sector      = profile?.finnhubIndustry || meta?.sector || null;
+  const exchange    = profile?.exchange  || meta?.exchangeName || null;
 
-  // Valuation
-  const pe          = sd.trailingPE?.raw    ?? ks.trailingPE?.raw    ?? null;
-  const pb          = ks.priceToBook?.raw   ?? null;
-  const ps          = ks.priceToSalesTrailing12Months?.raw ?? null;
-  const marketCap   = pr.marketCap?.raw     ?? sd.marketCap?.raw     ?? null;
-  const beta        = sd.beta?.raw          ?? null;
-  const dividend    = sd.dividendYield?.raw ?? null;
+  // Valuation (Finnhub metrics)
+  const pe          = m.peBasicExclExtraTTM  ?? m.peNormalizedAnnual ?? null;
+  const pb          = m.pbAnnual             ?? null;
+  const ps          = m.psAnnual             ?? null;
+  const marketCap   = profile?.marketCapitalization
+    ? profile.marketCapitalization * 1e6
+    : (meta?.regularMarketVolume ? null : null);
+  const beta        = m.beta ?? null;
+  const dividend    = m['dividendYieldIndicatedAnnual'] ?? null;
 
   // 52w
-  const high52w     = sd.fiftyTwoWeekHigh?.raw ?? null;
-  const low52w      = sd.fiftyTwoWeekLow?.raw  ?? null;
+  const high52w     = m['52WeekHigh'] ?? meta?.fiftyTwoWeekHigh ?? null;
+  const low52w      = m['52WeekLow']  ?? meta?.fiftyTwoWeekLow  ?? null;
 
-  // Analyst recommendations (Finnhub)
+  // Analyst recommendations
   const recLatest   = Array.isArray(recommendations) && recommendations.length ? recommendations[0] : null;
   const analystScore = recLatest
-    ? { buy: recLatest.buy, hold: recLatest.hold, sell: recLatest.sell + recLatest.strongSell, strongBuy: recLatest.strongBuy }
+    ? { buy: recLatest.buy || 0, hold: recLatest.hold || 0,
+        sell: (recLatest.sell || 0) + (recLatest.strongSell || 0),
+        strongBuy: recLatest.strongBuy || 0 }
     : null;
 
-  // Price target (Yahoo)
-  const targetMean  = fd.targetMeanPrice?.raw ?? null;
-  const targetHigh  = fd.targetHighPrice?.raw ?? null;
-  const targetLow   = fd.targetLowPrice?.raw  ?? null;
+  // Price target
+  const targetMean  = target?.targetMean  ?? null;
+  const targetHigh  = target?.targetHigh  ?? null;
+  const targetLow   = target?.targetLow   ?? null;
 
   // Debt/Equity
-  const debtEquity  = fd.debtToEquity?.raw ?? null;
+  const debtEquity  = m['totalDebt/totalEquityAnnual'] ?? m.totalDebtToEquityAnnual ?? null;
 
-  // Earnings date
-  const earningsTs  = cal.earnings?.earningsDate?.[0]?.raw ?? null;
-  const earningsDate = earningsTs ? new Date(earningsTs * 1000) : null;
-
-  // Institutional (Finnhub)
-  const instPct     = institutional?.ownership?.[0]?.share ?? null;
-
-  // EPS growth (FMP)
-  let epsGrowth = null;
-  if (Array.isArray(eps) && eps.length >= 2) {
-    const recent = eps[0]?.eps ?? eps[0]?.actualEarningResult?.earningsPerShare;
-    const older  = eps[4]?.eps ?? eps[4]?.actualEarningResult?.earningsPerShare;
-    if (recent != null && older != null && older !== 0) {
-      epsGrowth = ((recent - older) / Math.abs(older)) * 100;
-    }
-  }
+  // EPS growth (Finnhub)
+  const epsGrowth   = m.epsGrowth3Y ?? m.epsGrowthTTMYoy ?? null;
 
   // Revenue growth (FMP)
   let revenueGrowth = null;
@@ -225,6 +238,19 @@ function parseAllData({ result, recommendations, institutional, news, eps, reven
     if (r0 != null && r1 != null && r1 !== 0) {
       revenueGrowth = ((r0 - r1) / Math.abs(r1)) * 100;
     }
+  }
+
+  // Institutional %
+  const instPct = institutional?.ownership?.[0]?.share ?? null;
+
+  // Earnings date (FMP calendar or Finnhub earnings)
+  let earningsDate = null;
+  if (Array.isArray(calendar) && calendar.length) {
+    const d = calendar[0]?.date;
+    if (d) earningsDate = new Date(d);
+  } else if (Array.isArray(earnings) && earnings.length) {
+    const next = earnings.find(e => new Date(e.period) > new Date());
+    if (next) earningsDate = new Date(next.period);
   }
 
   // News
@@ -239,7 +265,7 @@ function parseAllData({ result, recommendations, institutional, news, eps, reven
     : [];
 
   return {
-    symbol, name, sector, industry, exchange, currency, isTASE, marketState,
+    symbol, name, sector, exchange, currency, isTASE, marketState,
     price, prevClose, change, changePct,
     pe, pb, ps, marketCap, beta, dividend,
     high52w, low52w,
@@ -252,37 +278,21 @@ function parseAllData({ result, recommendations, institutional, news, eps, reven
 
 // ── Historical prices for chart ───────────────────────
 async function fetchHistory(symbol, range) {
-  const now    = Math.floor(Date.now() / 1000);
-  const ranges = {
-    '1W': { period1: now - 7  * 86400, interval: '15m' },
-    '1M': { period1: now - 30 * 86400, interval: '1d'  },
-    '3M': { period1: now - 90 * 86400, interval: '1d'  },
-    '6M': { period1: now - 180 * 86400, interval: '1d' },
+  const now = Math.floor(Date.now() / 1000);
+  const configs = {
+    '1W': { period1: now - 7   * 86400, interval: '15m' },
+    '1M': { period1: now - 30  * 86400, interval: '1d'  },
+    '3M': { period1: now - 90  * 86400, interval: '1d'  },
+    '6M': { period1: now - 180 * 86400, interval: '1d'  },
     '1Y': { period1: now - 365 * 86400, interval: '1wk' },
     '3Y': { period1: now - 3 * 365 * 86400, interval: '1mo' },
     '5Y': { period1: now - 5 * 365 * 86400, interval: '1mo' },
   };
-  const { period1, interval } = ranges[range] || ranges['1M'];
+  const { period1, interval } = configs[range] || configs['1M'];
   const raw = await yahooHistory(symbol, period1, now, interval);
-  const chart = raw?.chart?.result?.[0];
-  if (!chart) return [];
-  const ts = chart.timestamp || [];
-  const closes = chart.indicators?.quote?.[0]?.close || [];
+  const result = raw?.chart?.result?.[0];
+  if (!result) return [];
+  const ts     = result.timestamp || [];
+  const closes = result.indicators?.quote?.[0]?.close || [];
   return ts.map((t, i) => ({ time: t, value: closes[i] })).filter(p => p.value != null);
-}
-
-// ── Trending symbols (hardcoded + Finnhub news) ───────
-const TRENDING_DEFAULTS = ['AAPL', 'TSLA', 'NVDA', 'AMZN', 'MSFT'];
-
-async function fetchTrending() {
-  return TRENDING_DEFAULTS;
-}
-
-// ── Validate symbol exists ─────────────────────────────
-async function validateSymbol(symbol) {
-  try {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=1d&interval=1d`;
-    const data = await fetchProxy(url);
-    return data?.chart?.result?.[0] != null;
-  } catch { return false; }
 }

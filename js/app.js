@@ -358,7 +358,7 @@ function renderResults(data, scored) {
 
   // Dividend
   document.getElementById('info-dividend').textContent =
-    data.dividend != null ? `${(data.dividend * 100).toFixed(2)}%` : t('noData');
+    data.dividend != null ? `${data.dividend.toFixed(2)}%` : t('noData');
 
   // Earnings
   const earningsEl = document.getElementById('info-earnings');
