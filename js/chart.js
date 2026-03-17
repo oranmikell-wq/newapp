@@ -57,13 +57,14 @@ async function loadChart(symbol, range = '1M') {
 
   try {
     const data = await fetchHistory(symbol, range);
-    if (!data.length) { mainSeries.setData([]); return; }
+    if (!data.length || !mainSeries) return;
 
     const chartData = data.map(p => ({
       time:  p.time,
       value: p.value,
     }));
 
+    if (!mainSeries) return;
     mainSeries.setData(chartData);
     mainChart.timeScale().fitContent();
 
