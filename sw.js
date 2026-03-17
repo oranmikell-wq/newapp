@@ -1,19 +1,19 @@
 // Service Worker — StockIT PWA
 const CACHE = 'stockit-v1';
 const STATIC = [
-  '/newapp/',
-  '/newapp/index.html',
-  '/newapp/css/main.css',
-  '/newapp/css/home.css',
-  '/newapp/css/results.css',
-  '/newapp/css/compare.css',
-  '/newapp/js/i18n.js',
-  '/newapp/js/api.js',
-  '/newapp/js/scoring.js',
-  '/newapp/js/chart.js',
-  '/newapp/js/watchlist.js',
-  '/newapp/js/compare.js',
-  '/newapp/js/app.js',
+  '/stockit/',
+  '/stockit/index.html',
+  '/stockit/css/main.css',
+  '/stockit/css/home.css',
+  '/stockit/css/results.css',
+  '/stockit/css/compare.css',
+  '/stockit/js/i18n.js',
+  '/stockit/js/api.js',
+  '/stockit/js/scoring.js',
+  '/stockit/js/chart.js',
+  '/stockit/js/watchlist.js',
+  '/stockit/js/compare.js',
+  '/stockit/js/app.js',
 ];
 
 self.addEventListener('install', e => {
