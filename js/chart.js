@@ -5,6 +5,7 @@ let mainSeries = null;
 let compareChart = null;
 let currentSymbol = null;
 let currentRange = '1M';
+let chartLoadGen = 0;
 
 function initChart() {
   const container = document.getElementById('chart-container');
@@ -71,16 +72,18 @@ async function loadChart(symbol, range = '1M') {
   currentSymbol = symbol;
   currentRange  = range;
 
+  const gen = ++chartLoadGen;
+
   try {
     const data = await fetchHistory(symbol, range);
-    if (!data.length || !mainSeries) return;
+    if (gen !== chartLoadGen || !mainSeries) return; // stale request
 
     const chartData = data.map(p => ({
       time:  p.time,
       value: p.value,
     }));
 
-    if (!mainSeries) return;
+    if (!data.length) return;
     mainSeries.setData(chartData);
     mainChart.timeScale().fitContent();
 
