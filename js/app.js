@@ -380,11 +380,12 @@ function renderResults(data, scored) {
   const targetRangeEl = document.getElementById('info-target-range');
   if (data.targetMean) {
     targetEl.textContent = `${currency} ${data.targetMean.toFixed(2)}`;
-    if (data.targetLow && data.targetHigh) {
-      targetRangeEl.textContent = `${data.targetLow.toFixed(0)}–${data.targetHigh.toFixed(0)}`;
-    }
+    targetRangeEl.textContent = (data.targetLow && data.targetHigh)
+      ? `${data.targetLow.toFixed(0)}–${data.targetHigh.toFixed(0)}`
+      : '';
   } else {
     targetEl.textContent = t('noData');
+    targetRangeEl.textContent = '';
   }
 
   // Criteria table
