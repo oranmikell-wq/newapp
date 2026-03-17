@@ -111,8 +111,12 @@ async function getFmpRevenue(symbol) {
   return fmpGet(`income-statement?symbol=${symbol}&limit=3&period=annual`);
 }
 
-async function getFmpEarningsCalendar(symbol) {
-  return fmpGet(`earnings-confirmed?symbol=${symbol}&limit=1`);
+async function getFmpEarnings(symbol) {
+  return fmpGet(`earnings?symbol=${symbol}&limit=2`);
+}
+
+async function getFmpPriceTarget(symbol) {
+  return fmpGet(`price-target-summary?symbol=${symbol}`);
 }
 
 // ── Trending symbols ───────────────────────────────────
@@ -130,20 +134,20 @@ async function fetchAllData(symbol) {
   const stale = cacheGetStale(symbol);
 
   try {
-    const [chartRaw, quoteRaw, profileRaw, metricsRaw, recRaw, targetRaw,
-           earningsRaw, instRaw, newsRaw, revenueRaw, calendarRaw] =
+    const [chartRaw, quoteRaw, profileRaw, metricsRaw, recRaw,
+           earningsRaw, instRaw, newsRaw, revenueRaw, fmpEarningsRaw, fmpTargetRaw] =
       await Promise.allSettled([
         yahooChart(symbol, '1d', '1d'),
         getFinnhubQuote(symbol),
         getFinnhubProfile(symbol),
         getFinnhubMetrics(symbol),
         getFinnhubRecommendations(symbol),
-        getFinnhubPriceTarget(symbol),
         getFinnhubEarnings(symbol),
         getFinnhubInstitutional(symbol),
         getFinnhubNews(symbol),
         getFmpRevenue(symbol),
-        getFmpEarningsCalendar(symbol),
+        getFmpEarnings(symbol),
+        getFmpPriceTarget(symbol),
       ]);
 
     const chart   = chartRaw.status   === 'fulfilled' ? chartRaw.value   : null;
@@ -158,13 +162,13 @@ async function fetchAllData(symbol) {
 
     const data = parseAllData({
       meta, quote, profile, metrics,
-      recommendations: recRaw.status    === 'fulfilled' ? recRaw.value    : [],
-      target:          targetRaw.status === 'fulfilled' ? targetRaw.value : null,
-      earnings:        earningsRaw.status === 'fulfilled' ? earningsRaw.value : [],
-      institutional:   instRaw.status   === 'fulfilled' ? instRaw.value   : null,
-      news:            newsRaw.status   === 'fulfilled' ? newsRaw.value   : [],
-      revenue:         revenueRaw.status === 'fulfilled' ? revenueRaw.value : [],
-      calendar:        calendarRaw.status === 'fulfilled' ? calendarRaw.value : [],
+      recommendations:  recRaw.status        === 'fulfilled' ? recRaw.value        : [],
+      earnings:         earningsRaw.status   === 'fulfilled' ? earningsRaw.value   : [],
+      institutional:    instRaw.status       === 'fulfilled' ? instRaw.value       : null,
+      news:             newsRaw.status       === 'fulfilled' ? newsRaw.value       : [],
+      revenue:          revenueRaw.status    === 'fulfilled' ? revenueRaw.value    : [],
+      fmpEarnings:      fmpEarningsRaw.status === 'fulfilled' ? fmpEarningsRaw.value : [],
+      fmpTarget:        fmpTargetRaw.status  === 'fulfilled' ? fmpTargetRaw.value  : [],
     }, symbol);
 
     cacheSet(symbol, data);
@@ -180,7 +184,7 @@ async function fetchAllData(symbol) {
 
 // ── Parse all raw data into clean object ──────────────
 function parseAllData({ meta, quote, profile, metrics, recommendations,
-                         target, earnings, institutional, news, revenue, calendar }, symbol) {
+                         earnings, institutional, news, revenue, fmpEarnings, fmpTarget }, symbol) {
   const m  = metrics?.metric || {};
 
   // Price from Finnhub quote (most accurate) or Yahoo meta
@@ -219,10 +223,11 @@ function parseAllData({ meta, quote, profile, metrics, recommendations,
         strongBuy: recLatest.strongBuy || 0 }
     : null;
 
-  // Price target
-  const targetMean  = target?.targetMean  ?? null;
-  const targetHigh  = target?.targetHigh  ?? null;
-  const targetLow   = target?.targetLow   ?? null;
+  // Price target (FMP price-target-summary)
+  const targetSummary = Array.isArray(fmpTarget) && fmpTarget.length ? fmpTarget[0] : null;
+  const targetMean  = targetSummary?.lastMonthAvgPriceTarget ?? targetSummary?.lastQuarterAvgPriceTarget ?? null;
+  const targetHigh  = targetSummary?.lastQuarterAvgPriceTarget ?? null;
+  const targetLow   = targetSummary?.allTimeAvgPriceTarget ?? null;
 
   // Debt/Equity
   const debtEquity  = m['totalDebt/totalEquityAnnual'] ?? m.totalDebtToEquityAnnual ?? null;
@@ -243,12 +248,13 @@ function parseAllData({ meta, quote, profile, metrics, recommendations,
   // Institutional %
   const instPct = institutional?.ownership?.[0]?.share ?? null;
 
-  // Earnings date (FMP calendar or Finnhub earnings)
+  // Earnings date — FMP /earnings returns upcoming dates with epsActual=null
   let earningsDate = null;
-  if (Array.isArray(calendar) && calendar.length) {
-    const d = calendar[0]?.date;
-    if (d) earningsDate = new Date(d);
-  } else if (Array.isArray(earnings) && earnings.length) {
+  if (Array.isArray(fmpEarnings) && fmpEarnings.length) {
+    const next = fmpEarnings.find(e => e.epsActual == null && e.date);
+    if (next) earningsDate = new Date(next.date);
+  }
+  if (!earningsDate && Array.isArray(earnings) && earnings.length) {
     const next = earnings.find(e => new Date(e.period) > new Date());
     if (next) earningsDate = new Date(next.period);
   }

@@ -364,8 +364,9 @@ function renderResults(data, scored) {
   const earningsEl = document.getElementById('info-earnings');
   const earningsDaysEl = document.getElementById('info-earnings-days');
   if (data.earningsDate) {
-    earningsEl.textContent = data.earningsDate.toLocaleDateString();
-    const days = Math.round((data.earningsDate - new Date()) / 86400000);
+    const ed = new Date(data.earningsDate);
+    earningsEl.textContent = ed.toLocaleDateString();
+    const days = Math.round((ed - new Date()) / 86400000);
     if (days === 0)       earningsDaysEl.textContent = t('today');
     else if (days > 0)    earningsDaysEl.textContent = t('daysUntil', { n: days });
     else                  earningsDaysEl.textContent = t('daysAgo', { n: Math.abs(days) });
