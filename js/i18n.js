@@ -2,7 +2,7 @@
 
 const TRANSLATIONS = {
   he: {
-    tagline: 'ניתוח מניות בלחיצת כפתור',
+    tagline: 'Trade with a clear head',
     searchPlaceholder: 'חפש מניה... (AAPL, תל אביב, אמזון)',
     search: 'חפש',
     trending: 'מניות טרנדינג',
@@ -63,8 +63,8 @@ const TRANSLATIONS = {
     criteria_highs: 'שיאים שנשברו',
     criteria_highs_desc: 'כמה פעמים המניה שברה שיאים חדשים בשנה/3 שנים/5 שנים? מעיד על טרנד חזק.',
     about: 'אודותינו',
-    about_what_title: 'מה זה Interesting Zone?',
-    about_what_body: 'Interesting Zone היא אפליקציית ניתוח מניות חינמית המיועדת לכולם — ללא צורך בידע פיננסי. הזן סימול מניה וקבל דירוג מיידי: קנה / המתן / אל תקנה, המבוסס על 10 קריטריונים מקצועיים.',
+    about_what_title: 'מה זה Bull Therapy?',
+    about_what_body: 'Bull Therapy היא אפליקציית ניתוח מניות חינמית המיועדת לכולם — ללא צורך בידע פיננסי. הזן סימול מניה וקבל דירוג מיידי: קנה / המתן / אל תקנה, המבוסס על 10 קריטריונים מקצועיים.',
     about_how_title: 'איך מחושב הציון?',
     about_data_title: 'מקורות מידע',
     about_data_body: 'נתוני מחיר מגיעים מ-Yahoo Finance בזמן אמת. נתונים פונדמנטליים (P/E, צמיחה, חוב, המלצות אנליסטים) מגיעים מ-Twelve Data. חדשות מגיעות מ-Yahoo Finance. כל הנתונים נשמרים מקומית לביצועים אופטימליים.',
@@ -82,7 +82,7 @@ const TRANSLATIONS = {
     taseMarketHours: 'שעות מסחר: 9:00–17:30',
   },
   en: {
-    tagline: 'Stock analysis in one click',
+    tagline: 'Trade with a clear head',
     searchPlaceholder: 'Search stock... (AAPL, Tesla, Apple)',
     search: 'Search',
     trending: 'Trending Stocks',
@@ -105,7 +105,7 @@ const TRANSLATIONS = {
     compare: 'Compare Stocks',
     watchlist: 'Watchlist',
     home: 'Home',
-    buy: 'Interesting Zone',
+    buy: 'Bull Therapy',
     wait: 'Wait',
     sell: 'Not Interesting',
     noData: 'No data',
@@ -143,8 +143,8 @@ const TRANSLATIONS = {
     criteria_highs: 'Highs Broken',
     criteria_highs_desc: 'How many new highs has the stock set in 1/3/5 years? Signals strong trend.',
     about: 'About Us',
-    about_what_title: 'What is Interesting Zone?',
-    about_what_body: 'Interesting Zone is a free stock analysis app designed for everyone — no financial background needed. Enter any stock symbol and get an instant Buy / Wait / Don\'t Buy rating based on 10 professional criteria.',
+    about_what_title: 'What is Bull Therapy?',
+    about_what_body: 'Bull Therapy is a free stock analysis app designed for everyone — no financial background needed. Enter any stock symbol and get an instant Buy / Wait / Don\'t Buy rating based on 10 professional criteria.',
     about_how_title: 'How does the score work?',
     about_data_title: 'Data Sources',
     about_data_body: 'Price data is sourced from Yahoo Finance in real time. Fundamental data (P/E, growth, debt, analyst ratings) is sourced from Twelve Data. News is fetched from Yahoo Finance. All data is cached locally for performance.',

@@ -6,9 +6,9 @@
   <meta name="theme-color" content="#000000" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Interesting Zone" />
-  <meta name="application-name" content="Interesting Zone" />
-  <title>Interesting Zone</title>
+  <meta name="apple-mobile-web-app-title" content="Bull Therapy" />
+  <meta name="application-name" content="Bull Therapy" />
+  <title>Bull Therapy</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="icons/icon-192.png" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
@@ -36,10 +36,10 @@
     <div class="top-bar-titles">
       <div class="top-bar-brand-row">
         <div class="top-bar-text">
-          <span class="top-bar-brand">Interesting Zone</span>
-          <span class="top-bar-sub" data-i18n="tagline">Stock analysis in one click</span>
+          <span class="top-bar-brand">Bull Therapy</span>
+          <span class="top-bar-sub" data-i18n="tagline">Trade with a clear head</span>
         </div>
-        <img src="logo2.png" alt="Interesting Zone logo" class="top-bar-logo" />
+        <img src="logo2.png" alt="Bull Therapy logo" class="top-bar-logo" />
       </div>
     </div>
   </header>
@@ -47,6 +47,7 @@
   <!-- ===== HOME PAGE ===== -->
   <div id="page-home" class="page active">
     <main class="home-main">
+      <p class="home-tagline">Stock analysis in one click</p>
       <div class="search-wrap">
         <div class="search-box">
           <input
@@ -198,30 +199,21 @@
 
   <!-- ===== COMPARE PAGE ===== -->
   <div id="page-compare" class="page">
-    <header class="results-header">
-      <button id="btn-back-compare" class="icon-btn back-btn">←</button>
-      <h2 data-i18n="compare">השוואת מניות</h2>
-    </header>
+    <button id="btn-back-compare" class="icon-btn back-btn page-back-btn">←</button>
     <div id="compare-content" class="compare-content"></div>
   </div>
 
   <!-- ===== WATCHLIST PAGE ===== -->
   <div id="page-watchlist" class="page">
-    <header class="results-header">
-      <button id="btn-back-watchlist" class="icon-btn back-btn">←</button>
-      <h2 data-i18n="watchlist">רשימת מעקב</h2>
-    </header>
+    <button id="btn-back-watchlist" class="icon-btn back-btn page-back-btn">←</button>
     <div id="watchlist-content" class="watchlist-content"></div>
   </div>
 
   <!-- ===== ABOUT PAGE ===== -->
   <div id="page-about" class="page">
-    <header class="results-header">
-      <button id="btn-back-about" class="icon-btn back-btn">←</button>
-      <h2 data-i18n="about">About Us</h2>
-    </header>
+    <button id="btn-back-about" class="icon-btn back-btn page-back-btn">←</button>
     <div class="about-content">
-      <div class="about-logo">Interesting Zone</div>
+      <div class="about-logo">About Us</div>
       <div class="about-section">
         <p class="about-text">Getting started with investing can feel overwhelming, especially when you're not sure about the timing or the assets. While we don't offer buy or sell recommendations, we provide all the data in one spot to give you better insight and perspective.</p>
         <p class="about-text">Remember, it's your capital at stake — potential rewards always go hand-in-hand with risks.</p>
@@ -233,7 +225,7 @@
   <div id="drawer-overlay" class="drawer-overlay" onclick="closeDrawer()"></div>
   <aside id="nav-drawer" class="nav-drawer" aria-hidden="true">
     <div class="drawer-header-row">
-      <span class="drawer-brand">Interesting Zone</span>
+      <span class="drawer-brand">Bull Therapy</span>
       <button class="icon-btn" onclick="closeDrawer()" aria-label="סגור">✕</button>
     </div>
     <nav class="drawer-nav-list">
@@ -258,7 +250,7 @@
 
   <!-- ===== FOOTER ===== -->
   <footer class="app-footer">
-    <span>Copyright 2026 © Interesting Zone</span>
+    <span>Copyright 2026 © Bull Therapy</span>
   </footer>
 
   <!-- ===== IN-APP NOTIFICATION ===== -->

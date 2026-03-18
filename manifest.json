@@ -1,7 +1,7 @@
 {
-  "name": "Interesting Zone",
-  "short_name": "Interesting Zone",
-  "description": "ניתוח מניות בלחיצת כפתור",
+  "name": "Bull Therapy",
+  "short_name": "Bull Therapy",
+  "description": "Trade with a clear head",
   "start_url": "/StockIT/",
   "scope": "/StockIT/",
   "display": "standalone",

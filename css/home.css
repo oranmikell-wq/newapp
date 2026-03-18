@@ -18,6 +18,17 @@
   width: 100%;
 }
 
+/* Home tagline above search */
+.home-tagline {
+  font-size: 15px;
+  font-weight: 500;
+  color: #888;
+  text-align: center;
+  margin: 0;
+  letter-spacing: 0.3px;
+}
+.theme-dark .home-tagline { color: #aaa; }
+
 /* Logo */
 .logo-wrap { text-align: center; }
 
