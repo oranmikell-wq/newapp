@@ -531,13 +531,15 @@ body {
   gap: 4px;
 }
 .footer-sep { opacity: 0.3; }
-.footer-contact {
-  color: rgba(255,255,255,0.45);
-  text-decoration: none;
-  -webkit-text-decoration: none;
+.footer-contact,
+.footer-contact:link,
+.footer-contact:visited,
+.footer-contact:active {
+  color: rgba(255,255,255,0.45) !important;
+  text-decoration: none !important;
+  -webkit-text-fill-color: rgba(255,255,255,0.45);
 }
-.footer-contact:hover { color: rgba(255,255,255,0.7); }
-.footer-contact:visited { color: rgba(255,255,255,0.45); }
+.footer-contact:hover { color: rgba(255,255,255,0.7) !important; -webkit-text-fill-color: rgba(255,255,255,0.7); }
 
 /* ===== HIDDEN UTIL ===== */
 .hidden { display: none !important; }
