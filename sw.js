@@ -1,27 +1,13 @@
 // Service Worker — StockIT PWA
-const CACHE = 'stockit-v1';
-const STATIC = [
-  '/StockIT/',
-  '/StockIT/index.html',
-  '/StockIT/css/main.css',
-  '/StockIT/css/home.css',
-  '/StockIT/css/results.css',
-  '/StockIT/css/compare.css',
-  '/StockIT/js/i18n.js',
-  '/StockIT/js/api.js',
-  '/StockIT/js/scoring.js',
-  '/StockIT/js/chart.js',
-  '/StockIT/js/watchlist.js',
-  '/StockIT/js/compare.js',
-  '/StockIT/js/app.js',
-];
+// Bump version on every deploy so users always get fresh files
+const CACHE = 'stockit-v3';
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(STATIC)));
   self.skipWaiting();
 });
 
 self.addEventListener('activate', e => {
+  // Delete all old caches
   e.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
@@ -31,15 +17,24 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Network first for API calls, cache first for static
   const url = e.request.url;
-  if (url.includes('finance.yahoo') || url.includes('finnhub') || url.includes('financialmodelingprep') || url.includes('corsproxy')) {
-    e.respondWith(
-      fetch(e.request).catch(() => caches.match(e.request))
-    );
-  } else {
-    e.respondWith(
-      caches.match(e.request).then(cached => cached || fetch(e.request))
-    );
+
+  // External APIs — network only, no caching
+  if (url.includes('finance.yahoo') || url.includes('twelvedata') ||
+      url.includes('corsproxy') || url.includes('allorigins')) {
+    e.respondWith(fetch(e.request));
+    return;
   }
+
+  // App shell — network first, fallback to cache for offline
+  e.respondWith(
+    fetch(e.request)
+      .then(res => {
+        // Cache fresh copy
+        const clone = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+        return res;
+      })
+      .catch(() => caches.match(e.request))
+  );
 });
