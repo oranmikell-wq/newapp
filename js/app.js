@@ -476,8 +476,8 @@ function renderCriteriaTable(scored, data) {
     { key: 'technical',    icon: '📊', weight: '6%',  rawData: () => [scored.technicals?.rsi && `RSI: ${scored.technicals.rsi.toFixed(1)}`, scored.technicals?.macd && `MACD: ${scored.technicals.macd.toFixed(2)}`].filter(Boolean) },
     { key: 'ath',          icon: '🏔️', weight: '4%',  rawData: () => {
         if (data.price == null || data.high52w == null) return [];
-        const distPct = ((data.high52w - data.price) / data.high52w) * 100;
-        return [`${distPct.toFixed(1)}% מהשיא השנתי`];
+        const distPct = Math.max(0, ((data.high52w - data.price) / data.high52w) * 100);
+        return [distPct < 0.1 ? 'בשיא השנתי' : `${distPct.toFixed(1)}% מהשיא השנתי`];
       }},
     { key: 'highs',        icon: '⭐', weight: '2%',  rawData: () => scored.technicals?.highs ? [`1Y: ${scored.technicals.highs.y1}`, `3Y: ${scored.technicals.highs.y3}`, `5Y: ${scored.technicals.highs.y5}`] : [] },
   ];
