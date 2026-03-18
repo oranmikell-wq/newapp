@@ -133,22 +133,31 @@ body {
 }
 
 /* ===== NAV DRAWER ===== */
+/* LTR default: slides in from LEFT */
 .nav-drawer {
   position: fixed;
   top: 0;
-  right: 0;
+  left: 0;
   bottom: 0;
   width: min(300px, 88vw);
   background: var(--card-bg);
-  border-inline-start: 1px solid var(--border);
+  border-inline-end: 1px solid var(--border);
   z-index: 301;
   display: flex;
   flex-direction: column;
-  transform: translateX(100%);
+  transform: translateX(-100%);
   transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: var(--shadow-lg);
 }
 .nav-drawer.open { transform: translateX(0); }
+
+/* RTL override: slides in from RIGHT */
+[dir="rtl"] .nav-drawer {
+  left: auto;
+  right: 0;
+  transform: translateX(100%);
+}
+[dir="rtl"] .nav-drawer.open { transform: translateX(0); }
 
 .drawer-header-row {
   display: flex;
@@ -158,7 +167,6 @@ body {
   border-bottom: 1px solid var(--border);
   flex-direction: row;
 }
-[dir="rtl"] .drawer-header-row { flex-direction: row-reverse; }
 
 .drawer-brand {
   font-size: 18px;
@@ -191,24 +199,52 @@ body {
 }
 .drawer-nav-item:hover { background: var(--bg-3); color: var(--text); }
 .drawer-nav-item.active { color: var(--green); background: var(--green-bg); font-weight: 600; }
-.drawer-icon { font-size: 20px; line-height: 1; }
-
 .drawer-footer {
   padding: 16px;
   border-top: 1px solid var(--border);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
+.theme-toggle-btn {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 9px;
+  color: var(--text-2);
+  font-family: inherit;
+  letter-spacing: 0.3px;
+  transition: background var(--transition), color var(--transition);
+}
+.theme-toggle-btn:hover { background: var(--bg-4); color: var(--text); }
+
 /* ===== NAV BRAND (top-bar) ===== */
-.top-bar-brand {
-  font-size: 16px;
-  font-weight: 800;
-  color: var(--green);
-  letter-spacing: -0.5px;
+.top-bar-titles {
   flex: 1;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.top-bar-brand {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--green) !important;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+}
+
+.top-bar-sub {
+  font-size: 11px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 0.2px;
+  line-height: 1;
 }
 
 /* ===== BACK BUTTON ARROW (flips for RTL) ===== */
@@ -229,7 +265,6 @@ body {
 }
 
 /* Header text/icon colors on black bar */
-.top-bar .top-bar-brand,
 .results-header .res-symbol,
 .results-header h2 {
   color: #ffffff;

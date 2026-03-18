@@ -88,9 +88,8 @@ function closeDrawer() {
 function applyTheme() {
   const theme = localStorage.getItem('bon-theme') || 'light';
   document.body.className = `theme-${theme}`;
-  const icon = theme === 'dark' ? '☀️' : '🌙';
   const btn = document.getElementById('btn-theme-drawer');
-  if (btn) btn.textContent = icon;
+  if (btn) btn.textContent = theme === 'dark' ? 'Light' : 'Dark';
 }
 
 function toggleTheme() {
@@ -483,20 +482,20 @@ function renderCriteriaTable(scored, data) {
   const container = document.getElementById('criteria-table');
 
   const CRITERIA = [
-    { key: 'eps',          icon: '📈', weight: '18%', rawData: () => data.epsGrowth != null ? [`EPS Growth: ${data.epsGrowth.toFixed(1)}%`] : [] },
-    { key: 'multiples',    icon: '💰', weight: '18%', rawData: () => [data.pe && `P/E: ${data.pe.toFixed(1)}`, data.pb && `P/B: ${data.pb.toFixed(1)}`, data.ps && `P/S: ${data.ps.toFixed(1)}`].filter(Boolean) },
-    { key: 'revenue',      icon: '🏢', weight: '12%', rawData: () => data.revenueGrowth != null ? [`Revenue Growth: ${data.revenueGrowth.toFixed(1)}%`] : [] },
-    { key: 'analysts',     icon: '🔬', weight: '12%', rawData: () => data.analystScore ? [`Buy: ${data.analystScore.buy + data.analystScore.strongBuy}`, `Hold: ${data.analystScore.hold}`, `Sell: ${data.analystScore.sell}`] : [] },
-    { key: 'momentum',     icon: '🚀', weight: '12%', rawData: () => [data.changePct != null && `שינוי יומי: ${data.changePct.toFixed(2)}%`, data.high52w && `52w High: ${data.high52w}`].filter(Boolean) },
-    { key: 'institutional',icon: '🏦', weight: '8%',  rawData: () => data.instPct != null ? [`אחזקות: ${(data.instPct * 100).toFixed(1)}%`] : [] },
-    { key: 'debt',         icon: '⚖️', weight: '8%',  rawData: () => data.debtEquity != null ? [`D/E: ${data.debtEquity.toFixed(1)}`] : [] },
-    { key: 'technical',    icon: '📊', weight: '6%',  rawData: () => [scored.technicals?.rsi && `RSI: ${scored.technicals.rsi.toFixed(1)}`, scored.technicals?.macd && `MACD: ${scored.technicals.macd.toFixed(2)}`].filter(Boolean) },
-    { key: 'ath',          icon: '🏔️', weight: '4%',  rawData: () => {
+    { key: 'eps',           rawData: () => data.epsGrowth != null ? [`EPS Growth: ${data.epsGrowth.toFixed(1)}%`] : [] },
+    { key: 'multiples',     rawData: () => [data.pe && `P/E: ${data.pe.toFixed(1)}`, data.pb && `P/B: ${data.pb.toFixed(1)}`, data.ps && `P/S: ${data.ps.toFixed(1)}`].filter(Boolean) },
+    { key: 'revenue',       rawData: () => data.revenueGrowth != null ? [`Revenue Growth: ${data.revenueGrowth.toFixed(1)}%`] : [] },
+    { key: 'analysts',      rawData: () => data.analystScore ? [`Buy: ${data.analystScore.buy + data.analystScore.strongBuy}`, `Hold: ${data.analystScore.hold}`, `Sell: ${data.analystScore.sell}`] : [] },
+    { key: 'momentum',      rawData: () => [data.changePct != null && `שינוי יומי: ${data.changePct.toFixed(2)}%`, data.high52w && `52w High: ${data.high52w}`].filter(Boolean) },
+    { key: 'institutional', rawData: () => data.instPct != null ? [`אחזקות: ${(data.instPct * 100).toFixed(1)}%`] : [] },
+    { key: 'debt',          rawData: () => data.debtEquity != null ? [`D/E: ${data.debtEquity.toFixed(1)}`] : [] },
+    { key: 'technical',     rawData: () => [scored.technicals?.rsi && `RSI: ${scored.technicals.rsi.toFixed(1)}`, scored.technicals?.macd && `MACD: ${scored.technicals.macd.toFixed(2)}`].filter(Boolean) },
+    { key: 'ath',           rawData: () => {
         if (data.price == null || data.high52w == null) return [];
         const distPct = Math.max(0, ((data.high52w - data.price) / data.price) * 100);
         return [distPct < 0.1 ? 'בשיא השנתי' : `+${distPct.toFixed(1)}% לשיא השנתי`];
       }},
-    { key: 'highs',        icon: '⭐', weight: '2%',  rawData: () => scored.technicals?.highs ? [`1Y: ${scored.technicals.highs.y1}`, `3Y: ${scored.technicals.highs.y3}`, `5Y: ${scored.technicals.highs.y5}`] : [] },
+    { key: 'highs',         rawData: () => scored.technicals?.highs ? [`1Y: ${scored.technicals.highs.y1}`, `3Y: ${scored.technicals.highs.y3}`, `5Y: ${scored.technicals.highs.y5}`] : [] },
   ];
 
   container.innerHTML = CRITERIA.map(c => {
@@ -510,7 +509,6 @@ function renderCriteriaTable(scored, data) {
     return `
       <div class="criteria-row" onclick="this.classList.toggle('expanded')">
         <div class="criteria-row-header">
-          <span class="criteria-icon">${c.icon}</span>
           <span class="criteria-name">${t('criteria_' + c.key)}</span>
           <span class="criteria-score-badge ${badgeClass}">${scoreDisplay}</span>
         </div>

@@ -191,7 +191,7 @@
 }
 
 #chart-container {
-  height: 260px;
+  height: 300px;
   border-radius: var(--radius);
   overflow: hidden;
   background: var(--bg-2);

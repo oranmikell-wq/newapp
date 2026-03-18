@@ -2,6 +2,7 @@
 
 let mainChart = null;
 let mainSeries = null;
+let mainRO = null;       // ResizeObserver reference so we can disconnect it
 let compareChart = null;
 let currentSymbol = null;
 let currentRange = '1M';
@@ -11,54 +12,59 @@ function initChart() {
   const container = document.getElementById('chart-container');
   if (!container) return;
 
+  // Disconnect previous ResizeObserver
+  if (mainRO) { mainRO.disconnect(); mainRO = null; }
+
   // Destroy existing chart before recreating
   if (mainChart) { try { mainChart.remove(); } catch {} }
   mainChart = null;
   mainSeries = null;
+  container.innerHTML = '';
 
   const isDark = document.body.classList.contains('theme-dark');
-  const h = Math.max(container.clientHeight, 260);
+  const w = container.clientWidth || container.offsetWidth || 360;
+  const h = Math.max(container.clientHeight || 0, 300);
 
   try {
-  mainChart = LightweightCharts.createChart(container, {
-    width:  container.clientWidth || 400,
-    height: h,
-    layout: {
-      background: { color: isDark ? '#0a0a0a' : '#ffffff' },
-      textColor:  isDark ? '#94a3b8' : '#475569',
-    },
-    grid: {
-      vertLines:   { color: isDark ? '#1a1a1a' : '#f1f5f9' },
-      horzLines:   { color: isDark ? '#1a1a1a' : '#f1f5f9' },
-    },
-    crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
-    rightPriceScale: { borderColor: isDark ? '#2a2a2a' : '#e2e8f0' },
-    timeScale: {
-      borderColor: isDark ? '#2a2a2a' : '#e2e8f0',
-      timeVisible: true,
-    },
-    handleScroll: true,
-    handleScale: true,
-  });
+    mainChart = LightweightCharts.createChart(container, {
+      width:  w,
+      height: h,
+      layout: {
+        background: { color: isDark ? '#111113' : '#ffffff' },
+        textColor:  isDark ? '#94a3b8' : '#475569',
+      },
+      grid: {
+        vertLines: { color: isDark ? '#1e1e21' : '#f1f5f9' },
+        horzLines: { color: isDark ? '#1e1e21' : '#f1f5f9' },
+      },
+      crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+      rightPriceScale: { borderColor: isDark ? '#2a2a2a' : '#e2e8f0' },
+      timeScale: {
+        borderColor: isDark ? '#2a2a2a' : '#e2e8f0',
+        timeVisible: true,
+      },
+      handleScroll: true,
+      handleScale:  true,
+    });
 
-  mainSeries = mainChart.addSeries(LightweightCharts.AreaSeries, {
-    lineColor:       '#16a34a',
-    topColor:        'rgba(22,163,74,0.2)',
-    bottomColor:     'rgba(22,163,74,0)',
-    lineWidth:       2,
-    priceLineVisible: false,
-  });
+    mainSeries = mainChart.addSeries(LightweightCharts.AreaSeries, {
+      lineColor:        '#16a34a',
+      topColor:         'rgba(22,163,74,0.2)',
+      bottomColor:      'rgba(22,163,74,0)',
+      lineWidth:        2,
+      priceLineVisible: false,
+    });
 
-  // Resize observer
-  const ro = new ResizeObserver(entries => {
-    if (!mainChart) return;
-    for (const entry of entries) {
-      const w = entry.contentRect.width;
-      const h = Math.max(entry.contentRect.height, 260);
-      if (w > 0) mainChart.applyOptions({ width: w, height: h });
-    }
-  });
-  ro.observe(container);
+    // Resize observer — stored so it can be cleaned up
+    mainRO = new ResizeObserver(entries => {
+      if (!mainChart) return;
+      for (const entry of entries) {
+        const rw = entry.contentRect.width;
+        const rh = Math.max(entry.contentRect.height, 300);
+        if (rw > 0) mainChart.applyOptions({ width: rw, height: rh });
+      }
+    });
+    mainRO.observe(container);
   } catch (e) {
     console.error('Chart init error:', e);
     mainChart = null;
@@ -67,8 +73,9 @@ function initChart() {
 }
 
 async function loadChart(symbol, range = '1M') {
-  if (!mainChart || !mainSeries) initChart();
-  if (!mainSeries) return; // init failed silently
+  // Always reinit when switching to a completely new symbol
+  if (symbol !== currentSymbol || !mainChart || !mainSeries) initChart();
+  if (!mainSeries) return; // init failed
   currentSymbol = symbol;
   currentRange  = range;
 

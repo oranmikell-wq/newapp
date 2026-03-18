@@ -21,18 +21,15 @@
   <div id="page-home" class="page active">
     <header class="top-bar">
       <button class="hamburger-btn" onclick="openDrawer()" aria-label="תפריט">☰</button>
-      <span class="top-bar-brand">Stock Zone</span>
+      <div class="top-bar-titles">
+        <span class="top-bar-brand">Stock Zone</span>
+        <span class="top-bar-sub" data-i18n="tagline">Stock analysis in one click</span>
+      </div>
     </header>
 
     <main class="home-main">
-      <div class="logo-wrap">
-        <h1 class="logo-title">Stock Zone</h1>
-        <p class="logo-sub" data-i18n="tagline">ניתוח מניות בלחיצת כפתור</p>
-      </div>
-
       <div class="search-wrap">
         <div class="search-box">
-          <span class="search-icon">🔍</span>
           <input
             id="search-input"
             type="text"
@@ -85,7 +82,6 @@
     </div>
 
     <div id="results-error" class="error-state hidden">
-      <div class="error-icon">❌</div>
       <p id="error-msg" data-i18n="stockNotFound">המניה לא נמצאה</p>
       <button class="btn-primary" id="btn-back-err" data-i18n="back">חזור</button>
     </div>
@@ -211,20 +207,17 @@
     </div>
     <nav class="drawer-nav-list">
       <button class="drawer-nav-item nav-btn" data-page="home">
-        <span class="drawer-icon">🏠</span>
-        <span data-i18n="home">בית</span>
+        <span data-i18n="home">Home</span>
       </button>
       <button class="drawer-nav-item nav-btn" data-page="watchlist">
-        <span class="drawer-icon">⭐</span>
-        <span data-i18n="watchlist">מעקב</span>
+        <span data-i18n="watchlist">Watchlist</span>
       </button>
       <button class="drawer-nav-item nav-btn" data-page="compare">
-        <span class="drawer-icon">⚖️</span>
-        <span data-i18n="compare">השוואה</span>
+        <span data-i18n="compare">Compare Stocks</span>
       </button>
     </nav>
     <div class="drawer-footer">
-      <button id="btn-theme-drawer" class="icon-btn" aria-label="ניגוד צבעים">🌙</button>
+      <button id="btn-theme-drawer" class="theme-toggle-btn" aria-label="Toggle theme">Dark</button>
       <button id="btn-lang-drawer" class="lang-btn">EN</button>
     </div>
   </aside>
