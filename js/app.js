@@ -1,70 +1,203 @@
 // app.js — ניהול ניווט, UI, אתחול
 
-// ── S&P 500 + ת"א 125 autocomplete list ───────────────
+// ── S&P 500 + ת"א 125 + Crypto autocomplete list ──────
 const STOCK_LIST = [
-  // S&P 500 (מייצגים)
-  { symbol: 'AAPL',  name: 'Apple Inc.',            exchange: 'NASDAQ' },
-  { symbol: 'MSFT',  name: 'Microsoft Corporation', exchange: 'NASDAQ' },
-  { symbol: 'AMZN',  name: 'Amazon.com Inc.',       exchange: 'NASDAQ' },
-  { symbol: 'NVDA',  name: 'NVIDIA Corporation',    exchange: 'NASDAQ' },
-  { symbol: 'GOOGL', name: 'Alphabet Inc.',         exchange: 'NASDAQ' },
-  { symbol: 'META',  name: 'Meta Platforms',        exchange: 'NASDAQ' },
-  { symbol: 'TSLA',  name: 'Tesla Inc.',            exchange: 'NASDAQ' },
-  { symbol: 'AVGO',  name: 'Broadcom Inc.',         exchange: 'NASDAQ' },
-  { symbol: 'JPM',   name: 'JPMorgan Chase',        exchange: 'NYSE'   },
-  { symbol: 'LLY',   name: 'Eli Lilly',             exchange: 'NYSE'   },
-  { symbol: 'V',     name: 'Visa Inc.',             exchange: 'NYSE'   },
-  { symbol: 'UNH',   name: 'UnitedHealth Group',    exchange: 'NYSE'   },
-  { symbol: 'XOM',   name: 'Exxon Mobil',           exchange: 'NYSE'   },
-  { symbol: 'MA',    name: 'Mastercard',            exchange: 'NYSE'   },
-  { symbol: 'COST',  name: 'Costco Wholesale',      exchange: 'NASDAQ' },
-  { symbol: 'HD',    name: 'Home Depot',            exchange: 'NYSE'   },
-  { symbol: 'WMT',   name: 'Walmart Inc.',          exchange: 'NYSE'   },
-  { symbol: 'PG',    name: 'Procter & Gamble',      exchange: 'NYSE'   },
-  { symbol: 'BAC',   name: 'Bank of America',       exchange: 'NYSE'   },
-  { symbol: 'NFLX',  name: 'Netflix Inc.',          exchange: 'NASDAQ' },
-  { symbol: 'AMD',   name: 'Advanced Micro Devices',exchange: 'NASDAQ' },
-  { symbol: 'ORCL',  name: 'Oracle Corporation',    exchange: 'NYSE'   },
-  { symbol: 'INTC',  name: 'Intel Corporation',     exchange: 'NASDAQ' },
-  { symbol: 'CSCO',  name: 'Cisco Systems',         exchange: 'NASDAQ' },
-  { symbol: 'DIS',   name: 'Walt Disney',           exchange: 'NYSE'   },
-  { symbol: 'PYPL',  name: 'PayPal Holdings',       exchange: 'NASDAQ' },
-  { symbol: 'ADBE',  name: 'Adobe Inc.',            exchange: 'NASDAQ' },
-  { symbol: 'CRM',   name: 'Salesforce Inc.',       exchange: 'NYSE'   },
-  { symbol: 'QCOM',  name: 'Qualcomm',              exchange: 'NASDAQ' },
-  { symbol: 'PFE',   name: 'Pfizer Inc.',           exchange: 'NYSE'   },
-  // Crypto
-  { symbol: 'BTC-USD',  name: 'Bitcoin',          exchange: 'Crypto' },
-  { symbol: 'ETH-USD',  name: 'Ethereum',          exchange: 'Crypto' },
-  { symbol: 'BNB-USD',  name: 'Binance Coin',      exchange: 'Crypto' },
-  { symbol: 'SOL-USD',  name: 'Solana',            exchange: 'Crypto' },
-  { symbol: 'XRP-USD',  name: 'Ripple (XRP)',      exchange: 'Crypto' },
-  { symbol: 'DOGE-USD', name: 'Dogecoin',          exchange: 'Crypto' },
-  { symbol: 'ADA-USD',  name: 'Cardano',           exchange: 'Crypto' },
-  { symbol: 'AVAX-USD', name: 'Avalanche',         exchange: 'Crypto' },
-  { symbol: 'MATIC-USD',name: 'Polygon',           exchange: 'Crypto' },
-  { symbol: 'DOT-USD',  name: 'Polkadot',          exchange: 'Crypto' },
-  { symbol: 'LINK-USD', name: 'Chainlink',         exchange: 'Crypto' },
-  { symbol: 'UNI-USD',  name: 'Uniswap',           exchange: 'Crypto' },
-  { symbol: 'LTC-USD',  name: 'Litecoin',          exchange: 'Crypto' },
-  { symbol: 'BCH-USD',  name: 'Bitcoin Cash',      exchange: 'Crypto' },
-  { symbol: 'ATOM-USD', name: 'Cosmos',            exchange: 'Crypto' },
-  // ת"א 125
-  { symbol: '1155.TA', name: 'בנק לאומי',           exchange: 'TASE' },
-  { symbol: '1120.TA', name: 'בנק הפועלים',         exchange: 'TASE' },
-  { symbol: '1082.TA', name: 'בנק דיסקונט',         exchange: 'TASE' },
-  { symbol: '1044.TA', name: 'בנק מזרחי-טפחות',    exchange: 'TASE' },
-  { symbol: '1084.TA', name: 'בנק הבינלאומי',       exchange: 'TASE' },
-  { symbol: '5122.TA', name: 'חברת החשמל',          exchange: 'TASE' },
-  { symbol: '1081.TA', name: 'בזק',                 exchange: 'TASE' },
-  { symbol: '1602.TA', name: 'טבע תעשיות',          exchange: 'TASE' },
-  { symbol: '7200.TA', name: 'אמדוקס',              exchange: 'TASE' },
-  { symbol: '1094.TA', name: 'מגדל ביטוח',         exchange: 'TASE' },
-  { symbol: '2588.TA', name: 'נייס סיסטמס',        exchange: 'TASE' },
-  { symbol: '4590.TA', name: 'כיל',                 exchange: 'TASE' },
-  { symbol: '2100.TA', name: 'אלביט מערכות',       exchange: 'TASE' },
-  { symbol: '6450.TA', name: 'רפאל',                exchange: 'TASE' },
-  { symbol: '1091.TA', name: 'הראל ביטוח',         exchange: 'TASE' },
+  // ── Top S&P 500 by market cap ──
+  { symbol: 'AAPL',  name: 'Apple Inc.',                  exchange: 'NASDAQ' },
+  { symbol: 'MSFT',  name: 'Microsoft Corporation',       exchange: 'NASDAQ' },
+  { symbol: 'NVDA',  name: 'NVIDIA Corporation',          exchange: 'NASDAQ' },
+  { symbol: 'AMZN',  name: 'Amazon.com Inc.',             exchange: 'NASDAQ' },
+  { symbol: 'GOOGL', name: 'Alphabet Inc. (Class A)',     exchange: 'NASDAQ' },
+  { symbol: 'GOOG',  name: 'Alphabet Inc. (Class C)',     exchange: 'NASDAQ' },
+  { symbol: 'META',  name: 'Meta Platforms',              exchange: 'NASDAQ' },
+  { symbol: 'TSLA',  name: 'Tesla Inc.',                  exchange: 'NASDAQ' },
+  { symbol: 'AVGO',  name: 'Broadcom Inc.',               exchange: 'NASDAQ' },
+  { symbol: 'BRK-B', name: 'Berkshire Hathaway',          exchange: 'NYSE'   },
+  { symbol: 'JPM',   name: 'JPMorgan Chase',              exchange: 'NYSE'   },
+  { symbol: 'LLY',   name: 'Eli Lilly',                   exchange: 'NYSE'   },
+  { symbol: 'V',     name: 'Visa Inc.',                   exchange: 'NYSE'   },
+  { symbol: 'UNH',   name: 'UnitedHealth Group',          exchange: 'NYSE'   },
+  { symbol: 'XOM',   name: 'Exxon Mobil',                 exchange: 'NYSE'   },
+  { symbol: 'MA',    name: 'Mastercard',                  exchange: 'NYSE'   },
+  { symbol: 'COST',  name: 'Costco Wholesale',            exchange: 'NASDAQ' },
+  { symbol: 'HD',    name: 'Home Depot',                  exchange: 'NYSE'   },
+  { symbol: 'WMT',   name: 'Walmart Inc.',                exchange: 'NYSE'   },
+  { symbol: 'PG',    name: 'Procter & Gamble',            exchange: 'NYSE'   },
+  { symbol: 'NFLX',  name: 'Netflix Inc.',                exchange: 'NASDAQ' },
+  { symbol: 'BAC',   name: 'Bank of America',             exchange: 'NYSE'   },
+  { symbol: 'ORCL',  name: 'Oracle Corporation',          exchange: 'NYSE'   },
+  { symbol: 'AMD',   name: 'Advanced Micro Devices',      exchange: 'NASDAQ' },
+  { symbol: 'WFC',   name: 'Wells Fargo',                 exchange: 'NYSE'   },
+  { symbol: 'ABBV',  name: 'AbbVie Inc.',                 exchange: 'NYSE'   },
+  { symbol: 'NOW',   name: 'ServiceNow Inc.',             exchange: 'NYSE'   },
+  { symbol: 'PM',    name: 'Philip Morris',               exchange: 'NYSE'   },
+  { symbol: 'GS',    name: 'Goldman Sachs',               exchange: 'NYSE'   },
+  { symbol: 'CAT',   name: 'Caterpillar Inc.',            exchange: 'NYSE'   },
+  { symbol: 'ISRG',  name: 'Intuitive Surgical',          exchange: 'NASDAQ' },
+  { symbol: 'IBM',   name: 'IBM Corporation',             exchange: 'NYSE'   },
+  { symbol: 'RTX',   name: 'RTX Corporation (Raytheon)',  exchange: 'NYSE'   },
+  { symbol: 'INTU',  name: 'Intuit Inc.',                 exchange: 'NASDAQ' },
+  { symbol: 'TXN',   name: 'Texas Instruments',           exchange: 'NASDAQ' },
+  { symbol: 'AMGN',  name: 'Amgen Inc.',                  exchange: 'NASDAQ' },
+  { symbol: 'SPGI',  name: 'S&P Global Inc.',             exchange: 'NYSE'   },
+  { symbol: 'BKNG',  name: 'Booking Holdings',            exchange: 'NASDAQ' },
+  { symbol: 'MS',    name: 'Morgan Stanley',              exchange: 'NYSE'   },
+  { symbol: 'PANW',  name: 'Palo Alto Networks',          exchange: 'NASDAQ' },
+  { symbol: 'HON',   name: 'Honeywell International',     exchange: 'NASDAQ' },
+  { symbol: 'NEE',   name: 'NextEra Energy',              exchange: 'NYSE'   },
+  { symbol: 'MU',    name: 'Micron Technology',           exchange: 'NASDAQ' },
+  { symbol: 'VRTX',  name: 'Vertex Pharmaceuticals',      exchange: 'NASDAQ' },
+  { symbol: 'AXP',   name: 'American Express',            exchange: 'NYSE'   },
+  { symbol: 'ETN',   name: 'Eaton Corporation',           exchange: 'NYSE'   },
+  { symbol: 'LRCX',  name: 'Lam Research',                exchange: 'NASDAQ' },
+  { symbol: 'KLAC',  name: 'KLA Corporation',             exchange: 'NASDAQ' },
+  { symbol: 'ANET',  name: 'Arista Networks',             exchange: 'NYSE'   },
+  { symbol: 'SYK',   name: 'Stryker Corporation',         exchange: 'NYSE'   },
+  { symbol: 'REGN',  name: 'Regeneron Pharmaceuticals',   exchange: 'NASDAQ' },
+  { symbol: 'BX',    name: 'Blackstone Inc.',             exchange: 'NYSE'   },
+  { symbol: 'LOW',   name: "Lowe's Companies",            exchange: 'NYSE'   },
+  { symbol: 'PLD',   name: 'Prologis Inc.',               exchange: 'NYSE'   },
+  { symbol: 'SCHW',  name: 'Charles Schwab',              exchange: 'NYSE'   },
+  { symbol: 'MDLZ',  name: 'Mondelez International',      exchange: 'NASDAQ' },
+  { symbol: 'CI',    name: 'Cigna Group',                 exchange: 'NYSE'   },
+  { symbol: 'CB',    name: 'Chubb Limited',               exchange: 'NYSE'   },
+  { symbol: 'ADI',   name: 'Analog Devices',              exchange: 'NASDAQ' },
+  { symbol: 'APH',   name: 'Amphenol Corporation',        exchange: 'NYSE'   },
+  { symbol: 'CRWD',  name: 'CrowdStrike Holdings',        exchange: 'NASDAQ' },
+  { symbol: 'MELI',  name: 'MercadoLibre Inc.',           exchange: 'NASDAQ' },
+  { symbol: 'SNPS',  name: 'Synopsys Inc.',               exchange: 'NASDAQ' },
+  { symbol: 'CDNS',  name: 'Cadence Design Systems',      exchange: 'NASDAQ' },
+  { symbol: 'NKE',   name: 'Nike Inc.',                   exchange: 'NYSE'   },
+  { symbol: 'KO',    name: 'Coca-Cola Company',           exchange: 'NYSE'   },
+  { symbol: 'PEP',   name: 'PepsiCo Inc.',                exchange: 'NASDAQ' },
+  { symbol: 'UNP',   name: 'Union Pacific',               exchange: 'NYSE'   },
+  { symbol: 'MMC',   name: 'Marsh & McLennan',            exchange: 'NYSE'   },
+  { symbol: 'SO',    name: 'Southern Company',            exchange: 'NYSE'   },
+  { symbol: 'ICE',   name: 'Intercontinental Exchange',   exchange: 'NYSE'   },
+  { symbol: 'AON',   name: 'Aon plc',                     exchange: 'NYSE'   },
+  { symbol: 'CME',   name: 'CME Group',                   exchange: 'NASDAQ' },
+  { symbol: 'SHW',   name: 'Sherwin-Williams',            exchange: 'NYSE'   },
+  { symbol: 'GE',    name: 'GE Aerospace',                exchange: 'NYSE'   },
+  { symbol: 'DE',    name: 'Deere & Company',             exchange: 'NYSE'   },
+  { symbol: 'EQIX',  name: 'Equinix Inc.',                exchange: 'NASDAQ' },
+  { symbol: 'MCO',   name: 'Moody\'s Corporation',        exchange: 'NYSE'   },
+  { symbol: 'FI',    name: 'Fiserv Inc.',                 exchange: 'NYSE'   },
+  { symbol: 'MCD',   name: 'McDonald\'s Corporation',     exchange: 'NYSE'   },
+  { symbol: 'MSI',   name: 'Motorola Solutions',          exchange: 'NYSE'   },
+  { symbol: 'ELV',   name: 'Elevance Health',             exchange: 'NYSE'   },
+  { symbol: 'BDX',   name: 'Becton Dickinson',            exchange: 'NYSE'   },
+  { symbol: 'CL',    name: 'Colgate-Palmolive',           exchange: 'NYSE'   },
+  { symbol: 'TJX',   name: 'TJX Companies',               exchange: 'NYSE'   },
+  { symbol: 'CVS',   name: 'CVS Health',                  exchange: 'NYSE'   },
+  { symbol: 'MMM',   name: '3M Company',                  exchange: 'NYSE'   },
+  { symbol: 'GILD',  name: 'Gilead Sciences',             exchange: 'NASDAQ' },
+  { symbol: 'PH',    name: 'Parker-Hannifin',             exchange: 'NYSE'   },
+  { symbol: 'ECL',   name: 'Ecolab Inc.',                 exchange: 'NYSE'   },
+  { symbol: 'CTAS',  name: 'Cintas Corporation',          exchange: 'NASDAQ' },
+  { symbol: 'CMG',   name: 'Chipotle Mexican Grill',      exchange: 'NYSE'   },
+  { symbol: 'CARR',  name: 'Carrier Global',              exchange: 'NYSE'   },
+  { symbol: 'WELL',  name: 'Welltower Inc.',              exchange: 'NYSE'   },
+  { symbol: 'APD',   name: 'Air Products & Chemicals',    exchange: 'NASDAQ' },
+  { symbol: 'UBER',  name: 'Uber Technologies',           exchange: 'NYSE'   },
+  { symbol: 'ABNB',  name: 'Airbnb Inc.',                 exchange: 'NASDAQ' },
+  { symbol: 'SPOT',  name: 'Spotify Technology',          exchange: 'NYSE'   },
+  { symbol: 'SHOP',  name: 'Shopify Inc.',                exchange: 'NYSE'   },
+  { symbol: 'SQ',    name: 'Block Inc.',                  exchange: 'NYSE'   },
+  { symbol: 'COIN',  name: 'Coinbase Global',             exchange: 'NASDAQ' },
+  { symbol: 'RBLX',  name: 'Roblox Corporation',          exchange: 'NYSE'   },
+  { symbol: 'SNAP',  name: 'Snap Inc.',                   exchange: 'NYSE'   },
+  { symbol: 'PINS',  name: 'Pinterest Inc.',              exchange: 'NYSE'   },
+  { symbol: 'TWLO',  name: 'Twilio Inc.',                 exchange: 'NYSE'   },
+  { symbol: 'NET',   name: 'Cloudflare Inc.',             exchange: 'NYSE'   },
+  { symbol: 'DDOG',  name: 'Datadog Inc.',                exchange: 'NASDAQ' },
+  { symbol: 'ZS',    name: 'Zscaler Inc.',                exchange: 'NASDAQ' },
+  { symbol: 'SNOW',  name: 'Snowflake Inc.',              exchange: 'NYSE'   },
+  { symbol: 'PLTR',  name: 'Palantir Technologies',       exchange: 'NASDAQ' },
+  { symbol: 'ARM',   name: 'Arm Holdings',                exchange: 'NASDAQ' },
+  { symbol: 'SMCI',  name: 'Super Micro Computer',        exchange: 'NASDAQ' },
+  { symbol: 'CEG',   name: 'Constellation Energy',        exchange: 'NASDAQ' },
+  { symbol: 'VST',   name: 'Vistra Corp',                 exchange: 'NYSE'   },
+  { symbol: 'VZ',    name: 'Verizon Communications',      exchange: 'NYSE'   },
+  { symbol: 'T',     name: 'AT&T Inc.',                   exchange: 'NYSE'   },
+  { symbol: 'TMUS',  name: 'T-Mobile US',                 exchange: 'NASDAQ' },
+  { symbol: 'INTC',  name: 'Intel Corporation',           exchange: 'NASDAQ' },
+  { symbol: 'CSCO',  name: 'Cisco Systems',               exchange: 'NASDAQ' },
+  { symbol: 'DIS',   name: 'Walt Disney',                 exchange: 'NYSE'   },
+  { symbol: 'PYPL',  name: 'PayPal Holdings',             exchange: 'NASDAQ' },
+  { symbol: 'ADBE',  name: 'Adobe Inc.',                  exchange: 'NASDAQ' },
+  { symbol: 'CRM',   name: 'Salesforce Inc.',             exchange: 'NYSE'   },
+  { symbol: 'QCOM',  name: 'Qualcomm',                    exchange: 'NASDAQ' },
+  { symbol: 'PFE',   name: 'Pfizer Inc.',                 exchange: 'NYSE'   },
+  { symbol: 'JNJ',   name: 'Johnson & Johnson',           exchange: 'NYSE'   },
+  { symbol: 'MRK',   name: 'Merck & Co.',                 exchange: 'NYSE'   },
+  { symbol: 'ABT',   name: 'Abbott Laboratories',         exchange: 'NYSE'   },
+  { symbol: 'TMO',   name: 'Thermo Fisher Scientific',    exchange: 'NYSE'   },
+  { symbol: 'DHR',   name: 'Danaher Corporation',         exchange: 'NYSE'   },
+  { symbol: 'BMY',   name: 'Bristol-Myers Squibb',        exchange: 'NYSE'   },
+  { symbol: 'CVX',   name: 'Chevron Corporation',         exchange: 'NYSE'   },
+  { symbol: 'COP',   name: 'ConocoPhillips',              exchange: 'NASDAQ' },
+  { symbol: 'SLB',   name: 'Schlumberger (SLB)',          exchange: 'NYSE'   },
+  { symbol: 'LIN',   name: 'Linde plc',                   exchange: 'NASDAQ' },
+  { symbol: 'DD',    name: 'DuPont de Nemours',           exchange: 'NYSE'   },
+  // ── International (ADR / direct) ──
+  { symbol: 'TSM',   name: 'Taiwan Semiconductor (TSMC)', exchange: 'NYSE'   },
+  { symbol: 'ASML',  name: 'ASML Holding',                exchange: 'NASDAQ' },
+  { symbol: 'NVO',   name: 'Novo Nordisk',                exchange: 'NYSE'   },
+  { symbol: 'SAP',   name: 'SAP SE',                      exchange: 'NYSE'   },
+  { symbol: 'TM',    name: 'Toyota Motor',                exchange: 'NYSE'   },
+  { symbol: 'SONY',  name: 'Sony Group',                  exchange: 'NYSE'   },
+  { symbol: 'BABA',  name: 'Alibaba Group',               exchange: 'NYSE'   },
+  { symbol: 'JD',    name: 'JD.com Inc.',                 exchange: 'NASDAQ' },
+  { symbol: 'BIDU',  name: 'Baidu Inc.',                  exchange: 'NASDAQ' },
+  { symbol: 'SE',    name: 'Sea Limited',                 exchange: 'NYSE'   },
+  { symbol: 'GRAB',  name: 'Grab Holdings',               exchange: 'NASDAQ' },
+  // ── Crypto ──
+  { symbol: 'BTC-USD',   name: 'Bitcoin',                 exchange: 'Crypto' },
+  { symbol: 'ETH-USD',   name: 'Ethereum',                exchange: 'Crypto' },
+  { symbol: 'BNB-USD',   name: 'Binance Coin',            exchange: 'Crypto' },
+  { symbol: 'SOL-USD',   name: 'Solana',                  exchange: 'Crypto' },
+  { symbol: 'XRP-USD',   name: 'Ripple (XRP)',            exchange: 'Crypto' },
+  { symbol: 'DOGE-USD',  name: 'Dogecoin',                exchange: 'Crypto' },
+  { symbol: 'ADA-USD',   name: 'Cardano',                 exchange: 'Crypto' },
+  { symbol: 'AVAX-USD',  name: 'Avalanche',               exchange: 'Crypto' },
+  { symbol: 'LINK-USD',  name: 'Chainlink',               exchange: 'Crypto' },
+  { symbol: 'DOT-USD',   name: 'Polkadot',                exchange: 'Crypto' },
+  { symbol: 'MATIC-USD', name: 'Polygon',                 exchange: 'Crypto' },
+  { symbol: 'UNI-USD',   name: 'Uniswap',                 exchange: 'Crypto' },
+  { symbol: 'LTC-USD',   name: 'Litecoin',                exchange: 'Crypto' },
+  { symbol: 'BCH-USD',   name: 'Bitcoin Cash',            exchange: 'Crypto' },
+  { symbol: 'ATOM-USD',  name: 'Cosmos',                  exchange: 'Crypto' },
+  { symbol: 'NEAR-USD',  name: 'NEAR Protocol',           exchange: 'Crypto' },
+  { symbol: 'ICP-USD',   name: 'Internet Computer',       exchange: 'Crypto' },
+  { symbol: 'APT-USD',   name: 'Aptos',                   exchange: 'Crypto' },
+  { symbol: 'ARB-USD',   name: 'Arbitrum',                exchange: 'Crypto' },
+  { symbol: 'OP-USD',    name: 'Optimism',                exchange: 'Crypto' },
+  // ── ת"א 125 ──
+  { symbol: '1155.TA', name: 'בנק לאומי',                exchange: 'TASE' },
+  { symbol: '1120.TA', name: 'בנק הפועלים',              exchange: 'TASE' },
+  { symbol: '1082.TA', name: 'בנק דיסקונט',              exchange: 'TASE' },
+  { symbol: '1044.TA', name: 'בנק מזרחי-טפחות',         exchange: 'TASE' },
+  { symbol: '1084.TA', name: 'בנק הבינלאומי',            exchange: 'TASE' },
+  { symbol: '1602.TA', name: 'טבע תעשיות',               exchange: 'TASE' },
+  { symbol: '2100.TA', name: 'אלביט מערכות',             exchange: 'TASE' },
+  { symbol: '7200.TA', name: 'אמדוקס',                   exchange: 'TASE' },
+  { symbol: '2588.TA', name: 'נייס סיסטמס',             exchange: 'TASE' },
+  { symbol: '4590.TA', name: 'כיל',                      exchange: 'TASE' },
+  { symbol: '5122.TA', name: 'חברת החשמל',               exchange: 'TASE' },
+  { symbol: '1081.TA', name: 'בזק',                      exchange: 'TASE' },
+  { symbol: '1094.TA', name: 'מגדל ביטוח',               exchange: 'TASE' },
+  { symbol: '1091.TA', name: 'הראל ביטוח',               exchange: 'TASE' },
+  { symbol: '6450.TA', name: 'רפאל',                     exchange: 'TASE' },
+  { symbol: '6126.TA', name: 'אייס פאואר',               exchange: 'TASE' },
+  { symbol: '3570.TA', name: 'אסם',                      exchange: 'TASE' },
+  { symbol: '3672.TA', name: 'שטראוס גרופ',              exchange: 'TASE' },
+  { symbol: '1680.TA', name: 'מנורה מבטחים',             exchange: 'TASE' },
+  { symbol: '6998.TA', name: 'מלאנוקס טכנולוגיות',      exchange: 'TASE' },
+  { symbol: '1995.TA', name: 'גזית גלוב',                exchange: 'TASE' },
+  { symbol: '3290.TA', name: 'אמות השקעות',              exchange: 'TASE' },
+  { symbol: '6310.TA', name: 'קמהדע',                    exchange: 'TASE' },
+  { symbol: '4902.TA', name: 'כיל (ICL)',                 exchange: 'TASE' },
+  { symbol: '3010.TA', name: 'אאורה נדל"ן',              exchange: 'TASE' },
 ];
 
 // ── State ──────────────────────────────────────────────
@@ -219,26 +352,18 @@ function doSearch(query) {
 
 // ── Autocomplete ───────────────────────────────────────
 let acIndex = -1;
+let acDebounceTimer = null;
+let acLastQuery = '';
 
-function showAutocomplete(query) {
+function renderAutocompleteItems(matches) {
   const list = document.getElementById('autocomplete-list');
-  query = query.trim().toUpperCase();
-  if (!query) { hideAutocomplete(); return; }
-
-  const matches = STOCK_LIST.filter(s =>
-    s.symbol.includes(query) ||
-    s.name.toUpperCase().includes(query)
-  ).slice(0, 8);
-
   if (!matches.length) { hideAutocomplete(); return; }
-
   list.innerHTML = matches.map((s, i) => `
     <div class="autocomplete-item" data-index="${i}" data-symbol="${s.symbol}">
       <span class="ac-symbol">${s.symbol}</span>
       <span class="ac-name">${s.name}</span>
       <span class="ac-exchange">${s.exchange}</span>
     </div>`).join('');
-
   list.querySelectorAll('.autocomplete-item').forEach(el => {
     el.addEventListener('click', () => {
       document.getElementById('search-input').value = el.dataset.symbol;
@@ -246,9 +371,60 @@ function showAutocomplete(query) {
       doSearch(el.dataset.symbol);
     });
   });
-
   acIndex = -1;
   list.classList.remove('hidden');
+}
+
+async function fetchYahooSearch(query) {
+  try {
+    const url = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=8&newsCount=0&enableNavLinks=false`;
+    const raw = await fetchProxy(url);
+    const quotes = raw?.quotes || [];
+    return quotes
+      .filter(q => q.symbol && (q.quoteType === 'EQUITY' || q.quoteType === 'CRYPTOCURRENCY' || q.quoteType === 'ETF' || q.quoteType === 'MUTUALFUND'))
+      .slice(0, 8)
+      .map(q => ({
+        symbol:   q.symbol,
+        name:     q.longname || q.shortname || q.symbol,
+        exchange: q.exchDisp || q.exchange || '',
+      }));
+  } catch {
+    return [];
+  }
+}
+
+function showAutocomplete(query) {
+  const rawQuery = query.trim();
+  if (!rawQuery) { hideAutocomplete(); return; }
+  const upperQuery = rawQuery.toUpperCase();
+
+  // 1. Instant: show local matches right away
+  const localMatches = STOCK_LIST.filter(s =>
+    s.symbol.startsWith(upperQuery) ||
+    s.symbol.includes(upperQuery) ||
+    s.name.toUpperCase().includes(upperQuery)
+  ).slice(0, 8);
+
+  if (localMatches.length) renderAutocompleteItems(localMatches);
+
+  // 2. Debounced: query Yahoo Finance for comprehensive results
+  clearTimeout(acDebounceTimer);
+  acLastQuery = rawQuery;
+  acDebounceTimer = setTimeout(async () => {
+    if (acLastQuery !== rawQuery) return; // stale
+    const remoteMatches = await fetchYahooSearch(rawQuery);
+    if (acLastQuery !== rawQuery) return; // stale
+
+    // Merge: remote results first, then fill with local if needed
+    const seen = new Set(remoteMatches.map(s => s.symbol));
+    const merged = [
+      ...remoteMatches,
+      ...localMatches.filter(s => !seen.has(s.symbol)),
+    ].slice(0, 8);
+
+    if (merged.length) renderAutocompleteItems(merged);
+    else if (!localMatches.length) hideAutocomplete();
+  }, 200);
 }
 
 function selectAutocomplete(dir) {
