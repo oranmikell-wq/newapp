@@ -1,6 +1,6 @@
-// Service Worker — Interesting Zone PWA
+// Service Worker — Bull Therapy PWA
 // Bump version on every deploy so users always get fresh files
-const CACHE = 'interesting-zone-v11';
+const CACHE = 'bull-therapy-v1';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
