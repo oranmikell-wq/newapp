@@ -1,9 +1,9 @@
 {
-  "name": "Stock Zone",
-  "short_name": "Stock Zone",
+  "name": "Interesting Zone",
+  "short_name": "Interesting Zone",
   "description": "ניתוח מניות בלחיצת כפתור",
-  "start_url": "/Stock Zone/",
-  "scope": "/Stock Zone/",
+  "start_url": "/Interesting Zone/",
+  "scope": "/Interesting Zone/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",

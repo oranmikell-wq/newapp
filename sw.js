@@ -1,6 +1,6 @@
-// Service Worker — Stock Zone PWA
+// Service Worker — Interesting Zone PWA
 // Bump version on every deploy so users always get fresh files
-const CACHE = 'stock-zone-v8';
+const CACHE = 'interesting-zone-v9';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
