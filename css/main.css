@@ -501,23 +501,14 @@ body {
 
 /* ===== FOOTER ===== */
 .app-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 40;
   background: #000000;
   color: rgba(255,255,255,0.45);
   text-align: center;
   font-size: 11px;
   font-weight: 500;
-  padding: 8px 20px;
+  padding: 14px 20px;
   border-top: 1px solid rgba(255,255,255,0.08);
   letter-spacing: 0.3px;
-}
-
-.page {
-  padding-bottom: 36px;
 }
 
 /* ===== HIDDEN UTIL ===== */

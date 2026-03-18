@@ -221,6 +221,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Mark home as active in drawer
   const homeBtn = document.querySelector('.drawer-nav-item[data-page="home"]');
   if (homeBtn) homeBtn.classList.add('active');
+  // Move footer into active page
+  const footer = document.querySelector('.app-footer');
+  const initPage = document.querySelector('.page.active');
+  if (footer && initPage) initPage.appendChild(footer);
   checkURLParam();
   loadTrending();
   renderHistory();
@@ -260,7 +264,10 @@ function toggleTheme() {
 function navigateTo(page, symbol = null) {
   closeDrawer();
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(`page-${page}`).classList.add('active');
+  const activePage = document.getElementById(`page-${page}`);
+  activePage.classList.add('active');
+  const footer = document.querySelector('.app-footer');
+  if (footer) activePage.appendChild(footer);
   // Update drawer active state
   document.querySelectorAll('.drawer-nav-item').forEach(b => b.classList.remove('active'));
   const drawerBtn = document.querySelector(`.drawer-nav-item[data-page="${page}"]`);
