@@ -337,7 +337,11 @@ function bindEvents() {
   document.getElementById('btn-share').addEventListener('click', () => {
     if (!currentStock) return;
     const url = `${location.origin}${location.pathname}?s=${currentStock.symbol}`;
-    navigator.clipboard.writeText(url).then(() => showNotification(t('linkCopied')));
+    if (navigator.share) {
+      navigator.share({ title: currentStock.symbol, url });
+    } else {
+      navigator.clipboard.writeText(url).then(() => showNotification(t('linkCopied')));
+    }
   });
 
   // Chart ranges
