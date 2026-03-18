@@ -239,12 +239,9 @@ body {
 }
 
 .top-bar-logo {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   object-fit: contain;
-  filter: invert(1) brightness(1.5) drop-shadow(0 0 1px rgba(255,255,255,0.3));
-  background: #000;
-  border-radius: 4px;
 }
 
 .top-bar-brand {
