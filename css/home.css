@@ -272,17 +272,27 @@
 /* ===== DESKTOP ===== */
 @media (min-width: 768px) {
   .home-main {
-    max-width: 860px;
-    padding-top: 72px;
-    gap: 36px;
+    max-width: 900px;
+    padding: 72px 40px 48px;
+    gap: 40px;
   }
 
-  .logo-title { font-size: 64px; letter-spacing: -3px; }
-  .logo-sub { font-size: 17px; }
+  .search-box { padding: 7px 7px 7px 22px; }
+  #search-input { font-size: 16px; }
+  #search-btn { padding: 12px 28px; font-size: 14px; }
 
   .trending-list {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
   }
+
+  .trending-item { padding: 14px 20px; }
+  .trending-symbol { font-size: 15px; min-width: 72px; }
+  .trending-name { font-size: 13px; }
+}
+
+@media (min-width: 1200px) {
+  .home-main { max-width: 1100px; }
+  .trending-list { grid-template-columns: repeat(3, 1fr); }
 }

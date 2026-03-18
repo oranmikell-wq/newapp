@@ -1,6 +1,13 @@
 // compare.js — השוואת מניות (עד 3)
 
-let compareList = [];
+function loadCompareList() {
+  try { return JSON.parse(localStorage.getItem('bon-compare') || '[]'); } catch { return []; }
+}
+function saveCompareList() {
+  localStorage.setItem('bon-compare', JSON.stringify(compareList));
+}
+
+let compareList = loadCompareList();
 
 function getCompareList() { return compareList; }
 
@@ -11,12 +18,14 @@ function addToCompare(symbol, name) {
   }
   if (compareList.some(s => s.symbol === symbol)) return;
   compareList.push({ symbol, name });
+  saveCompareList();
   showNotification(t('compareAdded'));
   updateCompareBtn(symbol);
 }
 
 function removeFromCompare(symbol) {
   compareList = compareList.filter(s => s.symbol !== symbol);
+  saveCompareList();
   updateCompareBtn(symbol);
   if (document.getElementById('page-compare').classList.contains('active')) {
     renderCompare();
@@ -108,7 +117,7 @@ async function renderCompare() {
     await initCompareChart(symbols);
 
   } catch (e) {
-    container.innerHTML = `<div class="error-state"><div class="error-icon">❌</div><p>${e.message}</p></div>`;
+    container.innerHTML = `<div class="error-state"><p>${e.message}</p></div>`;
   }
 }
 

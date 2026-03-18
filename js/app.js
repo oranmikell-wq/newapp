@@ -33,6 +33,22 @@ const STOCK_LIST = [
   { symbol: 'CRM',   name: 'Salesforce Inc.',       exchange: 'NYSE'   },
   { symbol: 'QCOM',  name: 'Qualcomm',              exchange: 'NASDAQ' },
   { symbol: 'PFE',   name: 'Pfizer Inc.',           exchange: 'NYSE'   },
+  // Crypto
+  { symbol: 'BTC-USD',  name: 'Bitcoin',          exchange: 'Crypto' },
+  { symbol: 'ETH-USD',  name: 'Ethereum',          exchange: 'Crypto' },
+  { symbol: 'BNB-USD',  name: 'Binance Coin',      exchange: 'Crypto' },
+  { symbol: 'SOL-USD',  name: 'Solana',            exchange: 'Crypto' },
+  { symbol: 'XRP-USD',  name: 'Ripple (XRP)',      exchange: 'Crypto' },
+  { symbol: 'DOGE-USD', name: 'Dogecoin',          exchange: 'Crypto' },
+  { symbol: 'ADA-USD',  name: 'Cardano',           exchange: 'Crypto' },
+  { symbol: 'AVAX-USD', name: 'Avalanche',         exchange: 'Crypto' },
+  { symbol: 'MATIC-USD',name: 'Polygon',           exchange: 'Crypto' },
+  { symbol: 'DOT-USD',  name: 'Polkadot',          exchange: 'Crypto' },
+  { symbol: 'LINK-USD', name: 'Chainlink',         exchange: 'Crypto' },
+  { symbol: 'UNI-USD',  name: 'Uniswap',           exchange: 'Crypto' },
+  { symbol: 'LTC-USD',  name: 'Litecoin',          exchange: 'Crypto' },
+  { symbol: 'BCH-USD',  name: 'Bitcoin Cash',      exchange: 'Crypto' },
+  { symbol: 'ATOM-USD', name: 'Cosmos',            exchange: 'Crypto' },
   // ת"א 125
   { symbol: '1155.TA', name: 'בנק לאומי',           exchange: 'TASE' },
   { symbol: '1120.TA', name: 'בנק הפועלים',         exchange: 'TASE' },
@@ -286,8 +302,12 @@ async function loadTrending() {
         // skip failed stock, continue
       }
     }
+    // If nothing loaded, clear skeletons
+    if (!lastTrendingData.length) {
+      container.innerHTML = `<p style="padding:16px;color:var(--text-3);font-size:13px">Unable to load trending stocks</p>`;
+    }
   } catch (e) {
-    container.innerHTML = `<p style="padding:16px;color:var(--text-3)">${e.message}</p>`;
+    container.innerHTML = `<p style="padding:16px;color:var(--text-3);font-size:13px">${e.message}</p>`;
   }
 }
 
@@ -353,8 +373,7 @@ function renderResults(data, scored) {
   document.getElementById('res-symbol').textContent = data.symbol;
   document.getElementById('res-name').textContent   = data.name || '';
 
-  // Gauge
-  drawGauge(scored.score, scored.rating);
+  // Gauge text (canvas drawn after content is visible in loadResults)
   document.getElementById('gauge-score').textContent = scored.score ?? '--';
   document.getElementById('gauge-label').textContent = t(scored.rating);
   document.getElementById('gauge-label').className = `gauge-label badge-${scored.rating}`;
@@ -486,14 +505,14 @@ function renderCriteriaTable(scored, data) {
     { key: 'multiples',     rawData: () => [data.pe && `P/E: ${data.pe.toFixed(1)}`, data.pb && `P/B: ${data.pb.toFixed(1)}`, data.ps && `P/S: ${data.ps.toFixed(1)}`].filter(Boolean) },
     { key: 'revenue',       rawData: () => data.revenueGrowth != null ? [`Revenue Growth: ${data.revenueGrowth.toFixed(1)}%`] : [] },
     { key: 'analysts',      rawData: () => data.analystScore ? [`Buy: ${data.analystScore.buy + data.analystScore.strongBuy}`, `Hold: ${data.analystScore.hold}`, `Sell: ${data.analystScore.sell}`] : [] },
-    { key: 'momentum',      rawData: () => [data.changePct != null && `שינוי יומי: ${data.changePct.toFixed(2)}%`, data.high52w && `52w High: ${data.high52w}`].filter(Boolean) },
-    { key: 'institutional', rawData: () => data.instPct != null ? [`אחזקות: ${(data.instPct * 100).toFixed(1)}%`] : [] },
-    { key: 'debt',          rawData: () => data.debtEquity != null ? [`D/E: ${data.debtEquity.toFixed(1)}`] : [] },
-    { key: 'technical',     rawData: () => [scored.technicals?.rsi && `RSI: ${scored.technicals.rsi.toFixed(1)}`, scored.technicals?.macd && `MACD: ${scored.technicals.macd.toFixed(2)}`].filter(Boolean) },
+    { key: 'momentum',      rawData: () => [data.changePct != null && `Daily Change: ${data.changePct.toFixed(2)}%`, data.high52w && `52w High: ${data.high52w.toFixed(2)}`].filter(Boolean) },
+    { key: 'institutional', rawData: () => data.instPct != null ? [`Holdings: ${(data.instPct * 100).toFixed(1)}%`] : [] },
+    { key: 'debt',          rawData: () => data.debtEquity != null ? [`D/E: ${data.debtEquity.toFixed(2)}`] : [] },
+    { key: 'technical',     rawData: () => [scored.technicals?.rsi != null && `RSI: ${scored.technicals.rsi.toFixed(1)}`, scored.technicals?.macd != null && `MACD: ${scored.technicals.macd.toFixed(2)}`].filter(Boolean) },
     { key: 'ath',           rawData: () => {
         if (data.price == null || data.high52w == null) return [];
         const distPct = Math.max(0, ((data.high52w - data.price) / data.price) * 100);
-        return [distPct < 0.1 ? 'בשיא השנתי' : `+${distPct.toFixed(1)}% לשיא השנתי`];
+        return [distPct < 0.1 ? 'At 52w High' : `+${distPct.toFixed(1)}% to 52w High`];
       }},
     { key: 'highs',         rawData: () => scored.technicals?.highs ? [`1Y: ${scored.technicals.highs.y1}`, `3Y: ${scored.technicals.highs.y3}`, `5Y: ${scored.technicals.highs.y5}`] : [] },
   ];

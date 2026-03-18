@@ -464,13 +464,22 @@ body {
    DESKTOP LAYOUT (768px+)
    ================================================================ */
 @media (min-width: 768px) {
-  /* Notification position fix */
-  .notification {
-    bottom: 20px;
+  .notification { bottom: 20px; }
+
+  .hamburger-btn { font-size: 18px; }
+
+  /* Taller, more spacious header on desktop */
+  .top-bar, .results-header {
+    padding: 14px 32px;
   }
 
-  /* Wider hamburger touch target on desktop */
-  .hamburger-btn {
-    font-size: 18px;
-  }
+  .top-bar-brand { font-size: 20px; }
+  .top-bar-sub   { font-size: 12px; }
+
+  /* Wider drawer on desktop */
+  .nav-drawer { width: min(340px, 88vw); }
+}
+
+@media (min-width: 1200px) {
+  .top-bar, .results-header { padding: 14px 48px; }
 }

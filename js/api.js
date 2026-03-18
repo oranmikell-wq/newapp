@@ -100,32 +100,38 @@ async function fetchTrending() {
   return TRENDING_DEFAULTS;
 }
 
+// ── Crypto / TASE detection ────────────────────────────
+function isCryptoSymbol(symbol) {
+  return /^[A-Z0-9]+-(?:USD|USDT|USDC|BTC|ETH|EUR|GBP)$/i.test(symbol);
+}
+
 // ── Master fetch: all data for a symbol ───────────────
 async function fetchAllData(symbol, lite = false) {
   const cached = cacheGet(symbol);
   if (cached) {
     // If all Twelve Data fields are null, cache was stored during a rate-limit — re-fetch fresh
-    const isTASE = symbol.endsWith('.TA');
-    const hasTDData = isTASE || cached.pe != null || cached.epsGrowth != null || cached.instPct != null || cached.debtEquity != null;
+    const skipsTD = symbol.endsWith('.TA') || isCryptoSymbol(symbol);
+    const hasTDData = skipsTD || cached.pe != null || cached.epsGrowth != null || cached.instPct != null || cached.debtEquity != null;
     if (hasTDData) return { data: cached, fromCache: true, offline: false };
   }
 
   const stale = cacheGetStale(symbol);
 
   try {
-    // Always fetch Yahoo chart (works for all symbols including TASE)
+    // Always fetch Yahoo chart (works for all symbols including TASE and Crypto)
     const chartRaw = await yahooChart(symbol, '1d', '1d');
     const meta = chartRaw?.chart?.result?.[0]?.meta;
 
     if (!meta || meta.regularMarketPrice === 0) throw new Error('no_data');
 
-    // Twelve Data: skip for TASE (.TA) — returns 403 for Israeli stocks
+    // Twelve Data: skip for TASE (.TA) and Crypto — no fundamental data
     const isTASE = symbol.endsWith('.TA');
-    const stats = isTASE ? null : await tdStatistics(symbol).catch(() => null);
+    const isCrypto = isCryptoSymbol(symbol);
+    const stats = (isTASE || isCrypto) ? null : await tdStatistics(symbol).catch(() => null);
 
     // Non-lite: fetch earnings/target/ratings sequentially to avoid rate limit
     let earning = null, target = null, ratings = null;
-    if (!lite && !isTASE) {
+    if (!lite && !isTASE && !isCrypto) {
       earning = await tdEarnings(symbol).catch(() => null);
       target  = await tdPriceTarget(symbol).catch(() => null);
       ratings = await tdAnalystRatings(symbol).catch(() => null);
@@ -199,7 +205,8 @@ function parseAllData({ meta, stats, earning, target, ratings, newsResp }, symbo
   const currency  = meta.currency               ?? 'USD';
   const exchange  = meta.exchangeName           ?? meta.fullExchangeName ?? null;
   const isTASE    = symbol.endsWith('.TA');
-  const marketState = meta.marketState          ?? 'CLOSED';
+  const isCrypto  = isCryptoSymbol(symbol);
+  const marketState = isCrypto ? 'REGULAR' : (meta.marketState ?? 'CLOSED');
 
   // Name — from Twelve Data (better) or Yahoo chart
   const name = stats?.meta?.name ?? meta.longName ?? meta.shortName ?? symbol;
@@ -265,7 +272,7 @@ function parseAllData({ meta, stats, earning, target, ratings, newsResp }, symbo
   }));
 
   return {
-    symbol, name, sector, exchange, currency, isTASE, marketState,
+    symbol, name, sector, exchange, currency, isTASE, isCrypto, marketState,
     price, prevClose, change, changePct,
     pe, pb, ps, marketCap, beta, dividend,
     high52w, low52w,

@@ -394,17 +394,16 @@
   /* 2-column main layout */
   .results-layout {
     display: flex;
-    align-items: flex-start;
+    align-items: stretch;
     border-bottom: 1px solid var(--border);
-    min-height: 520px;
+    min-height: 560px;
   }
 
   .results-left {
     display: flex;
     flex-direction: column;
-    flex: 0 0 380px;
+    flex: 0 0 360px;
     border-inline-end: 1px solid var(--border);
-    min-height: 520px;
   }
 
   .results-right {
@@ -412,46 +411,55 @@
     min-width: 0;
     display: flex;
     flex-direction: column;
-    min-height: 520px;
   }
 
-  /* Gauge takes full height of left top */
+  /* Gauge */
   .results-left .gauge-section {
     flex: 1;
     border-bottom: 1px solid var(--border);
-    padding: 32px 16px 20px;
+    padding: 36px 24px 24px;
   }
 
-  /* Info cards: 2-col grid */
+  #gauge-canvas { width: 280px !important; height: 160px !important; }
+  .gauge-score  { font-size: 52px; }
+
+  /* Info cards: 2-col grid on left */
   .results-left .info-cards {
     grid-template-columns: repeat(2, 1fr);
     border-bottom: none;
   }
-
   .results-left .info-card:nth-child(2n) { border-inline-end: none; }
   .results-left .info-card:nth-child(3n) { border-inline-end: 1px solid var(--border); }
+  .results-left .info-card { padding: 16px 18px; }
+  .results-left .info-label { font-size: 10px; }
+  .results-left .info-value { font-size: 16px; }
 
-  /* Chart fills right panel height */
+  /* Chart fills right panel */
   .results-right .chart-section {
     flex: 1;
     border-bottom: none;
     display: flex;
     flex-direction: column;
-    padding: 16px;
-    min-height: 520px;
+    padding: 20px;
   }
 
   .results-right #chart-container {
     flex: 1;
     height: auto;
-    min-height: 420px;
+    min-height: 440px;
+  }
+
+  /* Below the main 2-col: criteria + news in wider layout */
+  .criteria-section,
+  .news-section {
+    padding: 24px 32px;
   }
 
   /* Criteria: 2-column grid */
   .criteria-table {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
+    gap: 8px;
   }
 
   /* News: 2-column grid */
@@ -461,14 +469,20 @@
     gap: 8px;
   }
 
-  /* Header: show more info */
-  .res-symbol { font-size: 20px; }
-  .res-name { font-size: 13px; }
+  /* Header */
+  .res-symbol { font-size: 22px; }
+  .res-name   { font-size: 13px; }
 
-  #gauge-canvas { width: 320px !important; height: 180px !important; }
-  .gauge-score { font-size: 52px; }
+  .compare-bar { padding: 20px 32px; }
+  .disclaimer  { padding: 0 32px 16px; }
 }
 
 @media (min-width: 1200px) {
-  .results-left { flex: 0 0 420px; }
+  .results-left { flex: 0 0 400px; }
+
+  .criteria-table { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 1400px) {
+  .results-left { flex: 0 0 440px; }
 }
