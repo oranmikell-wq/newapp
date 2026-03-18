@@ -416,7 +416,7 @@ function drawGauge(score, rating) {
   const W = canvas.width, H = canvas.height;
   ctx.clearRect(0, 0, W, H);
 
-  const cx = W / 2, cy = H - 20;
+  const cx = W / 2, cy = H - 8;
   const r  = Math.min(W, H * 2) / 2 - 20;
 
   // Background arc
