@@ -180,7 +180,7 @@ body {
 .drawer-brand {
   font-size: 18px;
   font-weight: 800;
-  color: #000000;
+  color: var(--text);
   letter-spacing: -0.5px;
 }
 
@@ -207,7 +207,7 @@ body {
   transition: background var(--transition), color var(--transition);
 }
 .drawer-nav-item:hover { background: var(--bg-3); color: var(--text); }
-.drawer-nav-item.active { color: #000000; background: var(--green-bg); font-weight: 600; }
+.drawer-nav-item.active { color: var(--text); background: var(--green-bg); font-weight: 600; }
 .drawer-footer {
   padding: 16px;
   border-top: 1px solid var(--border);
@@ -501,7 +501,7 @@ body {
 }
 
 /* ===== RATING BADGES ===== */
-.badge-buy  { color: #000000;  font-weight: 700; }
+.badge-buy  { color: var(--green); font-weight: 700; }
 .badge-wait { color: var(--yellow); font-weight: 700; }
 .badge-sell { color: var(--red);    font-weight: 700; }
 

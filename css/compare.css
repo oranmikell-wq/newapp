@@ -30,7 +30,7 @@
 
 .compare-stock-chip .symbol {
   font-weight: 700;
-  color: #000000;
+  color: var(--text);
 }
 
 .compare-remove {
@@ -90,7 +90,7 @@
   font-size: 12px;
 }
 
-.compare-best { color: #000000; font-weight: 600; }
+.compare-best { color: var(--text); font-weight: 600; }
 .compare-worst { color: var(--red); }
 
 /* ===== WATCHLIST ===== */
@@ -170,7 +170,7 @@
 .about-logo {
   font-size: 36px;
   font-weight: 800;
-  color: #000000;
+  color: var(--text);
   letter-spacing: -1.5px;
   text-align: center;
   padding: 8px 0;
@@ -216,7 +216,7 @@
 
 .about-criteria-weight {
   background: var(--green-bg);
-  color: #000000;
+  color: var(--green);
   font-weight: 700;
   font-size: 11px;
   padding: 2px 8px;

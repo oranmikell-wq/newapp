@@ -35,7 +35,7 @@
 .logo-title {
   font-size: 52px;
   font-weight: 800;
-  color: #000000;
+  color: var(--text);
   letter-spacing: -2px;
   line-height: 1;
 }
@@ -138,7 +138,7 @@
 .ac-symbol {
   font-weight: 700;
   font-size: 13px;
-  color: #000000;
+  color: var(--text);
   min-width: 60px;
 }
 
@@ -228,7 +228,7 @@
   letter-spacing: 0.2px;
 }
 
-.badge-buy-bg  { background: var(--green-bg); color: #000000; }
+.badge-buy-bg  { background: var(--green-bg); color: var(--green); }
 .badge-wait-bg { background: var(--yellow-bg); color: var(--yellow); }
 .badge-sell-bg { background: var(--red-bg); color: var(--red); }
 

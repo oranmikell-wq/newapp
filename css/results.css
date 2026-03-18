@@ -148,7 +148,7 @@
   font-weight: 600;
 }
 
-.info-change.positive { color: #000000; }
+.info-change.positive { color: var(--green); }
 .info-change.negative { color: var(--red); }
 
 .info-sub {
@@ -256,7 +256,7 @@
   text-align: center;
 }
 
-.score-high { background: var(--green-bg); color: #000000; }
+.score-high { background: var(--green-bg); color: var(--green); }
 .score-mid  { background: var(--yellow-bg); color: var(--yellow); }
 .score-low  { background: var(--red-bg); color: var(--red); }
 .score-none { background: var(--bg-3); color: var(--text-3); }
