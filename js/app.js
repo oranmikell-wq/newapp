@@ -207,9 +207,16 @@ let autoRefreshTimer = null;
 let lastTrendingData = null;
 
 // ── Init ───────────────────────────────────────────────
+function syncTopbarHeight() {
+  const h = document.querySelector('.top-bar')?.offsetHeight;
+  if (h) document.documentElement.style.setProperty('--topbar-h', h + 'px');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   applyTheme();
   applyTranslations();
+  syncTopbarHeight();
+  window.addEventListener('resize', syncTopbarHeight);
   bindEvents();
   // Mark home as active in drawer
   const homeBtn = document.querySelector('.drawer-nav-item[data-page="home"]');
