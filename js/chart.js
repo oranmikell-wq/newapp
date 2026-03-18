@@ -91,11 +91,11 @@ async function loadChart(symbol, range = '1M') {
     const first = chartData[0]?.value;
     const last  = chartData[chartData.length - 1]?.value;
     if (first && last) {
-      const color = last >= first ? '#16a34a' : '#dc2626';
+      const up = last >= first;
       mainSeries.applyOptions({
-        lineColor:   color,
-        topColor:    color.replace(')', ',0.2)').replace('rgb', 'rgba'),
-        bottomColor: color.replace(')', ',0)').replace('rgb', 'rgba'),
+        lineColor:   up ? '#16a34a' : '#dc2626',
+        topColor:    up ? 'rgba(22,163,74,0.2)'  : 'rgba(220,38,38,0.2)',
+        bottomColor: up ? 'rgba(22,163,74,0)'    : 'rgba(220,38,38,0)',
       });
     }
   } catch (e) {

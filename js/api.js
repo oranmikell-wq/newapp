@@ -3,7 +3,7 @@
 // Supplemental: Twelve Data (free key — 800 req/day)
 //   Get your own free key at https://twelvedata.com/pricing
 
-const TWELVE_KEY = localStorage.getItem('bon-twelve-key') || 'demo';
+function getTwelveKey() { return localStorage.getItem('bon-twelve-key') || 'demo'; }
 
 const PROXY1 = 'https://corsproxy.io/?';
 const PROXY2 = 'https://api.allorigins.win/raw?url=';
@@ -69,7 +69,7 @@ async function yahooNewsSearch(symbol) {
 // ── Twelve Data ───────────────────────────────────────
 async function tdGet(endpoint) {
   const sep = endpoint.includes('?') ? '&' : '?';
-  const url = `https://api.twelvedata.com/${endpoint}${sep}apikey=${TWELVE_KEY}`;
+  const url = `https://api.twelvedata.com/${endpoint}${sep}apikey=${getTwelveKey()}`;
   const res = await fetchWithTimeout(url);
   if (!res.ok) throw new Error(res.status);
   const json = await res.json();
@@ -199,8 +199,8 @@ function parseAllData({ meta, stats, earning, target, ratings, newsResp }, symbo
   // Name — from Twelve Data (better) or Yahoo chart
   const name = stats?.meta?.name ?? meta.longName ?? meta.shortName ?? symbol;
 
-  // Sector from Twelve Data if available
-  const sector = null; // Twelve Data statistics doesn't include sector
+  // Sector from Yahoo Finance search results (free — already fetched in newsResp)
+  const sector = newsResp?.quotes?.find(q => q.symbol === symbol)?.sector || null;
 
   // Valuation from Twelve Data statistics
   const marketCap = val.market_capitalization  ?? null;
