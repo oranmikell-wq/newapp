@@ -121,7 +121,12 @@ function scoreRevenue(revenueGrowth) {
   return normalizeLinear(revenueGrowth, -10, 30);
 }
 
-function scoreAnalysts(analystScore) {
+function scoreAnalysts(analystScore, analystMean) {
+  // Yahoo Finance recommendationMean: 1=Strong Buy, 2=Buy, 3=Hold, 4=Underperform, 5=Sell
+  if (analystMean != null) {
+    // Map 1–5 scale to 0–100 (inverted: lower mean = better)
+    return normalizeLinear(5 - analystMean, 0, 4) * 100;
+  }
   if (!analystScore) return null;
   const { strongBuy = 0, buy = 0, hold = 0, sell = 0 } = analystScore;
   const total = strongBuy + buy + hold + sell;
@@ -265,7 +270,7 @@ function calcScore(data, history5y = []) {
     eps:          scoreEPS(data.epsGrowth),
     multiples:    scoreMultiples(data.pe, data.pb, data.ps, sectorKey),
     revenue:      scoreRevenue(data.revenueGrowth),
-    analysts:     scoreAnalysts(data.analystScore),
+    analysts:     scoreAnalysts(data.analystScore, data.analystMean),
     momentum:     scoreMomentum(data.changePct, data.price, data.high52w, data.low52w),
     institutional: scoreInstitutional(data.instPct),
     debt:         scoreDebt(data.debtEquity, sectorKey),

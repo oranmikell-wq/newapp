@@ -1,6 +1,6 @@
 // api.js — כל קריאות ה-API + corsproxy + cache
 // Price data: Yahoo Finance (free, no rate limit)
-// Fundamentals: Twelve Data (free key — 800 req/day, cached 24 hours)
+// Fundamentals: Yahoo Finance quoteSummary (primary) → Twelve Data (fallback)
 
 function getTwelveKey() { return localStorage.getItem('bon-twelve-key') || 'demo'; }
 
@@ -34,7 +34,6 @@ function cacheGetStale(symbol) {
 }
 
 // ── Fundamentals cache (24 hours) ─────────────────────
-// Fundamentals (PE, PB, growth, debt, etc.) change slowly — cache for 24h
 function fundGet(symbol) {
   try {
     const raw = localStorage.getItem(`bon-fund-${symbol}`);
@@ -52,7 +51,7 @@ function fundSet(symbol, data) {
 }
 
 // ── Fetch helpers ──────────────────────────────────────
-function fetchWithTimeout(url, ms = 10000) {
+function fetchWithTimeout(url, ms = 12000) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), ms);
   return fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(timer));
@@ -83,11 +82,33 @@ async function yahooNewsSearch(symbol) {
   return fetchProxy(url);
 }
 
+// ── Yahoo Finance quoteSummary — fundamentals (no auth required via proxy) ──
+async function yahooFundamentals(symbol) {
+  const modules = 'summaryDetail,defaultKeyStatistics,financialData,assetProfile,calendarEvents';
+  // Try query2 which sometimes has looser CORS requirements
+  const url = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=${modules}&formatted=false&corsDomain=finance.yahoo.com`;
+  try {
+    const raw = await fetchProxy(url);
+    // Check for auth error
+    if (raw?.quoteSummary?.error || !raw?.quoteSummary?.result?.[0]) {
+      // Try query1 as fallback
+      const url2 = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=${modules}&formatted=false`;
+      const raw2 = await fetchProxy(url2);
+      const result2 = raw2?.quoteSummary?.result?.[0];
+      if (!result2 || raw2?.quoteSummary?.error) return null;
+      return result2;
+    }
+    return raw.quoteSummary.result[0];
+  } catch {
+    return null;
+  }
+}
+
 // ── Twelve Data ───────────────────────────────────────
 async function tdGet(endpoint) {
   const sep = endpoint.includes('?') ? '&' : '?';
   const url = `https://api.twelvedata.com/${endpoint}${sep}apikey=${getTwelveKey()}`;
-  const res = await fetchWithTimeout(url);
+  const res = await fetchWithTimeout(url, 8000);
   if (!res.ok) throw new Error(res.status);
   const json = await res.json();
   if (json.code >= 400 || json.status === 'error') throw new Error(json.message || json.code);
@@ -140,35 +161,51 @@ async function fetchAllData(symbol, lite = false) {
     const meta = chartRaw?.chart?.result?.[0]?.meta;
     if (!meta || !meta.regularMarketPrice) throw new Error('no_data');
 
-    // 2. Fundamentals from Twelve Data — 24h cache, skip for TASE/Crypto/lite
-    let stats = null, ratings = null, target = null, earning = null;
+    // 2. Fundamentals — 24h cache, skip for TASE/Crypto
+    let yfFund = null;    // Yahoo quoteSummary
+    let stats  = null;    // Twelve Data statistics
+    let ratings = null, target = null, earning = null;  // Twelve Data extras
+
     if (!skipFund) {
       const cached24h = fundGet(symbol);
       if (cached24h) {
-        // Use cached fundamentals
-        stats   = cached24h.stats;
-        ratings = cached24h.ratings;
-        target  = cached24h.target;
-        earning = cached24h.earning;
-      } else if (!lite) {
-        // Fetch fresh fundamentals (full mode only)
-        stats   = await tdStatistics(symbol).catch(() => null);
-        ratings = await tdAnalystRatings(symbol).catch(() => null);
-        target  = await tdPriceTarget(symbol).catch(() => null);
-        earning = await tdEarnings(symbol).catch(() => null);
-        // Cache fundamentals for 24 hours
-        fundSet(symbol, { stats, ratings, target, earning });
+        // Restore from cache (supports both yfFund and TD format)
+        yfFund   = cached24h.yfFund   ?? null;
+        stats    = cached24h.stats    ?? null;
+        ratings  = cached24h.ratings  ?? null;
+        target   = cached24h.target   ?? null;
+        earning  = cached24h.earning  ?? null;
       } else {
-        // lite mode: try stats only (for scoring), skip heavy calls
-        stats = await tdStatistics(symbol).catch(() => null);
-        if (stats) fundSet(symbol, { stats, ratings: null, target: null, earning: null });
+        // Try Yahoo Finance quoteSummary first (no rate limit)
+        yfFund = await yahooFundamentals(symbol);
+
+        if (!lite) {
+          // In full mode: also try Twelve Data for any missing fields
+          if (!yfFund) {
+            // Yahoo failed — use Twelve Data as full replacement
+            stats   = await tdStatistics(symbol).catch(() => null);
+            ratings = await tdAnalystRatings(symbol).catch(() => null);
+            target  = await tdPriceTarget(symbol).catch(() => null);
+            earning = await tdEarnings(symbol).catch(() => null);
+          } else {
+            // Yahoo succeeded — TD only needed for detailed analyst ratings (optional)
+            ratings = await tdAnalystRatings(symbol).catch(() => null);
+          }
+        } else {
+          // lite mode: Yahoo quoteSummary is enough, skip heavy TD calls
+          if (!yfFund) {
+            stats = await tdStatistics(symbol).catch(() => null);
+          }
+        }
+
+        fundSet(symbol, { yfFund, stats, ratings, target, earning });
       }
     }
 
     // 3. News (Yahoo — no rate limit)
     const newsResp = await yahooNewsSearch(symbol).catch(() => null);
 
-    const data = parseAllData({ meta, stats, ratings, target, earning, newsResp }, symbol);
+    const data = parseAllData({ meta, yfFund, stats, ratings, target, earning, newsResp }, symbol);
     cacheSet(symbol, data);
     return { data, fromCache: false, offline: false };
 
@@ -180,7 +217,7 @@ async function fetchAllData(symbol, lite = false) {
   }
 }
 
-// ── Analyst ratings aggregation ───────────────────────
+// ── Analyst ratings aggregation (Twelve Data) ─────────
 function aggregateRatings(ratingsData) {
   if (!ratingsData?.ratings?.length) return null;
 
@@ -213,7 +250,15 @@ function aggregateRatings(ratingsData) {
 }
 
 // ── Parse all raw data into clean object ──────────────
-function parseAllData({ meta, stats, ratings, target, earning, newsResp }, symbol) {
+function parseAllData({ meta, yfFund, stats, ratings, target, earning, newsResp }, symbol) {
+  // ── Yahoo quoteSummary fields ──
+  const yfSum  = yfFund?.summaryDetail        || {};
+  const yfDef  = yfFund?.defaultKeyStatistics || {};
+  const yfFin  = yfFund?.financialData        || {};
+  const yfProf = yfFund?.assetProfile         || {};
+  const yfCal  = yfFund?.calendarEvents       || {};
+
+  // ── Twelve Data fields ──
   const st  = stats?.statistics || {};
   const val = st.valuations_metrics || {};
   const fin = st.financials || {};
@@ -227,7 +272,7 @@ function parseAllData({ meta, stats, ratings, target, earning, newsResp }, symbo
   const isTASE      = symbol.endsWith('.TA');
   const marketState = isCrypto ? 'REGULAR' : (meta.marketState ?? 'CLOSED');
 
-  // Price (Yahoo chart — always reliable)
+  // ── Price (Yahoo chart — always reliable) ──
   const price     = meta.regularMarketPrice    ?? null;
   const prevClose = meta.chartPreviousClose    ?? meta.regularMarketPreviousClose ?? null;
   const change    = (price != null && prevClose) ? price - prevClose : null;
@@ -235,58 +280,89 @@ function parseAllData({ meta, stats, ratings, target, earning, newsResp }, symbo
   const currency  = meta.currency    ?? 'USD';
   const exchange  = meta.exchangeName ?? meta.fullExchangeName ?? null;
 
-  // Name & sector
-  const name   = stats?.meta?.name ?? meta.longName ?? meta.shortName ?? symbol;
-  const sector = newsResp?.quotes?.find(q => q.symbol === symbol)?.sector || null;
+  // ── Name & sector — prefer Yahoo quoteSummary, fall back to chart meta ──
+  const name   = yfProf.longName ?? stats?.meta?.name ?? meta.longName ?? meta.shortName ?? symbol;
+  // Sector: Yahoo assetProfile → Yahoo search result → null
+  const sectorFromSearch = newsResp?.quotes?.find(q => q.symbol === symbol)?.sector || null;
+  const sector = yfProf.sector ?? sectorFromSearch ?? null;
 
-  // Valuation (Twelve Data)
-  const marketCap = val.market_capitalization  ?? null;
-  const pe        = val.trailing_pe            ?? null;
-  const pb        = val.price_to_book_mrq      ?? null;
-  const ps        = val.price_to_sales_ttm     ?? null;
+  // ── Valuation — Yahoo first, TD fallback ──
+  const marketCap = yfSum.marketCap?.raw         ?? yfSum.marketCap         ?? val.market_capitalization ?? null;
+  const pe        = yfSum.trailingPE?.raw        ?? yfSum.trailingPE        ?? val.trailing_pe            ?? null;
+  const pb        = yfSum.priceToBook?.raw       ?? yfSum.priceToBook       ?? val.price_to_book_mrq     ?? null;
+  const ps        = yfDef.priceToSalesTrailing12Months?.raw
+                    ?? yfDef.priceToSalesTrailing12Months
+                    ?? val.price_to_sales_ttm ?? null;
 
-  // Price stats (Twelve Data + Yahoo fallback)
-  const beta    = sps.beta                ?? null;
+  // ── Price stats — Yahoo first, Yahoo chart fallback, then TD ──
+  const beta    = yfSum.beta?.raw ?? yfSum.beta ?? sps.beta ?? null;
   const high52w = sps.fifty_two_week_high ?? meta.fiftyTwoWeekHigh ?? null;
   const low52w  = sps.fifty_two_week_low  ?? meta.fiftyTwoWeekLow  ?? null;
 
-  // Dividend (Twelve Data — decimal: 0.0041 = 0.41%)
-  const dividend = div.forward_annual_dividend_yield != null
-    ? div.forward_annual_dividend_yield * 100
-    : null;
+  // ── Dividend — Yahoo first (decimal 0.0041=0.41%), TD also decimal ──
+  const yfDividend = yfSum.dividendYield?.raw ?? yfSum.dividendYield ?? null;
+  const tdDividend = div.forward_annual_dividend_yield != null ? div.forward_annual_dividend_yield : null;
+  const dividend   = yfDividend != null ? yfDividend * 100
+                   : tdDividend != null ? tdDividend * 100
+                   : null;
 
-  // Growth (Twelve Data — decimal: 0.159 = 15.9%)
-  const epsGrowth     = inc.quarterly_earnings_growth_yoy != null
-    ? inc.quarterly_earnings_growth_yoy * 100
-    : null;
-  const revenueGrowth = inc.quarterly_revenue_growth != null
-    ? inc.quarterly_revenue_growth * 100
-    : null;
+  // ── Growth — Yahoo first (decimal 0.159=15.9%), TD also decimal ──
+  const yfEpsGrowth     = yfFin.earningsGrowth?.raw ?? yfFin.earningsGrowth ?? null;
+  const yfRevenueGrowth = yfFin.revenueGrowth?.raw  ?? yfFin.revenueGrowth  ?? null;
+  const tdEpsGrowth     = inc.quarterly_earnings_growth_yoy ?? null;
+  const tdRevenueGrowth = inc.quarterly_revenue_growth      ?? null;
+  const epsGrowth     = yfEpsGrowth     != null ? yfEpsGrowth * 100     : tdEpsGrowth     != null ? tdEpsGrowth * 100     : null;
+  const revenueGrowth = yfRevenueGrowth != null ? yfRevenueGrowth * 100 : tdRevenueGrowth != null ? tdRevenueGrowth * 100 : null;
 
-  // Debt/Equity (Twelve Data — returns as percent: 102.63 = 1.0263x)
-  const debtEquity = bal.total_debt_to_equity_mrq != null
-    ? bal.total_debt_to_equity_mrq / 100
-    : null;
+  // ── Debt/Equity — Yahoo (reported as 0–1000 range, divide by 100), TD (percent ÷ 100) ──
+  const yfDebtEquity = yfFin.debtToEquity?.raw ?? yfFin.debtToEquity ?? null;
+  const tdDebtEquity = bal.total_debt_to_equity_mrq ?? null;
+  const debtEquity   = yfDebtEquity != null ? yfDebtEquity / 100
+                     : tdDebtEquity != null ? tdDebtEquity / 100
+                     : null;
 
-  // Institutional %
-  const instPct = sst.percent_held_by_institutions ?? null;
+  // ── Institutional holdings — Yahoo (0–1 decimal), TD (0–1 decimal) ──
+  const yfInstPct = yfDef.heldPercentInstitutions?.raw ?? yfDef.heldPercentInstitutions ?? null;
+  const tdInstPct = sst.percent_held_by_institutions ?? null;
+  const instPct   = yfInstPct ?? tdInstPct ?? null;
 
-  // Analyst recommendations
+  // ── Analyst data — Yahoo recommendationMean (1–5 scale) as primary ──
+  // 1=Strong Buy, 2=Buy, 3=Hold, 4=Underperform, 5=Sell
+  const analystMean  = yfFin.recommendationMean?.raw ?? yfFin.recommendationMean ?? null;
+  const analystCount = yfFin.numberOfAnalystOpinions?.raw ?? yfFin.numberOfAnalystOpinions ?? null;
+  // Detailed TD ratings as supplement
   const analystScore = aggregateRatings(ratings);
 
-  // Price target
-  const pt = target?.price_target || null;
-  const targetMean = pt?.average ?? null;
-  const targetHigh = pt?.high    ?? null;
-  const targetLow  = pt?.low     ?? null;
+  // ── Price target — Yahoo first, TD fallback ──
+  const yfTargetMean = yfFin.targetMeanPrice?.raw ?? yfFin.targetMeanPrice ?? null;
+  const yfTargetHigh = yfFin.targetHighPrice?.raw ?? yfFin.targetHighPrice ?? null;
+  const yfTargetLow  = yfFin.targetLowPrice?.raw  ?? yfFin.targetLowPrice  ?? null;
+  const tdPT = target?.price_target || null;
+  const targetMean = yfTargetMean ?? tdPT?.average ?? null;
+  const targetHigh = yfTargetHigh ?? tdPT?.high    ?? null;
+  const targetLow  = yfTargetLow  ?? tdPT?.low     ?? null;
 
-  // Earnings date
+  // ── Earnings date — Yahoo calendarEvents first, TD fallback ──
   let earningsDate = null;
-  const earningsArr = Array.isArray(earning?.earnings) ? earning.earnings : [];
-  const nextEarning = earningsArr.find(e => e.date && new Date(e.date) > new Date());
-  if (nextEarning) earningsDate = new Date(nextEarning.date);
+  // Yahoo calendarEvents.earnings.earningsDate is an array of unix timestamps
+  const yfEarningsDates = yfCal.earnings?.earningsDate;
+  if (Array.isArray(yfEarningsDates) && yfEarningsDates.length > 0) {
+    const next = yfEarningsDates.find(d => {
+      const ts = typeof d === 'object' ? (d.raw ?? d) : d;
+      return new Date(ts * 1000) > new Date();
+    });
+    if (next != null) {
+      const ts = typeof next === 'object' ? (next.raw ?? next) : next;
+      earningsDate = new Date(ts * 1000);
+    }
+  }
+  if (!earningsDate) {
+    const earningsArr = Array.isArray(earning?.earnings) ? earning.earnings : [];
+    const nextEarning = earningsArr.find(e => e.date && new Date(e.date) > new Date());
+    if (nextEarning) earningsDate = new Date(nextEarning.date);
+  }
 
-  // News
+  // ── News ──
   const rawNews   = newsResp?.news || [];
   const newsItems = rawNews.slice(0, 5).map(n => ({
     headline: n.title,
@@ -301,7 +377,8 @@ function parseAllData({ meta, stats, ratings, target, earning, newsResp }, symbo
     price, prevClose, change, changePct,
     pe, pb, ps, marketCap, beta, dividend,
     high52w, low52w,
-    analystScore, targetMean, targetHigh, targetLow,
+    analystScore, analystMean, analystCount,
+    targetMean, targetHigh, targetLow,
     debtEquity, earningsDate,
     instPct, epsGrowth, revenueGrowth,
     newsItems,

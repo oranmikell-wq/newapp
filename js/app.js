@@ -505,7 +505,18 @@ function renderCriteriaTable(scored, data) {
     { key: 'eps',           rawData: () => data.epsGrowth != null ? [`EPS Growth: ${data.epsGrowth.toFixed(1)}%`] : [] },
     { key: 'multiples',     rawData: () => [data.pe && `P/E: ${data.pe.toFixed(1)}`, data.pb && `P/B: ${data.pb.toFixed(1)}`, data.ps && `P/S: ${data.ps.toFixed(1)}`].filter(Boolean) },
     { key: 'revenue',       rawData: () => data.revenueGrowth != null ? [`Revenue Growth: ${data.revenueGrowth.toFixed(1)}%`] : [] },
-    { key: 'analysts',      rawData: () => data.analystScore ? [`Buy: ${data.analystScore.buy + data.analystScore.strongBuy}`, `Hold: ${data.analystScore.hold}`, `Sell: ${data.analystScore.sell}`] : [] },
+    { key: 'analysts',      rawData: () => {
+        if (data.analystMean != null) {
+          const labels = ['', 'Strong Buy', 'Buy', 'Hold', 'Underperform', 'Sell'];
+          const label = labels[Math.round(data.analystMean)] || '';
+          const countStr = data.analystCount ? ` (${data.analystCount} analysts)` : '';
+          return [`Mean: ${data.analystMean.toFixed(1)} — ${label}${countStr}`];
+        }
+        if (data.analystScore) {
+          return [`Buy: ${data.analystScore.buy + data.analystScore.strongBuy}`, `Hold: ${data.analystScore.hold}`, `Sell: ${data.analystScore.sell}`];
+        }
+        return [];
+      }},
     { key: 'momentum',      rawData: () => [data.changePct != null && `Daily Change: ${data.changePct.toFixed(2)}%`, data.high52w && `52w High: ${data.high52w.toFixed(2)}`].filter(Boolean) },
     { key: 'institutional', rawData: () => data.instPct != null ? [`Holdings: ${(data.instPct * 100).toFixed(1)}%`] : [] },
     { key: 'debt',          rawData: () => data.debtEquity != null ? [`D/E: ${data.debtEquity.toFixed(2)}`] : [] },
