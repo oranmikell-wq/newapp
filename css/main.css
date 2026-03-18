@@ -220,14 +220,35 @@ body {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: var(--header-bg);
-  border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: #000000;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
   padding: 10px 16px;
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* Header text/icon colors on black bar */
+.top-bar .top-bar-brand,
+.results-header .res-symbol,
+.results-header h2 {
+  color: #ffffff;
+}
+.top-bar .hamburger-btn,
+.results-header .hamburger-btn,
+.results-header .icon-btn,
+.results-header .back-btn {
+  color: rgba(255,255,255,0.8);
+}
+.top-bar .hamburger-btn:hover,
+.results-header .hamburger-btn:hover,
+.results-header .icon-btn:hover,
+.results-header .back-btn:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: transparent;
+}
+.results-header .res-name {
+  color: rgba(255,255,255,0.55);
 }
 
 /* ===== BUTTONS ===== */
@@ -383,6 +404,18 @@ body {
 .badge-buy  { color: var(--green);  font-weight: 700; }
 .badge-wait { color: var(--yellow); font-weight: 700; }
 .badge-sell { color: var(--red);    font-weight: 700; }
+
+/* ===== FOOTER ===== */
+.app-footer {
+  background: #000000;
+  color: rgba(255,255,255,0.45);
+  text-align: center;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 14px 20px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  letter-spacing: 0.3px;
+}
 
 /* ===== HIDDEN UTIL ===== */
 .hidden { display: none !important; }
