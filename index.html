@@ -17,16 +17,17 @@
 </head>
 <body class="theme-light">
 
+  <!-- ===== GLOBAL STICKY TOP-BAR (always visible on every page) ===== -->
+  <header class="top-bar">
+    <button class="hamburger-btn" onclick="openDrawer()" aria-label="תפריט">☰</button>
+    <div class="top-bar-titles">
+      <span class="top-bar-brand">Stock Zone</span>
+      <span class="top-bar-sub" data-i18n="tagline">Stock analysis in one click</span>
+    </div>
+  </header>
+
   <!-- ===== HOME PAGE ===== -->
   <div id="page-home" class="page active">
-    <header class="top-bar">
-      <button class="hamburger-btn" onclick="openDrawer()" aria-label="תפריט">☰</button>
-      <div class="top-bar-titles">
-        <span class="top-bar-brand">Stock Zone</span>
-        <span class="top-bar-sub" data-i18n="tagline">Stock analysis in one click</span>
-      </div>
-    </header>
-
     <main class="home-main">
       <div class="search-wrap">
         <div class="search-box">
@@ -72,7 +73,6 @@
       <div class="header-actions">
         <button id="btn-watchlist-toggle" class="icon-btn" title="הוסף למעקב">☆</button>
         <button id="btn-share" class="icon-btn" title="שתף">↑</button>
-        <button class="hamburger-btn" onclick="openDrawer()" aria-label="תפריט">☰</button>
       </div>
     </header>
 
@@ -183,7 +183,6 @@
     <header class="results-header">
       <button id="btn-back-compare" class="icon-btn back-btn">←</button>
       <h2 data-i18n="compare">השוואת מניות</h2>
-      <button class="hamburger-btn" onclick="openDrawer()" aria-label="תפריט">☰</button>
     </header>
     <div id="compare-content" class="compare-content"></div>
   </div>
@@ -193,7 +192,6 @@
     <header class="results-header">
       <button id="btn-back-watchlist" class="icon-btn back-btn">←</button>
       <h2 data-i18n="watchlist">רשימת מעקב</h2>
-      <button class="hamburger-btn" onclick="openDrawer()" aria-label="תפריט">☰</button>
     </header>
     <div id="watchlist-content" class="watchlist-content"></div>
   </div>
@@ -202,8 +200,7 @@
   <div id="page-about" class="page">
     <header class="results-header">
       <button id="btn-back-about" class="icon-btn back-btn">←</button>
-      <h2 data-i18n="about">About</h2>
-      <button class="hamburger-btn" onclick="openDrawer()" aria-label="תפריט">☰</button>
+      <h2 data-i18n="about">About Us</h2>
     </header>
     <div class="about-content">
       <div class="about-logo">Stock Zone</div>
@@ -243,7 +240,7 @@
 
   <!-- ===== FOOTER ===== -->
   <footer class="app-footer">
-    <span>© 2026 Stock Zone · All Rights Reserved</span>
+    <span>Copyright 2026 © Stock Zone</span>
   </footer>
 
   <!-- ===== IN-APP NOTIFICATION ===== -->

@@ -3,6 +3,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Rubik:wght@400;500;600;700;800&display=swap');
 
 :root {
+  --topbar-h: 53px;   /* global top-bar height — mobile */
   --green:        #16a34a;
   --green-light:  #22c55e;
   --green-dark:   #15803d;
@@ -252,9 +253,22 @@ body {
 [dir="rtl"] .back-btn { transform: scaleX(-1); }
 
 /* ===== HEADER ===== */
-.top-bar, .results-header {
+.top-bar {
   position: sticky;
   top: 0;
+  z-index: 100;   /* always on top */
+  background: #000000;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Sub-page headers stick below the global top-bar */
+.results-header {
+  position: sticky;
+  top: var(--topbar-h);
   z-index: 50;
   background: #000000;
   border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -262,6 +276,13 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* Page title in sub-headers fills available space */
+.results-header h2 {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 700;
 }
 
 /* Header text/icon colors on black bar */
@@ -464,6 +485,8 @@ body {
    DESKTOP LAYOUT (768px+)
    ================================================================ */
 @media (min-width: 768px) {
+  :root { --topbar-h: 59px; }   /* taller header on desktop */
+
   .notification { bottom: 20px; }
 
   .hamburger-btn { font-size: 18px; }
