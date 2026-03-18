@@ -1,6 +1,6 @@
 // Service Worker — Interesting Zone PWA
 // Bump version on every deploy so users always get fresh files
-const CACHE = 'interesting-zone-v10';
+const CACHE = 'interesting-zone-v11';
 
 self.addEventListener('install', e => {
   self.skipWaiting();

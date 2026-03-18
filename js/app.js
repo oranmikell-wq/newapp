@@ -463,25 +463,31 @@ function renderTrendingList() {
   });
 }
 
+// Fallback names for trending stocks when API is unavailable
+const TRENDING_NAMES = { AAPL:'Apple Inc.', TSLA:'Tesla, Inc.', NVDA:'NVIDIA Corporation', AMZN:'Amazon.com, Inc.', MSFT:'Microsoft Corporation' };
+
 async function loadTrending() {
   const container = document.getElementById('trending-list');
   try {
     const symbols = await fetchTrending();
     lastTrendingData = [];
-    for (const sym of symbols) {
+
+    // Show fallback cards immediately so user sees something
+    lastTrendingData = symbols.map(sym => ({ symbol: sym, name: TRENDING_NAMES[sym] || sym, rating: null, changePct: null }));
+    renderTrendingList();
+
+    // Then enrich with live data one by one
+    for (let i = 0; i < symbols.length; i++) {
+      const sym = symbols[i];
       try {
         const { data } = await fetchAllData(sym, true);
         const h5 = await fetchHistory(sym, '5Y');
         const scored = calcScore(data, h5);
-        lastTrendingData.push({ ...data, ...scored });
+        lastTrendingData[i] = { ...data, ...scored };
         renderTrendingList();
       } catch (e) {
-        // skip failed stock, continue
+        // keep fallback entry, continue
       }
-    }
-    // If nothing loaded, clear skeletons
-    if (!lastTrendingData.length) {
-      container.innerHTML = `<p style="padding:16px;color:var(--text-3);font-size:13px">Unable to load trending stocks</p>`;
     }
   } catch (e) {
     container.innerHTML = `<p style="padding:16px;color:var(--text-3);font-size:13px">${e.message}</p>`;
