@@ -77,17 +77,17 @@ function buildGaugeSVG(score, activeIdx, label) {
     </g>`;
   }).join('');
 
-  // 3. Tick dots on inner arc at every 5 units (skip zone boundaries + number positions)
+  // 3. Tick dots — same radius as the 25/50/75 numbers so they sit between them
+  const R_NUM = R_I - 18; // shared radius for both dots and arc numbers
   const skipS = new Set([0, 25, 45, 50, 55, 75, 100]);
   const dots = [];
   for (let s = 5; s < 100; s += 5) {
     if (skipS.has(s)) continue;
-    const { x: dx, y: dy } = pt(PI * (1 - s / 100), R_I + 7);
-    dots.push(`<circle cx="${dx}" cy="${dy}" r="1.5" fill="var(--text-3)" opacity="0.4"/>`);
+    const { x: dx, y: dy } = pt(PI * (1 - s / 100), R_NUM);
+    dots.push(`<circle cx="${dx}" cy="${dy}" r="1.8" fill="var(--text-3)" opacity="0.45"/>`);
   }
 
   // 4. Numbers: 0 and 100 at base endpoints; 25, 50, 75 along inner arc
-  const R_NUM = R_I - 18; // just inside the inner ring
   const arcNums = [
     { s: 25,  label: '25'  },
     { s: 50,  label: '50'  },
