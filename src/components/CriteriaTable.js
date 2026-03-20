@@ -1,0 +1,60 @@
+// CriteriaTable.js — renders the detailed criteria breakdown table
+
+import { t } from '../utils/i18n.js';
+
+export function renderCriteriaTable(scored, data) {
+  const container = document.getElementById('criteria-table');
+  if (!container) return;
+
+  const CRITERIA = [
+    { key: 'eps',           rawData: () => data.epsGrowth != null ? [`EPS Growth: ${data.epsGrowth.toFixed(1)}%`] : [] },
+    { key: 'multiples',     rawData: () => [data.pe && `P/E: ${data.pe.toFixed(1)}`, data.pb && `P/B: ${data.pb.toFixed(1)}`, data.ps && `P/S: ${data.ps.toFixed(1)}`].filter(Boolean) },
+    { key: 'revenue',       rawData: () => data.revenueGrowth != null ? [`Revenue Growth: ${data.revenueGrowth.toFixed(1)}%`] : [] },
+    { key: 'analysts',      rawData: () => {
+        if (data.analystMean != null) {
+          const labels = ['', 'Strong Buy', 'Buy', 'Hold', 'Underperform', 'Sell'];
+          const label = labels[Math.round(data.analystMean)] || '';
+          const countStr = data.analystCount ? ` (${data.analystCount} analysts)` : '';
+          return [`Mean: ${data.analystMean.toFixed(1)} — ${label}${countStr}`];
+        }
+        if (data.analystScore) {
+          return [`Buy: ${data.analystScore.buy + data.analystScore.strongBuy}`, `Hold: ${data.analystScore.hold}`, `Sell: ${data.analystScore.sell}`];
+        }
+        return [];
+      }},
+    { key: 'momentum',      rawData: () => [data.changePct != null && `Daily Change: ${data.changePct.toFixed(2)}%`, data.high52w && `52w High: ${data.high52w.toFixed(2)}`].filter(Boolean) },
+    { key: 'institutional', rawData: () => data.instPct != null ? [`Holdings: ${(data.instPct * 100).toFixed(1)}%`] : [] },
+    { key: 'debt',          rawData: () => data.debtEquity != null ? [`D/E: ${data.debtEquity.toFixed(2)}`] : [] },
+    { key: 'technical',     rawData: () => [scored.technicals?.rsi != null && `RSI: ${scored.technicals.rsi.toFixed(1)}`, scored.technicals?.macd != null && `MACD: ${scored.technicals.macd.toFixed(2)}`].filter(Boolean) },
+    { key: 'ath',           rawData: () => {
+        if (data.price == null || data.high52w == null) return [];
+        const distPct = Math.max(0, ((data.high52w - data.price) / data.high52w) * 100);
+        return [distPct < 0.1 ? 'At 52w High' : `+${distPct.toFixed(1)}% to 52w High`];
+      }},
+    { key: 'highs',         rawData: () => scored.technicals?.highs ? [`1Y: ${scored.technicals.highs.y1}`, `3Y: ${scored.technicals.highs.y3}`, `5Y: ${scored.technicals.highs.y5}`] : [] },
+  ];
+
+  container.innerHTML = CRITERIA.map(c => {
+    const score = scored.criteria[c.key];
+    const hasData = score != null;
+    const scoreDisplay = hasData ? Math.round(score) : t('noData');
+    const badgeClass = !hasData ? 'score-none' : score >= 66 ? 'score-high' : score >= 41 ? 'score-mid' : 'score-low';
+    const barColor   = !hasData ? 'var(--border)' : score >= 66 ? 'var(--green)' : score >= 41 ? 'var(--yellow)' : 'var(--red)';
+    const rawItems   = c.rawData();
+
+    return `
+      <div class="criteria-row" onclick="this.classList.toggle('expanded')">
+        <div class="criteria-row-header">
+          <span class="criteria-name">${t('criteria_' + c.key)}</span>
+          <span class="criteria-score-badge ${badgeClass}">${scoreDisplay}</span>
+        </div>
+        <div class="criteria-bar-wrap">
+          <div class="criteria-bar" style="width:${hasData ? score : 0}%;background:${barColor}"></div>
+        </div>
+        <div class="criteria-desc">
+          <p>${t('criteria_' + c.key + '_desc')}</p>
+          ${rawItems.length ? `<div class="criteria-data">${rawItems.map(r => `<span class="criteria-data-item">${r}</span>`).join('')}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
