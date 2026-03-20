@@ -2,6 +2,8 @@
 // Animated SVG gauge with 4-factor scoring:
 //   20% RSI(14) | 30% Moving Averages | 25% Valuation (P/E) | 25% Relative Strength
 
+import { t } from '../utils/i18n.js';
+
 // ── SVG geometry constants ────────────────────────────────
 const CX = 150, CY = 158, R = 110;
 const DASHLEN = Math.PI * R; // full semicircle arc length ≈ 345.58
@@ -327,9 +329,9 @@ function buildBreakdown(breakdown) {
 // ═════════════════════════════════════════════════════════
 
 const BADGE_META = {
-  buy:  { text: 'Bullish',  cls: 'sg-badge-buy'  },
-  wait: { text: 'Neutral',  cls: 'sg-badge-wait' },
-  sell: { text: 'Bearish',  cls: 'sg-badge-sell' },
+  buy:  { key: 'buy',  cls: 'sg-badge-buy'  },
+  wait: { key: 'wait', cls: 'sg-badge-wait' },
+  sell: { key: 'sell', cls: 'sg-badge-sell' },
 };
 
 /**
@@ -353,7 +355,7 @@ export function renderSummaryGauge(container, summaryScored) {
   card.innerHTML = `
     <div class="sg-header">
       <h3 class="sg-title">Summary Score</h3>
-      <span class="sg-badge ${badge.cls}">${badge.text}</span>
+      <span class="sg-badge ${badge.cls}">${t(badge.key)}</span>
     </div>`;
 
   // Body: SVG + breakdown (flex)
