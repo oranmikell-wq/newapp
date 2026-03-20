@@ -575,9 +575,14 @@ body {
 
   .hamburger-btn { font-size: 18px; }
 
-  /* Taller, more spacious header on desktop */
+  /* Taller, more spacious header on desktop — content aligned with 80% page */
   .top-bar, .results-header {
-    padding: 14px 32px;
+    padding: 14px 10%;
+  }
+
+  .app-footer {
+    padding-left: 10%;
+    padding-right: 10%;
   }
 
   .top-bar-brand { font-size: 20px; }
@@ -601,7 +606,7 @@ body {
 }
 
 @media (min-width: 1200px) {
-  .top-bar, .results-header { padding: 14px 48px; }
+  .top-bar, .results-header { padding: 14px 10%; }
 }
 
 /* ============================================================
