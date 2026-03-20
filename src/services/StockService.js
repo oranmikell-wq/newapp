@@ -76,7 +76,16 @@ function _v7ToV10(q) {
 }
 
 export async function yahooFundamentals(symbol) {
-  // ── 1. Try v7/finance/quote (no crumb needed) ──────────────
+  // ── 1. HTML page scraping (no crumb needed) ─────────────────────────────
+  // The Worker intercepts finance.yahoo.com/quote/ requests, extracts the
+  // full quoteSummary embedded in the SvelteKit data island, and returns JSON.
+  try {
+    const raw = await fetchProxy(`https://finance.yahoo.com/quote/${encodeURIComponent(symbol)}/`);
+    const result = raw?.quoteSummary?.result?.[0];
+    if (result && !raw?.quoteSummary?.error) return result;
+  } catch {}
+
+  // ── 2. v7/finance/quote (flat response, may be blocked) ─────────────────
   try {
     const fields = [
       'trailingPE','forwardPE','marketCap','beta','priceToBook',
@@ -87,13 +96,14 @@ export async function yahooFundamentals(symbol) {
       'earningsGrowth','revenueGrowth','debtToEquity',
       'heldPercentInstitutions','sector','industry','longName','shortName',
     ].join(',');
-    const url7 = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(symbol)}&fields=${fields}`;
-    const raw7 = await fetchProxy(url7);
+    const raw7 = await fetchProxy(
+      `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(symbol)}&fields=${fields}`
+    );
     const q = raw7?.quoteResponse?.result?.[0];
     if (q?.symbol) return _v7ToV10(q);
   } catch {}
 
-  // ── 2. Fallback: v10/quoteSummary (needs crumb — may return 401) ──
+  // ── 3. v10/quoteSummary (needs crumb — will likely return 401) ──────────
   const modules = 'summaryDetail,defaultKeyStatistics,financialData,assetProfile,calendarEvents';
   try {
     const raw = await fetchProxy(
@@ -184,8 +194,11 @@ export function parseAllData({ meta, yfFund, stats, ratings, target, earning, ne
   const yfSum  = yfFund?.summaryDetail        || {};
   const yfDef  = yfFund?.defaultKeyStatistics || {};
   const yfFin  = yfFund?.financialData        || {};
-  const yfProf = yfFund?.assetProfile         || {};
+  // assetProfile (v10 direct) OR summaryProfile (embedded via HTML scrape)
+  const yfProf = yfFund?.assetProfile ?? yfFund?.summaryProfile ?? {};
   const yfCal  = yfFund?.calendarEvents       || {};
+  // price module (present in HTML-scraped data) — extra fallbacks for name/cap
+  const yfPrice = yfFund?.price || {};
 
   const st  = stats?.statistics || {};
   const val = st.valuations_metrics || {};
@@ -207,11 +220,14 @@ export function parseAllData({ meta, yfFund, stats, ratings, target, earning, ne
   const currency  = meta.currency    ?? 'USD';
   const exchange  = meta.exchangeName ?? meta.fullExchangeName ?? null;
 
-  const name   = yfProf.longName ?? stats?.meta?.name ?? meta.longName ?? meta.shortName ?? symbol;
+  const name   = yfProf.longName ?? yfPrice.longName?.raw ?? yfPrice.longName
+               ?? stats?.meta?.name ?? meta.longName ?? meta.shortName ?? symbol;
   const sectorFromSearch = newsResp?.quotes?.find(q => q.symbol === symbol)?.sector || null;
   const sector = yfProf.sector ?? sectorFromSearch ?? null;
 
-  const marketCap = yfSum.marketCap?.raw         ?? yfSum.marketCap         ?? val.market_capitalization ?? null;
+  const marketCap = yfSum.marketCap?.raw ?? yfSum.marketCap
+                 ?? yfPrice.marketCap?.raw ?? yfPrice.marketCap
+                 ?? val.market_capitalization ?? null;
   const pe        = yfSum.trailingPE?.raw        ?? yfSum.trailingPE        ?? val.trailing_pe            ?? null;
   const pb        = yfSum.priceToBook?.raw       ?? yfSum.priceToBook       ?? val.price_to_book_mrq     ?? null;
   const ps        = yfDef.priceToSalesTrailing12Months?.raw
