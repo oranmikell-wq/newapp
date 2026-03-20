@@ -353,8 +353,8 @@
   #search-btn { padding: 12px 28px; font-size: 14px; }
 
   .trending-list {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    display: flex;
+    flex-direction: column;
     gap: 8px;
   }
 
@@ -365,5 +365,4 @@
 
 @media (min-width: 1200px) {
   .home-main { width: 80%; max-width: 880px; }
-  .trending-list { grid-template-columns: repeat(3, 1fr); }
 }

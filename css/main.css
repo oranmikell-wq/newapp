@@ -603,6 +603,16 @@ body {
     margin-right: auto;
   }
 
+  /* Align back button with 80% content zone (accounts for max-width: 880px) */
+  .page-back-btn {
+    margin-left: max(10%, calc(50% - 440px));
+    margin-right: 0;
+  }
+  [dir="rtl"] .page-back-btn {
+    margin-right: max(10%, calc(50% - 440px));
+    margin-left: 0;
+  }
+
   /* results-header is sticky — use padding to align content with 80% zone */
   .results-header {
     padding-left: 10%;
