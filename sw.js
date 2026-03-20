@@ -1,6 +1,6 @@
 // Service Worker — Bull Therapy PWA
 // Bump version on every deploy so users always get fresh files
-const CACHE = 'bull-therapy-v1';
+const CACHE = 'bull-therapy-v2';
 
 self.addEventListener('install', e => {
   self.skipWaiting();
@@ -21,7 +21,8 @@ self.addEventListener('fetch', e => {
 
   // External APIs — network only, no caching
   if (url.includes('finance.yahoo') || url.includes('twelvedata') ||
-      url.includes('corsproxy') || url.includes('allorigins')) {
+      url.includes('corsproxy') || url.includes('allorigins') ||
+      url.includes('workers.dev')) {
     e.respondWith(fetch(e.request));
     return;
   }
