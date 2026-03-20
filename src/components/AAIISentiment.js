@@ -1,20 +1,15 @@
 // AAIISentiment.js — AAII Investor Sentiment Survey (stacked bar chart)
 
 import { t } from '../utils/i18n.js';
+import { fetchProxy } from '../services/StockService.js';
 
 const FRED_BASE = 'https://api.stlouisfed.org/fred/series/observations';
-
-function fredKey() {
-  return localStorage.getItem('bon-fred-key') || '7a1406a89db10455c27f6c7af6a94e08';
-}
+const FRED_KEY  = '7a1406a89db10455c27f6c7af6a94e08';
 
 async function fetchFred(seriesId) {
-  const key = fredKey();
-  if (!key) throw new Error('no_key');
+  const key = localStorage.getItem('bon-fred-key') || FRED_KEY;
   const url = `${FRED_BASE}?series_id=${seriesId}&api_key=${key}&file_type=json&sort_order=desc&limit=56`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const json = await res.json();
+  const json = await fetchProxy(url);
   if (json.error_message) throw new Error(json.error_message);
   return json.observations || [];
 }
@@ -125,10 +120,6 @@ export async function loadAAII() {
       <p class="aaii-source">${t('aaii_source')}</p>`;
 
   } catch (e) {
-    if (e.message === 'no_key') {
-      el.innerHTML = `<p class="aaii-no-key">${t('aaii_no_key')}</p>`;
-    } else {
-      el.innerHTML = `<p class="aaii-error">${t('aaii_error')}</p>`;
-    }
+    el.innerHTML = `<p class="aaii-error">${t('aaii_error')}</p>`;
   }
 }
