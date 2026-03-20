@@ -187,12 +187,6 @@ export async function loadFearGreed() {
       <div class="fng-gauge-wrap">
         ${buildGaugeSVG(score, activeIdx, label)}
         ${ts ? `<p class="fng-updated">${ts}</p>` : ''}
-      </div>
-      <div class="fng-compare">
-        ${compareRow('fng_prev_close', fg.previous_close,   score)}
-        ${compareRow('fng_prev_week',  fg.previous_1_week,  score)}
-        ${compareRow('fng_prev_month', fg.previous_1_month, score)}
-        ${compareRow('fng_prev_year',  fg.previous_1_year,  score)}
         <p class="fng-source">${t('fng_source')}</p>
       </div>`;
   } catch (e) {
