@@ -603,13 +603,13 @@ body {
     margin-right: auto;
   }
 
-  /* Align back button with 80% content zone (accounts for max-width: 880px) */
+/* Align back button below hamburger (top-bar has padding 10% + hamburger margin 8px) */
   .page-back-btn {
-    margin-left: max(10%, calc(50% - 440px));
+    margin-left: calc(10% + 8px);
     margin-right: 0;
   }
   [dir="rtl"] .page-back-btn {
-    margin-right: max(10%, calc(50% - 440px));
+    margin-right: calc(10% + 8px);
     margin-left: 0;
   }
 
