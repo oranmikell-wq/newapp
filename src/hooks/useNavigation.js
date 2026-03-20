@@ -27,7 +27,14 @@ export function navigateTo(page, symbol = null, { loadResults, renderWatchlist, 
     const inp = document.getElementById('search-input');
     if (inp) inp.value = '';
   }
-  if (page === 'results' && symbol && loadResults) loadResults(symbol);
+  if (page === 'results' && symbol) {
+    // Hide stale content immediately before the page is even visible
+    const content = document.getElementById('results-content');
+    const loading  = document.getElementById('results-loading');
+    if (content) content.classList.add('hidden');
+    if (loading)  loading.style.display = 'flex';
+    if (loadResults) loadResults(symbol);
+  }
   if (page === 'watchlist' && renderWatchlist) renderWatchlist();
   if (page === 'compare' && renderCompare) renderCompare();
 }
