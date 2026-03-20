@@ -1,8 +1,9 @@
 // main.js — entry point, orchestrates all modules
 
 import { applyTranslations, toggleLang, t } from './utils/i18n.js';
-import { fetchAllData, fetchHistory } from './services/StockService.js';
+import { fetchAllData, fetchHistory, fetchStockFullData } from './services/StockService.js';
 import { calcScore } from './utils/scoring.js';
+import { calcSummaryScore, renderSummaryGauge } from './components/SummaryGauge.js';
 
 import { drawGauge } from './components/Gauge.js';
 import { renderCriteriaTable } from './components/CriteriaTable.js';
@@ -134,13 +135,20 @@ async function loadResults(symbol) {
   clearInterval(autoRefreshTimer);
 
   try {
-    const { data, offline, cacheDate } = await fetchAllData(symbol);
+    // Run quote, 5Y history, and full indicator data all in parallel
+    const [
+      { data, offline, cacheDate },
+      h5,
+      fullStockData,
+    ] = await Promise.all([
+      fetchAllData(symbol),
+      fetchHistory(symbol, '5Y').catch(() => []),
+      fetchStockFullData(symbol).catch(() => null),
+    ]);
 
     if (!data) throw new Error(t('stockNotFound'));
 
-    const h5 = await fetchHistory(symbol, '5Y').catch(() => []);
     const scored = calcScore(data, h5);
-
     currentStock = { ...data, ...scored };
 
     if (offline && cacheDate) {
@@ -154,8 +162,16 @@ async function loadResults(symbol) {
     document.getElementById('results-loading').style.display = 'none';
     document.getElementById('results-content').classList.remove('hidden');
 
-    // Redraw gauge now that canvas is visible
+    // ── Existing canvas gauge (inside results-layout) ──
     drawGauge(scored.score, scored.rating);
+
+    // ── SummaryGauge — new animated SVG with 4-factor score ──
+    const summaryContainer = document.getElementById('summary-gauge-container');
+    if (summaryContainer) {
+      const indicators    = fullStockData?.indicators ?? null;
+      const summaryScored = calcSummaryScore(data, indicators);
+      renderSummaryGauge(summaryContainer, summaryScored);
+    }
 
     loadChart(symbol, '1M');
     updateWatchlistBtn(symbol);
