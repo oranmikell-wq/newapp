@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
+  <!-- Apply RTL immediately to avoid layout flash -->
+  <script>
+    (function(){
+      var lang = localStorage.getItem('bon-lang') || 'he';
+      document.documentElement.lang = lang;
+      document.documentElement.dir  = lang === 'he' ? 'rtl' : 'ltr';
+    })();
+  </script>
   <meta charset="UTF-8" />
   <meta name="google-adsense-account" content="ca-pub-6713759975495292">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6713759975495292" crossorigin="anonymous"></script>
@@ -19,7 +27,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
-  <link rel="stylesheet" href="css/main.css?v=15" />
+  <link rel="stylesheet" href="css/main.css?v=16" />
   <link rel="stylesheet" href="css/home.css?v=10" />
   <link rel="stylesheet" href="css/results.css?v=15" />
   <link rel="stylesheet" href="css/compare.css?v=9" />
