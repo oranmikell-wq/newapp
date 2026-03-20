@@ -164,9 +164,9 @@ function parseAAII(html) {
     if (!dateM) continue;
     const label = dateM[1].trim().replace(/\s+/g, ' ').replace(/:$/, '');
 
-    const bullM = sec.match(/class="bar bullish"[^>]*>([\d.]+)%/);
-    const neuM  = sec.match(/class="bar neutral"[^>]*>([\d.]+)%/);
-    const bearM = sec.match(/class="bar bearish"[^>]*>([\d.]+)%/);
+    const bullM = sec.match(/class="bar bullish"[^>]*>\s*([\d.]+)%/);
+    const neuM  = sec.match(/class="bar neutral"[^>]*>\s*([\d.]+)%/);
+    const bearM = sec.match(/class="bar bearish"[^>]*>\s*([\d.]+)%/);
     const endM  = sec.match(/class="ending">Week Ending ([^<]+)<\/div>/);
 
     const bull = bullM ? +bullM[1] : null;
