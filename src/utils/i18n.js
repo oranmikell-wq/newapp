@@ -3,7 +3,7 @@
 export const TRANSLATIONS = {
   he: {
     tagline: 'Trade with a clear head',
-    searchPlaceholder: 'חפש מניה... (AAPL, תל אביב, אמזון)',
+    searchPlaceholder: 'חפש מניה... (AAPL, Tesla, אמזון)',
     search: 'חפש',
     trending: 'מניות טרנדינג',
     recentSearches: 'חיפושים אחרונים',

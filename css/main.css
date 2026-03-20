@@ -155,7 +155,7 @@ body {
   top: 0;
   left: 0;
   bottom: 0;
-  width: min(300px, 88vw);
+  width: min(200px, 70vw);
   background: var(--card-bg);
   border-inline-end: 1px solid var(--border);
   z-index: 301;
@@ -201,8 +201,8 @@ body {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 15px 20px;
+  gap: 0;
+  padding: 14px 16px;
   background: none;
   border: none;
   cursor: pointer;
@@ -534,7 +534,7 @@ body {
   background: #000000;
   color: rgba(255,255,255,0.45);
   text-align: center;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
   padding: 14px 20px;
   padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
@@ -584,7 +584,7 @@ body {
   .top-bar-sub   { font-size: 12px; }
 
   /* Wider drawer on desktop */
-  .nav-drawer { width: min(340px, 88vw); }
+  .nav-drawer { width: min(200px, 70vw); }
 }
 
 @media (min-width: 1200px) {
@@ -856,12 +856,7 @@ body {
 }
 
 /* ── Drawer nav icons + watchlist badge ─────────────────────── */
-.drawer-nav-icon {
-  font-size: 16px;
-  width: 24px;
-  text-align: center;
-  flex-shrink: 0;
-}
+.drawer-nav-icon { display: none; }
 
 .drawer-nav-item--watchlist {
   justify-content: flex-start;

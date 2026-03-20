@@ -506,11 +506,11 @@
 
 /* ── Card ─────────────────────────────────────────────── */
 .sg-card {
-  background: var(--bg-2);
-  border: 1px solid var(--border);
-  border-radius: 18px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
   padding: 16px 18px 18px;
-  box-shadow: 0 2px 20px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+  box-shadow: none;
 }
 
 /* ── Header ──────────────────────────────────────────── */
@@ -880,7 +880,8 @@ body.theme-dark .sg-svg {
 /* Every major section becomes a floating card */
 .results-layout,
 .criteria-section,
-.news-section {
+.news-section,
+.summary-gauge-section {
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   overflow: hidden;
@@ -890,9 +891,10 @@ body.theme-dark .sg-svg {
   border-bottom: 1px solid var(--border);
 }
 
-/* summary-gauge-section has its own inner sg-card — no outer frame needed */
+/* summary-gauge-section: outer card aligns with others, inner sg-card is transparent */
 .summary-gauge-section {
-  padding: 0 10px 0;
+  padding: 0;
+  border-bottom: none !important;
 }
 
 /* Remove old flush outer border-bottoms — card border + gap replaces them */
@@ -908,7 +910,8 @@ body.theme-dark .sg-svg {
 /* Elevated shadow in dark mode for prominent card lift */
 .theme-dark .results-layout,
 .theme-dark .criteria-section,
-.theme-dark .news-section {
+.theme-dark .news-section,
+.theme-dark .summary-gauge-section {
   box-shadow: var(--shadow-lg);
   border-color: var(--border);
 }

@@ -19,16 +19,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
-  <link rel="stylesheet" href="css/main.css?v=11" />
+  <link rel="stylesheet" href="css/main.css?v=12" />
   <link rel="stylesheet" href="css/home.css?v=8" />
-  <link rel="stylesheet" href="css/results.css?v=9" />
+  <link rel="stylesheet" href="css/results.css?v=10" />
   <link rel="stylesheet" href="css/compare.css?v=8" />
 </head>
 <body class="theme-light">
 
   <!-- ===== GLOBAL STICKY TOP-BAR (always visible on every page) ===== -->
   <header class="top-bar">
-    <button class="hamburger-btn" onclick="openDrawer()" aria-label="תפריט">
+    <button class="hamburger-btn" onclick="openDrawer()" aria-label="תפריט" style="margin-left:8px">
       <svg width="20" height="16" viewBox="0 0 20 16" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="20" height="2.5" rx="1.25" fill="currentColor"/>
         <rect y="6.75" width="20" height="2.5" rx="1.25" fill="currentColor"/>
@@ -58,7 +58,7 @@
             id="search-input"
             type="text"
             data-i18n-placeholder="searchPlaceholder"
-            placeholder="חפש מניה... (AAPL, תל אביב, אמזון)"
+            placeholder="חפש מניה... (AAPL, Tesla, אמזון)"
             autocomplete="off"
             spellcheck="false"
           />
@@ -194,11 +194,6 @@
         <div id="news-list" class="news-list"></div>
       </section>
 
-      <!-- Compare button -->
-      <div class="compare-bar">
-        <button id="btn-add-compare" class="btn-secondary" data-i18n="addToCompare">הוסף להשוואה</button>
-      </div>
-
       <!-- Disclaimer -->
       <p class="disclaimer" data-i18n="disclaimer">אין לראות בניתוח זה ייעוץ פיננסי. המידע מוצג למטרות לימודיות בלבד.</p>
     </div>
@@ -231,25 +226,16 @@
   <!-- ===== NAV DRAWER ===== -->
   <div id="drawer-overlay" class="drawer-overlay" onclick="closeDrawer()"></div>
   <aside id="nav-drawer" class="nav-drawer" aria-hidden="true">
-    <div class="drawer-header-row">
-      <button class="icon-btn" onclick="closeDrawer()" aria-label="סגור">✕</button>
-    </div>
+    <div class="drawer-header-row"></div>
     <nav class="drawer-nav-list">
       <button class="drawer-nav-item nav-btn" data-page="home">
-        <span class="drawer-nav-icon">🏠</span>
         <span data-i18n="home">Home</span>
       </button>
       <button class="drawer-nav-item drawer-nav-item--watchlist nav-btn" data-page="watchlist">
-        <span class="drawer-nav-icon">☆</span>
         <span data-i18n="watchlist">Watchlist</span>
         <span id="wl-count-badge" class="wl-count-badge" style="display:none">0</span>
       </button>
-      <button class="drawer-nav-item nav-btn" data-page="compare">
-        <span class="drawer-nav-icon">⚖️</span>
-        <span data-i18n="compare">Compare Stocks</span>
-      </button>
       <button class="drawer-nav-item nav-btn" data-page="about">
-        <span class="drawer-nav-icon">ℹ️</span>
         <span data-i18n="about">About</span>
       </button>
     </nav>

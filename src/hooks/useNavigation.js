@@ -23,6 +23,10 @@ export function navigateTo(page, symbol = null, { loadResults, renderWatchlist, 
   currentPage = page;
   document.body.dataset.page = page;
 
+  if (page === 'home') {
+    const inp = document.getElementById('search-input');
+    if (inp) inp.value = '';
+  }
   if (page === 'results' && symbol && loadResults) loadResults(symbol);
   if (page === 'watchlist' && renderWatchlist) renderWatchlist();
   if (page === 'compare' && renderCompare) renderCompare();

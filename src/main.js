@@ -139,6 +139,11 @@ async function loadResults(symbol) {
   document.getElementById('results-content').classList.add('hidden');
   document.getElementById('results-error').classList.add('hidden');
   document.getElementById('offline-banner').classList.add('hidden');
+  // Clear stale data immediately so old stock info doesn't flash
+  const resSymbol = document.getElementById('res-symbol');
+  const resName   = document.getElementById('res-name');
+  if (resSymbol) resSymbol.textContent = symbol;
+  if (resName)   resName.textContent   = '';
 
   clearInterval(autoRefreshTimer);
 
@@ -335,15 +340,10 @@ function bindEvents() {
     updateSidebarCount();
   });
 
-  // Share
+  // Scroll to top
   document.getElementById('btn-share')?.addEventListener('click', () => {
-    if (!currentStock) return;
-    const url = `${location.origin}${location.pathname}?s=${currentStock.symbol}`;
-    if (navigator.share) {
-      navigator.share({ title: currentStock.symbol, url });
-    } else {
-      navigator.clipboard.writeText(url).then(() => showNotification(t('linkCopied')));
-    }
+    document.getElementById('page-results')?.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
   // Chart ranges
