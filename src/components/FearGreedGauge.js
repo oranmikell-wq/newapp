@@ -53,7 +53,7 @@ function buildGaugeSVG(score, activeIdx, label) {
   const sectors = ZONES.map((z, i) => {
     const isActive = i === activeIdx;
     return `<path d="${sectorPath(z.s1, z.s2)}"
-      fill="${z.color}" fill-opacity="${isActive ? '0.22' : '0.06'}"
+      fill="${z.color}" fill-opacity="${isActive ? '0.22' : '0.10'}"
       stroke="${isActive ? z.color : 'var(--border)'}" stroke-width="${isActive ? '1.5' : '0.8'}"/>`;
   }).join('');
 
@@ -77,8 +77,8 @@ function buildGaugeSVG(score, activeIdx, label) {
     </g>`;
   }).join('');
 
-  // 3. Tick dots on inner arc at every 5 units (skip zone boundaries)
-  const skipS = new Set([0, 25, 45, 55, 75, 100]);
+  // 3. Tick dots on inner arc at every 5 units (skip zone boundaries + number positions)
+  const skipS = new Set([0, 25, 45, 50, 55, 75, 100]);
   const dots = [];
   for (let s = 5; s < 100; s += 5) {
     if (skipS.has(s)) continue;
@@ -86,45 +86,47 @@ function buildGaugeSVG(score, activeIdx, label) {
     dots.push(`<circle cx="${dx}" cy="${dy}" r="1.5" fill="var(--text-3)" opacity="0.4"/>`);
   }
 
-  // 4. Zone boundary numbers (0, 25, 50, 75, 100) inside the donut hole
-  const numData = [
-    { s: 0,   label: '0',   fx: 18,  fy: 156 },
-    { s: 25,  label: '25' },
-    { s: 50,  label: '50' },
-    { s: 75,  label: '75' },
-    { s: 100, label: '100', fx: 260, fy: 156 },
-  ];
-  const nums = numData.map(({ s, label, fx, fy }) => {
-    let x, y;
-    if (fx != null) { x = fx; y = fy; }
-    else {
-      const { x: px, y: py } = pt(PI * (1 - s / 100), R_I - 14);
-      x = px; y = py;
-    }
-    return `<text x="${x}" y="${y}" text-anchor="middle"
-      font-size="9" font-weight="500" fill="var(--text-3)">${label}</text>`;
+  // 4. Numbers: 0 and 100 at base endpoints; 25, 50, 75 along inner arc
+  const R_NUM = R_I - 18; // just inside the inner ring
+  const arcNums = [
+    { s: 25,  label: '25'  },
+    { s: 50,  label: '50'  },
+    { s: 75,  label: '75'  },
+  ].map(({ s, label }) => {
+    const { x: nx2, y: ny2 } = pt(PI * (1 - s / 100), R_NUM);
+    return `<text x="${nx2}" y="${(ny2 + 3.5).toFixed(2)}" text-anchor="middle"
+      font-size="8" font-weight="500" fill="var(--text-3)">${label}</text>`;
   });
+  const nums = [
+    { x: 10,  y: CY + 16, label: '0'   },
+    { x: 270, y: CY + 16, label: '100' },
+  ].map(({ x, y, label }) =>
+    `<text x="${x}" y="${y}" text-anchor="middle"
+      font-size="9" font-weight="500" fill="var(--text-3)">${label}</text>`
+  );
 
   // 5. Needle
   const na = PI * (1 - score / 100);
   const { x: nx, y: ny } = pt(na, R_I - 8);
 
   return `
-<svg viewBox="0 0 280 190" fill="none" xmlns="http://www.w3.org/2000/svg" class="fng-svg">
+<svg viewBox="0 0 280 218" fill="none" xmlns="http://www.w3.org/2000/svg" class="fng-svg">
   ${sectors}
   ${zoneLabels}
   ${dots.join('')}
+  ${arcNums.join('')}
   ${nums.join('')}
   <!-- Needle -->
   <line x1="${CX}" y1="${CY}" x2="${nx}" y2="${ny}"
     stroke="var(--text)" stroke-width="3.5" stroke-linecap="round"/>
   <circle cx="${CX}" cy="${CY}" r="7" fill="var(--text)"/>
   <circle cx="${CX}" cy="${CY}" r="3" fill="var(--bg)"/>
-  <!-- Score + label below needle pivot -->
-  <text x="${CX}" y="${CY + 26}" text-anchor="middle"
-    font-size="34" font-weight="800" font-family="Inter,Heebo,sans-serif"
+  <!-- Score — safely below needle pivot (clearance ≥ 12px) -->
+  <text x="${CX}" y="${CY + 44}" text-anchor="middle"
+    font-size="36" font-weight="800" font-family="Inter,Heebo,sans-serif"
     fill="${activeZone.color}">${score}</text>
-  <text x="${CX}" y="${CY + 42}" text-anchor="middle"
+  <!-- Zone label -->
+  <text x="${CX}" y="${CY + 60}" text-anchor="middle"
     font-size="10" font-weight="700" font-family="Inter,Heebo,sans-serif"
     fill="${activeZone.color}" letter-spacing="0.8">${label.toUpperCase()}</text>
 </svg>`;
