@@ -176,6 +176,21 @@ export const TRANSLATIONS = {
     dark: 'כהה',
     // Watchlist sidebar title
     watchlistTitle: '★ מעקב',
+    // AAII Sentiment
+    aaii_title:           'סקר סנטימנט AAII',
+    aaii_sentiment_votes: 'הצבעות סנטימנט',
+    aaii_bullish:         'שוריים',
+    aaii_neutral:         'ניטרלים',
+    aaii_bearish:         'דוביים',
+    aaii_historical:      'מבט היסטורי',
+    aaii_avg:             'ממוצע היסטורי',
+    aaii_bull_high:       'שיא שורי שנתי',
+    aaii_neu_high:        'שיא ניטרלי שנתי',
+    aaii_bear_high:       'שיא דובי שנתי',
+    aaii_week_ending:     'שבוע שמסתיים',
+    aaii_source:          'מקור: AAII / FRED',
+    aaii_error:           'לא ניתן לטעון נתוני AAII',
+    aaii_no_key:          'הוסף FRED API key (bon-fred-key) ב-localStorage להצגת נתוני AAII',
   },
   en: {
     tagline: 'Trade with a clear head',
@@ -352,6 +367,21 @@ export const TRANSLATIONS = {
     dark: 'Dark',
     // Watchlist sidebar title
     watchlistTitle: '★ Watchlist',
+    // AAII Sentiment
+    aaii_title:           'AAII Sentiment Survey',
+    aaii_sentiment_votes: 'Sentiment Votes',
+    aaii_bullish:         'Bullish',
+    aaii_neutral:         'Neutral',
+    aaii_bearish:         'Bearish',
+    aaii_historical:      'Historical View',
+    aaii_avg:             'Historical Averages',
+    aaii_bull_high:       '1-Year Bullish High',
+    aaii_neu_high:        '1-Year Neutral High',
+    aaii_bear_high:       '1-Year Bearish High',
+    aaii_week_ending:     'Week Ending',
+    aaii_source:          'Source: AAII / FRED',
+    aaii_error:           'Unable to load AAII data',
+    aaii_no_key:          'Add your free FRED API key (bon-fred-key) to localStorage to enable AAII data',
   }
 };
 
