@@ -186,9 +186,9 @@ function buildGaugeSVG() {
 
   // ── Zone labels: Bearish / Neutral / Bullish ──
   const zoneData = [
-    { pct: 20, text: 'Bearish' },
-    { pct: 53, text: 'Neutral' },
-    { pct: 83, text: 'Bullish' },
+    { pct: 20, text: t('zone_bearish') },
+    { pct: 53, text: t('zone_neutral') },
+    { pct: 83, text: t('zone_bullish') },
   ];
   for (const { pct, text } of zoneData) {
     const pt = pointOnArc(pct, R - 32);
@@ -283,17 +283,18 @@ function animateGauge(svg, targetScore, duration = 1300) {
 // ═════════════════════════════════════════════════════════
 
 const FACTORS = [
-  { key: 'rsi', label: 'RSI (14)',          weight: '20%' },
-  { key: 'ma',  label: 'Moving Averages',   weight: '30%' },
-  { key: 'pe',  label: 'Valuation (P/E)',   weight: '25%' },
-  { key: 'rs',  label: 'Relative Strength', weight: '25%' },
+  { key: 'rsi', i18n: 'factor_rsi', weight: '20%' },
+  { key: 'ma',  i18n: 'factor_ma',  weight: '30%' },
+  { key: 'pe',  i18n: 'factor_valuation', weight: '25%' },
+  { key: 'rs',  i18n: 'factor_rs',  weight: '25%' },
 ];
 
 function buildBreakdown(breakdown) {
   const wrap = document.createElement('div');
   wrap.className = 'sg-breakdown';
 
-  FACTORS.forEach(({ key, label, weight }, idx) => {
+  FACTORS.forEach(({ key, i18n, weight }, idx) => {
+    const label = t(i18n);
     const score = breakdown?.[key] ?? null;
     const color = score != null ? scoreToColor(score) : '#cbd5e1';
 
@@ -354,7 +355,6 @@ export function renderSummaryGauge(container, summaryScored) {
   // Header row
   card.innerHTML = `
     <div class="sg-header">
-      <h3 class="sg-title">Summary Score</h3>
       <span class="sg-badge ${badge.cls}">${t(badge.key)}</span>
     </div>`;
 
@@ -371,14 +371,14 @@ export function renderSummaryGauge(container, summaryScored) {
   if (isPartial) {
     const note = document.createElement('p');
     note.className = 'sg-partial';
-    note.textContent = '⚠ Partial data';
+    note.textContent = t('partialDataWarn');
     svgWrap.appendChild(note);
   }
 
   if (score == null) {
     const na = document.createElement('p');
     na.className = 'sg-no-data';
-    na.textContent = 'Not enough data';
+    na.textContent = t('notEnoughData');
     svgWrap.appendChild(na);
   }
 

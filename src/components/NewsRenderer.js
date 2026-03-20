@@ -44,8 +44,8 @@ export async function renderAIInsight(newsItems, symbol = '') {
     body.innerHTML = `
       <div class="ai-setup">
         <p class="ai-setup-text">
-          Enter a free <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="ai-setup-link">Google Gemini API key</a>
-          to get an AI-generated insight for this stock's news.
+          ${t('aiKeyPrompt')} <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="ai-setup-link">Google Gemini API</a>
+          ${t('aiKeyPrompt2')}
         </p>
         <div class="ai-key-row">
           <input
@@ -56,9 +56,9 @@ export async function renderAIInsight(newsItems, symbol = '') {
             autocomplete="off"
             spellcheck="false"
           />
-          <button id="ai-key-save" class="ai-key-btn">Save key</button>
+          <button id="ai-key-save" class="ai-key-btn">${t('aiSaveKey')}</button>
         </div>
-        <p class="ai-key-note">Key is stored only in your browser's localStorage. Never shared.</p>
+        <p class="ai-key-note">${t('aiKeyNote')}</p>
       </div>`;
 
     document.getElementById('ai-key-save')?.addEventListener('click', async () => {
@@ -99,8 +99,8 @@ export async function renderAIInsight(newsItems, symbol = '') {
         </li>`).join('')}
     </ul>
     <div class="ai-footer">
-      <span class="ai-powered">Powered by Gemini</span>
-      <button class="ai-clear-key" id="ai-clear-key-btn" title="Remove API key">✕ Remove key</button>
+      <span class="ai-powered">${t('aiPoweredBy')}</span>
+      <button class="ai-clear-key" id="ai-clear-key-btn">${t('aiRemoveKey')}</button>
     </div>`;
 
   document.getElementById('ai-clear-key-btn')?.addEventListener('click', () => {

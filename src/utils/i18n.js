@@ -80,6 +80,65 @@ export const TRANSLATIONS = {
     ratingChanged: 'הדירוג של {symbol} השתנה: {old} → {new}',
     closed: 'סגור',
     taseMarketHours: 'שעות מסחר: 9:00–17:30',
+    // SummaryGauge
+    summaryScore: 'ציון כולל',
+    notEnoughData: 'אין מספיק נתונים',
+    partialDataWarn: '⚠ נתונים חלקיים',
+    factor_rsi: 'RSI (14)',
+    factor_ma: 'ממוצעים נעים',
+    factor_valuation: 'שווי (P/E)',
+    factor_rs: 'חוזק יחסי',
+    zone_bearish: 'דובי',
+    zone_neutral: 'ניטרלי',
+    zone_bullish: 'שורי',
+    // StrategyChecklist
+    sc_analyzing: 'מנתח תבניות...',
+    sc_criteria: 'קריטריון',
+    sc_status: 'סטטוס',
+    sc_insight: 'תובנה',
+    sc_yes: 'כן',
+    sc_no: 'לא',
+    sc_neutral: 'ניטרלי',
+    sc_na: 'N/A',
+    sc_group_trend: '📈 אינדיקטורי מגמה',
+    sc_group_patterns: '🔍 זיהוי תבניות',
+    sc_group_valuation: '💰 שווי מול סקטור',
+    sc_group_rs: '📊 חוזק יחסי',
+    sc_ma150: 'מחיר מעל MA150',
+    sc_ma200: 'מחיר מעל MA200',
+    sc_new_highs: 'שיאים שנתיים חדשים',
+    sc_cup_handle: 'כוס וידית (Cup & Handle)',
+    sc_double_bottom: 'שפל כפול (Double Bottom)',
+    sc_pe_vs_sector: 'P/E מול ממוצע הסקטור',
+    sc_spy_drawdown: 'ירידה מול S&P 500',
+    sc_loading_spy: 'טוען נתוני SPY...',
+    sc_no_data: 'לא ניתן לטעון נתונים',
+    sc_cheap: 'זול',
+    sc_fair: 'הוגן',
+    sc_expensive: 'יקר',
+    sc_stronger: 'חזק יותר',
+    sc_weaker: 'חלש יותר',
+    sc_in_line: 'דומה לשוק',
+    sc_forming: 'מתפתח',
+    sc_confirmed: 'מאושר',
+    sc_not_detected: 'לא זוהה',
+    // Watchlist empty state
+    watchlistEmptyState: 'אין מניות ברשימת המעקב.\nלחץ על ★ כדי להוסיף מניה.',
+    // AI Insight
+    aiKeyPrompt: 'הזן מפתח API חינמי של',
+    aiKeyPrompt2: 'כדי לקבל תובנה מבוססת AI על החדשות.',
+    aiSaveKey: 'שמור מפתח',
+    aiKeyNote: 'המפתח נשמר רק בדפדפן שלך. לא משותף עם אף שרת.',
+    aiPoweredBy: 'מבוסס על Gemini',
+    aiRemoveKey: '✕ הסר מפתח',
+    // About page
+    aboutTitle: 'אודותינו',
+    aboutBody1: 'להתחיל להשקיע יכול להרגיש מכריע, במיוחד כשאינך בטוח בתזמון או בנכסים. אנחנו לא מציעים המלצות קנה/מכור, אבל מספקים את כל הנתונים במקום אחד כדי לתת לך תובנה ופרספקטיבה טובה יותר.',
+    aboutBody2: 'זכור — ההון שלך בסיכון. תגמולים פוטנציאליים תמיד הולכים יד ביד עם סיכונים.',
+    // Theme / dark
+    dark: 'כהה',
+    // Watchlist sidebar title
+    watchlistTitle: '★ מעקב',
   },
   en: {
     tagline: 'Trade with a clear head',
@@ -160,6 +219,65 @@ export const TRANSLATIONS = {
     ratingChanged: '{symbol} rating changed: {old} → {new}',
     closed: 'Closed',
     taseMarketHours: 'Market hours: 9:00–17:30',
+    // SummaryGauge
+    summaryScore: 'Summary Score',
+    notEnoughData: 'Not enough data',
+    partialDataWarn: '⚠ Partial data',
+    factor_rsi: 'RSI (14)',
+    factor_ma: 'Moving Averages',
+    factor_valuation: 'Valuation (P/E)',
+    factor_rs: 'Relative Strength',
+    zone_bearish: 'Bearish',
+    zone_neutral: 'Neutral',
+    zone_bullish: 'Bullish',
+    // StrategyChecklist
+    sc_analyzing: 'Analyzing patterns...',
+    sc_criteria: 'Criteria',
+    sc_status: 'Status',
+    sc_insight: 'Insight',
+    sc_yes: 'Yes',
+    sc_no: 'No',
+    sc_neutral: 'Neutral',
+    sc_na: 'N/A',
+    sc_group_trend: '📈 Trend Indicators',
+    sc_group_patterns: '🔍 Pattern Recognition',
+    sc_group_valuation: '💰 Valuation vs. Sector',
+    sc_group_rs: '📊 Relative Strength',
+    sc_ma150: 'Price above MA150',
+    sc_ma200: 'Price above MA200',
+    sc_new_highs: 'New 52-Week Highs (last year)',
+    sc_cup_handle: 'Cup & Handle',
+    sc_double_bottom: 'Double Bottom',
+    sc_pe_vs_sector: 'P/E vs. Industry Average',
+    sc_spy_drawdown: 'Drawdown vs. S&P 500 (SPY)',
+    sc_loading_spy: 'Loading SPY data...',
+    sc_no_data: 'Could not load data',
+    sc_cheap: 'Cheap',
+    sc_fair: 'Fair value',
+    sc_expensive: 'Expensive',
+    sc_stronger: 'Stronger',
+    sc_weaker: 'Weaker',
+    sc_in_line: 'In line',
+    sc_forming: 'Forming',
+    sc_confirmed: 'Confirmed',
+    sc_not_detected: 'Not detected',
+    // Watchlist empty state
+    watchlistEmptyState: 'No stocks in watchlist yet.\nStar a stock to track it here.',
+    // AI Insight
+    aiKeyPrompt: 'Enter a free',
+    aiKeyPrompt2: 'API key to get an AI-generated insight for this stock.',
+    aiSaveKey: 'Save key',
+    aiKeyNote: 'Key is stored only in your browser\'s localStorage. Never shared.',
+    aiPoweredBy: 'Powered by Gemini',
+    aiRemoveKey: '✕ Remove key',
+    // About page
+    aboutTitle: 'About Us',
+    aboutBody1: 'Getting started with investing can feel overwhelming, especially when you\'re not sure about the timing or the assets. We don\'t offer buy or sell recommendations, but we provide all the data in one spot to give you better insight and perspective.',
+    aboutBody2: 'Remember — it\'s your capital at stake. Potential rewards always go hand-in-hand with risks.',
+    // Theme
+    dark: 'Dark',
+    // Watchlist sidebar title
+    watchlistTitle: '★ Watchlist',
   }
 };
 
@@ -185,6 +303,10 @@ export function setLang(lang) {
 }
 
 export function applyTranslations() {
+  // Apply direction on every call (including initial page load)
+  document.documentElement.lang = currentLang;
+  document.documentElement.dir  = currentLang === 'he' ? 'rtl' : 'ltr';
+
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.dataset.i18n;
     el.textContent = t(key);

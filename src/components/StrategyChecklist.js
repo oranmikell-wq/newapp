@@ -2,6 +2,7 @@
 
 import { calcSMA, yahooChart } from '../services/StockService.js';
 import { getSectorKey } from '../utils/scoring.js';
+import { t } from '../utils/i18n.js';
 
 // ── Inline Lucide-style SVG icons ──────────────────────
 const ICON_CHECK = `<svg class="sc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
@@ -32,7 +33,8 @@ function statusCell(type, label) {
     NA:      { cls: 'sc-na',      icon: ICON_WARN  },
   };
   const s = map[type] || map.NA;
-  return `<span class="sc-status ${s.cls}">${s.icon}<span>${label ?? (type === 'YES' ? 'Yes' : type === 'NO' ? 'No' : type === 'NEUTRAL' ? 'Neutral' : 'N/A')}</span></span>`;
+  const fallback = type === 'YES' ? t('sc_yes') : type === 'NO' ? t('sc_no') : type === 'NEUTRAL' ? t('sc_neutral') : t('sc_na');
+  return `<span class="sc-status ${s.cls}">${s.icon}<span>${label ?? fallback}</span></span>`;
 }
 
 function row(criteria, statusType, statusLabel, insight) {
@@ -187,7 +189,7 @@ function detectDoubleBottom(closes) {
 export async function renderStrategyChecklist(container, data, history1Y, indicators) {
   if (!container) return;
 
-  container.innerHTML = `<div class="sc-loading"><div class="sc-spinner"></div><span>Analyzing patterns…</span></div>`;
+  container.innerHTML = `<div class="sc-loading"><div class="sc-spinner"></div><span>${t('sc_analyzing')}</span></div>`;
 
   const closes       = (history1Y || []).map(h => h.value).filter(v => v != null && v > 0);
   const currentPrice = data.price;
@@ -195,122 +197,93 @@ export async function renderStrategyChecklist(container, data, history1Y, indica
   let rows = '';
 
   // ── GROUP 1: Trend Indicators ──────────────────────────
-  rows += groupHeader('📈 Trend Indicators');
+  rows += groupHeader(t('sc_group_trend'));
 
   // MA150
   const ma150 = calcSMA(closes, 150);
   if (ma150 != null && currentPrice != null) {
     const above = currentPrice > ma150;
     const pct   = Math.abs((currentPrice / ma150 - 1) * 100).toFixed(1);
-    rows += row(
-      'Price above MA150',
-      above ? 'YES' : 'NO',
-      null,
-      above
-        ? `Strong mid-term uptrend — price is ${pct}% above the 150-day average`
-        : `Mid-term downtrend — price is ${pct}% below the 150-day average`,
-    );
+    rows += row(t('sc_ma150'), above ? 'YES' : 'NO', null,
+      above ? `מגמת עלייה — המחיר ${pct}% מעל ממוצע 150 ימים` : `מגמת ירידה — המחיר ${pct}% מתחת לממוצע 150 ימים`);
   } else {
-    rows += row('Price above MA150', 'NA', null, 'Insufficient price history (need 150+ trading days)');
+    rows += row(t('sc_ma150'), 'NA', null, 'אין מספיק היסטוריית מחירים (נדרשים 150+ ימי מסחר)');
   }
 
   // MA200
   if (indicators?.ma200 != null && currentPrice != null) {
     const above = indicators.priceAboveMA200;
     const pct   = Math.abs((currentPrice / indicators.ma200 - 1) * 100).toFixed(1);
-    rows += row(
-      'Price above MA200',
-      above ? 'YES' : 'NO',
-      null,
-      above
-        ? `Long-term uptrend confirmed — price is ${pct}% above the 200-day average`
-        : `Below 200-day average — long-term trend is bearish (${pct}% below)`,
-    );
+    rows += row(t('sc_ma200'), above ? 'YES' : 'NO', null,
+      above ? `מגמת עלייה ארוכת טווח — המחיר ${pct}% מעל ממוצע 200 ימים` : `מתחת לממוצע 200 ימים — מגמה שלילית (${pct}% מתחת)`);
   } else {
-    rows += row('Price above MA200', 'NA', null, 'Insufficient price history (need 200+ trading days)');
+    rows += row(t('sc_ma200'), 'NA', null, 'אין מספיק היסטוריית מחירים (נדרשים 200+ ימי מסחר)');
   }
 
   // New 52-week highs count
   const highCount = countNewHighs(closes);
   const highStatus = highCount >= 10 ? 'YES' : highCount >= 3 ? 'NEUTRAL' : 'NO';
-  rows += row(
-    'New 52-Week Highs (last year)',
-    highStatus,
-    `${highCount}×`,
-    highCount >= 10
-      ? `Exceptional momentum — hit new 52-week highs ${highCount} times this year`
-      : highCount >= 3
-        ? `Moderate momentum — ${highCount} new highs made in the past year`
-        : highCount === 0
-          ? 'No new 52-week highs — weak or declining trend structure'
-          : `Only ${highCount} new high(s) — limited upside momentum`,
-  );
+  rows += row(t('sc_new_highs'), highStatus, `${highCount}×`,
+    highCount >= 10 ? `מומנטום יוצא דופן — שבר שיא שנתי ${highCount} פעמים השנה`
+    : highCount >= 3 ? `מומנטום מתון — ${highCount} שיאים חדשים בשנה האחרונה`
+    : highCount === 0 ? 'ללא שיאים שנתיים — מגמה חלשה'
+    : `רק ${highCount} שיא חדש — מומנטום מוגבל`);
 
   // ── GROUP 2: Pattern Recognition ──────────────────────
-  rows += groupHeader('🔍 Pattern Recognition');
+  rows += groupHeader(t('sc_group_patterns'));
 
   // Cup & Handle
   const cup = detectCupAndHandle(closes);
-  rows += row(
-    'Cup & Handle',
+  rows += row(t('sc_cup_handle'),
     cup.detected ? 'YES' : 'NEUTRAL',
-    cup.detected ? (cup.confidence === 'high' ? 'Strong signal' : 'Forming') : 'Not detected',
+    cup.detected ? (cup.confidence === 'high' ? t('sc_forming') : t('sc_forming')) : t('sc_not_detected'),
     cup.detected
-      ? `Cup depth ${cup.depth}%, handle pullback ${cup.handlePct}% — ${cup.confidence === 'high' ? 'breakout setup is imminent' : 'pattern still developing'}`
-      : 'No Cup & Handle pattern identified in the last 6 months',
-  );
+      ? `עומק כוס ${cup.depth}%, ידית ${cup.handlePct}% — ${cup.confidence === 'high' ? 'פריצה צפויה בקרוב' : 'תבנית מתפתחת'}`
+      : 'לא זוהתה תבנית כוס וידית ב-6 החודשים האחרונים');
 
   // Double Bottom
   const dbl = detectDoubleBottom(closes);
-  rows += row(
-    'Double Bottom',
+  rows += row(t('sc_double_bottom'),
     dbl.detected ? 'YES' : 'NEUTRAL',
-    dbl.detected ? (dbl.confirmed ? 'Confirmed' : 'Forming') : 'Not detected',
+    dbl.detected ? (dbl.confirmed ? t('sc_confirmed') : t('sc_forming')) : t('sc_not_detected'),
     dbl.detected
-      ? `Two lows within ${dbl.variance}% of each other, ${dbl.recovery}% bounce between them — ${dbl.confirmed ? 'breakout confirmed above neckline' : 'awaiting breakout confirmation'}`
-      : 'No Double Bottom pattern identified in the last 3 months',
-  );
+      ? `שני שפלים בסטייה של ${dbl.variance}%, קפיצה של ${dbl.recovery}% ביניהם — ${dbl.confirmed ? 'פריצה מעל קו הצוואר' : 'ממתין לאישור פריצה'}`
+      : 'לא זוהתה תבנית שפל כפול ב-3 החודשים האחרונים');
 
   // ── GROUP 3: Valuation vs. Sector ─────────────────────
-  rows += groupHeader('💰 Valuation vs. Sector');
+  rows += groupHeader(t('sc_group_valuation'));
 
   const sectorKey     = getSectorKey(data.sector);
   const industryAvgPE = INDUSTRY_PE_AVG[sectorKey] || INDUSTRY_PE_AVG.default;
-  const sectorLabel   = data.sector || 'sector';
+  const sectorLabel   = data.sector || 'הסקטור';
 
   if (data.pe != null && data.pe > 0) {
     const ratio = data.pe / industryAvgPE;
     let vType, vLabel, vInsight;
-
     if (ratio <= 0.8) {
-      vType    = 'YES';
-      vLabel   = 'Cheap';
-      vInsight = `P/E of ${data.pe.toFixed(1)}x is ${((1 - ratio) * 100).toFixed(0)}% below the ${sectorLabel} average (${industryAvgPE}x) — potentially undervalued vs peers`;
+      vType = 'YES'; vLabel = t('sc_cheap');
+      vInsight = `P/E של ${data.pe.toFixed(1)}x הוא ${((1 - ratio) * 100).toFixed(0)}% מתחת לממוצע ${sectorLabel} (${industryAvgPE}x) — בעל ערך ביחס לסקטור`;
     } else if (ratio <= 1.2) {
-      vType    = 'NEUTRAL';
-      vLabel   = 'Fair value';
-      vInsight = `P/E of ${data.pe.toFixed(1)}x is in line with the ${sectorLabel} average of ${industryAvgPE}x — fairly valued`;
+      vType = 'NEUTRAL'; vLabel = t('sc_fair');
+      vInsight = `P/E של ${data.pe.toFixed(1)}x תואם את ממוצע ${sectorLabel} (${industryAvgPE}x)`;
     } else {
-      vType    = 'NO';
-      vLabel   = 'Expensive';
-      vInsight = `P/E of ${data.pe.toFixed(1)}x is ${((ratio - 1) * 100).toFixed(0)}% above the ${sectorLabel} average (${industryAvgPE}x) — overvalued vs peers`;
+      vType = 'NO'; vLabel = t('sc_expensive');
+      vInsight = `P/E של ${data.pe.toFixed(1)}x הוא ${((ratio - 1) * 100).toFixed(0)}% מעל ממוצע ${sectorLabel} (${industryAvgPE}x) — יקר ביחס לסקטור`;
     }
-
-    rows += row('P/E vs. Industry Average', vType, vLabel, vInsight);
+    rows += row(t('sc_pe_vs_sector'), vType, vLabel, vInsight);
   } else {
-    rows += row('P/E vs. Industry Average', 'NA', null, 'P/E ratio not available — may be a non-profitable or financial-sector stock');
+    rows += row(t('sc_pe_vs_sector'), 'NA', null, 'P/E לא זמין — ייתכן חברה לא רווחית או מניה פיננסית');
   }
 
   // ── GROUP 4: Relative Strength vs. SPY ────────────────
-  rows += groupHeader('📊 Relative Strength');
+  rows += groupHeader(t('sc_group_rs'));
 
-  // SPY row rendered with a unique ID so we can update it after async fetch
   const spyId = `sc-spy-${Date.now()}`;
   rows += `
     <tr class="sc-row" id="${spyId}">
-      <td class="sc-criteria">Drawdown vs. S&amp;P 500 (SPY)</td>
-      <td class="sc-status-cell">${statusCell('NEUTRAL', 'Loading…')}</td>
-      <td class="sc-insight sc-insight-loading">Fetching SPY data…</td>
+      <td class="sc-criteria">${t('sc_spy_drawdown')}</td>
+      <td class="sc-status-cell">${statusCell('NEUTRAL', t('sc_neutral'))}</td>
+      <td class="sc-insight sc-insight-loading">${t('sc_loading_spy')}</td>
     </tr>`;
 
   // Render table immediately (SPY will fill in async)
@@ -319,9 +292,9 @@ export async function renderStrategyChecklist(container, data, history1Y, indica
       <table class="sc-table">
         <thead>
           <tr>
-            <th>Criteria</th>
-            <th>Status</th>
-            <th>Insight</th>
+            <th>${t('sc_criteria')}</th>
+            <th>${t('sc_status')}</th>
+            <th>${t('sc_insight')}</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
@@ -346,16 +319,16 @@ export async function renderStrategyChecklist(container, data, history1Y, indica
       let spyType, spyLabel, spyInsight;
       if (diff < -3) {
         spyType    = 'YES';
-        spyLabel   = 'Stronger';
-        spyInsight = `Stock drawdown: ${stockDrawdown.toFixed(1)}% vs SPY: ${spyDrawdown.toFixed(1)}% — outperforming the market by ${Math.abs(diff).toFixed(1)}%`;
+        spyLabel   = t('sc_stronger');
+        spyInsight = `ירידה של המניה: ${stockDrawdown.toFixed(1)}% לעומת SPY: ${spyDrawdown.toFixed(1)}% — עדיפות של ${Math.abs(diff).toFixed(1)}% על השוק`;
       } else if (diff > 3) {
         spyType    = 'NO';
-        spyLabel   = 'Weaker';
-        spyInsight = `Stock drawdown: ${stockDrawdown.toFixed(1)}% vs SPY: ${spyDrawdown.toFixed(1)}% — underperforming by ${diff.toFixed(1)}% vs the market`;
+        spyLabel   = t('sc_weaker');
+        spyInsight = `ירידה של המניה: ${stockDrawdown.toFixed(1)}% לעומת SPY: ${spyDrawdown.toFixed(1)}% — חולשה של ${diff.toFixed(1)}% ביחס לשוק`;
       } else {
         spyType    = 'NEUTRAL';
-        spyLabel   = 'In line';
-        spyInsight = `Stock drawdown ${stockDrawdown.toFixed(1)}% is roughly in line with SPY ${spyDrawdown.toFixed(1)}%`;
+        spyLabel   = t('sc_in_line');
+        spyInsight = `ירידה של ${stockDrawdown.toFixed(1)}% דומה ל-SPY (${spyDrawdown.toFixed(1)}%)`;
       }
 
       const spyRow = document.getElementById(spyId);
@@ -371,7 +344,7 @@ export async function renderStrategyChecklist(container, data, history1Y, indica
     const spyRow = document.getElementById(spyId);
     if (spyRow) {
       spyRow.querySelector('.sc-status-cell').innerHTML = statusCell('NA', 'N/A');
-      spyRow.querySelector('.sc-insight').textContent   = 'Could not fetch SPY comparison data';
+      spyRow.querySelector('.sc-insight').textContent   = t('sc_no_data');
       spyRow.querySelector('.sc-insight').classList.remove('sc-insight-loading');
     }
   }

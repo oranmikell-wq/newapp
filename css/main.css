@@ -913,3 +913,98 @@ body {
 
 /* .topbar-search-mini removed from HTML — rule kept for safety */
 .topbar-search-mini { display: none !important; }
+
+/* ============================================================
+   RTL — Global Hebrew alignment fixes
+   ============================================================ */
+
+/* All text elements default to right in RTL */
+[dir="rtl"] body,
+[dir="rtl"] p,
+[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3,
+[dir="rtl"] span, [dir="rtl"] label,
+[dir="rtl"] .section-title,
+[dir="rtl"] .info-label,
+[dir="rtl"] .info-value,
+[dir="rtl"] .info-change,
+[dir="rtl"] .info-sub,
+[dir="rtl"] .criteria-name,
+[dir="rtl"] .criteria-desc,
+[dir="rtl"] .criteria-data,
+[dir="rtl"] .criteria-data-item,
+[dir="rtl"] .news-headline,
+[dir="rtl"] .news-source,
+[dir="rtl"] .about-text,
+[dir="rtl"] .about-logo,
+[dir="rtl"] .disclaimer,
+[dir="rtl"] .offline-banner,
+[dir="rtl"] .wl-sidebar-empty p,
+[dir="rtl"] .drawer-nav-item {
+  text-align: right;
+}
+
+/* Flex rows — reverse direction in RTL */
+[dir="rtl"] .top-bar,
+[dir="rtl"] .results-header,
+[dir="rtl"] .header-actions,
+[dir="rtl"] .info-card,
+[dir="rtl"] .criteria-row-header,
+[dir="rtl"] .news-item,
+[dir="rtl"] .trending-item,
+[dir="rtl"] .sg-row,
+[dir="rtl"] .sg-row-meta,
+[dir="rtl"] .sg-header,
+[dir="rtl"] .wl-item,
+[dir="rtl"] .wl-item-meta {
+  flex-direction: row-reverse;
+}
+
+/* Info cards grid — keep grid, just flip text */
+[dir="rtl"] .info-cards {
+  direction: rtl;
+}
+
+/* Strategy Checklist table */
+[dir="rtl"] .sc-table th,
+[dir="rtl"] .sc-criteria,
+[dir="rtl"] .sc-insight,
+[dir="rtl"] .sc-group-header td {
+  text-align: right;
+}
+[dir="rtl"] .sc-status-cell {
+  text-align: right;
+}
+[dir="rtl"] .sc-status {
+  flex-direction: row-reverse;
+}
+
+/* Criteria rows */
+[dir="rtl"] .criteria-row-header {
+  flex-direction: row-reverse;
+}
+[dir="rtl"] .criteria-bar-wrap {
+  direction: rtl;
+}
+[dir="rtl"] .criteria-bar {
+  float: right;
+}
+
+/* Chart ranges */
+[dir="rtl"] .chart-ranges {
+  flex-direction: row-reverse;
+}
+
+/* Autocomplete */
+[dir="rtl"] .autocomplete-list {
+  text-align: right;
+}
+
+/* Notification */
+[dir="rtl"] .notification {
+  text-align: right;
+}
+
+/* Footer */
+[dir="rtl"] .app-footer {
+  text-align: center;
+}

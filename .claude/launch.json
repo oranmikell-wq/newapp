@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "BuyorNot (Python)",
-      "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "3000", "--directory", "/Users/oranmikel/Downloads/newapp"],
+      "runtimeExecutable": "/usr/local/bin/npx",
+      "runtimeArgs": ["serve", "-l", "3000", "/Users/oranmikel/Downloads/newapp"],
       "port": 3000
     },
     {

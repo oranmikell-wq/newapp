@@ -74,7 +74,7 @@ export async function renderWatchlistSidebar() {
     body.innerHTML = `
       <div class="wl-sidebar-empty">
         <span class="wl-sidebar-empty-icon">☆</span>
-        <p>No stocks in watchlist yet.<br>Star a stock to track it here.</p>
+        <p>${t('watchlistEmptyState').replace('\n', '<br>')}</p>
       </div>`;
     return;
   }
