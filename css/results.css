@@ -878,7 +878,6 @@ body.theme-dark .sg-svg {
 }
 
 /* Every major section becomes a floating card */
-.summary-gauge-section,
 .results-layout,
 .criteria-section,
 .news-section {
@@ -889,6 +888,11 @@ body.theme-dark .sg-svg {
   background: var(--card-bg);
   /* Remove old flush border-bottom (gap replaces it) */
   border-bottom: 1px solid var(--border);
+}
+
+/* summary-gauge-section has its own inner sg-card — no outer frame needed */
+.summary-gauge-section {
+  padding: 0 10px 0;
 }
 
 /* Remove old flush outer border-bottoms — card border + gap replaces them */
@@ -902,7 +906,6 @@ body.theme-dark .sg-svg {
 .chart-section    { background: var(--card-bg); border-bottom: none; }
 
 /* Elevated shadow in dark mode for prominent card lift */
-.theme-dark .summary-gauge-section,
 .theme-dark .results-layout,
 .theme-dark .criteria-section,
 .theme-dark .news-section {
