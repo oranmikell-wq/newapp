@@ -943,22 +943,7 @@ body {
   text-align: right;
 }
 
-/* Top-bar & results-header: ALWAYS LTR — hamburger stays on LEFT regardless of language */
-[dir="rtl"] .top-bar,
-[dir="rtl"] .results-header {
-  direction: ltr;
-}
-/* But text inside the header should still be readable in RTL */
-[dir="rtl"] .top-bar *,
-[dir="rtl"] .results-header * {
-  direction: rtl;
-}
-/* The stock title in results-header stays LTR order (back btn left, title center, actions right) */
-[dir="rtl"] .results-header {
-  direction: ltr;
-}
-
-/* Flex rows — reverse direction in RTL (NOT top-bar / results-header) */
+/* Flex rows — reverse direction in RTL (NOT top-bar / results-header — those have dir="ltr" in HTML) */
 [dir="rtl"] .header-actions,
 [dir="rtl"] .info-card,
 [dir="rtl"] .criteria-row-header,

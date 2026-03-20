@@ -27,7 +27,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
-  <link rel="stylesheet" href="css/main.css?v=16" />
+  <link rel="stylesheet" href="css/main.css?v=17" />
   <link rel="stylesheet" href="css/home.css?v=10" />
   <link rel="stylesheet" href="css/results.css?v=15" />
   <link rel="stylesheet" href="css/compare.css?v=9" />
@@ -35,7 +35,7 @@
 <body class="theme-light">
 
   <!-- ===== GLOBAL STICKY TOP-BAR (always visible on every page) ===== -->
-  <header class="top-bar">
+  <header class="top-bar" dir="ltr">
     <button class="hamburger-btn" onclick="openDrawer()" aria-label="תפריט" style="margin-left:8px">
       <svg width="20" height="16" viewBox="0 0 20 16" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="20" height="2.5" rx="1.25" fill="currentColor"/>
@@ -95,7 +95,7 @@
 
   <!-- ===== RESULTS PAGE ===== -->
   <div id="page-results" class="page">
-    <header class="results-header">
+    <header class="results-header" dir="ltr">
       <button id="btn-back" class="icon-btn back-btn">←</button>
       <div class="stock-title-wrap">
         <span id="res-symbol" class="res-symbol"></span>
