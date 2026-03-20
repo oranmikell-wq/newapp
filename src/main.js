@@ -5,7 +5,6 @@ import { fetchAllData, fetchHistory, fetchStockFullData } from './services/Stock
 import { calcScore } from './utils/scoring.js';
 import { calcSummaryScore, renderSummaryGauge } from './components/SummaryGauge.js';
 
-import { drawGauge } from './components/Gauge.js';
 import { renderCriteriaTable } from './components/CriteriaTable.js';
 import { renderNews, renderAIInsight } from './components/NewsRenderer.js';
 import { renderTrendingList, loadTrending } from './components/TrendingList.js';
@@ -176,10 +175,7 @@ async function loadResults(symbol) {
     void resultsContent.offsetWidth; // force reflow to restart animations
     resultsContent.classList.add('did-animate');
 
-    // ── Existing canvas gauge (inside results-layout) ──
-    drawGauge(scored.score, scored.rating);
-
-    // ── SummaryGauge — new animated SVG with 4-factor score ──
+    // ── SummaryGauge — animated SVG with 4-factor technical score ──
     const summaryContainer = document.getElementById('summary-gauge-container');
     if (summaryContainer) {
       const indicators    = fullStockData?.indicators ?? null;
@@ -306,6 +302,20 @@ function bindEvents() {
   }
   if (btn) btn.addEventListener('click', () => { if (input) doSearch(input.value); });
 
+  // Top-bar mini search (visible on non-home pages)
+  const topInput = document.getElementById('topbar-search-input');
+  const topBtn   = document.getElementById('topbar-search-btn');
+  if (topInput) {
+    topInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { doSearch(topInput.value); topInput.value = ''; }
+    });
+    // Clear on navigation away
+    topInput.addEventListener('blur', () => { setTimeout(() => { topInput.value = ''; }, 200); });
+  }
+  if (topBtn) topBtn.addEventListener('click', () => {
+    if (topInput) { doSearch(topInput.value); topInput.value = ''; }
+  });
+
   // Init autocomplete — onSelect triggers doSearch
   initAutocomplete((symbol) => doSearch(symbol));
 
@@ -365,6 +375,7 @@ function bindEvents() {
 
 // ── DOMContentLoaded ───────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  document.body.dataset.page = 'home'; // initial page state for CSS targeting
   applyTheme();
   applyTranslations();
   syncTopbarHeight();

@@ -21,6 +21,7 @@ export function navigateTo(page, symbol = null, { loadResults, renderWatchlist, 
   const drawerBtn = document.querySelector(`.drawer-nav-item[data-page="${page}"]`);
   if (drawerBtn) drawerBtn.classList.add('active');
   currentPage = page;
+  document.body.dataset.page = page;
 
   if (page === 'results' && symbol && loadResults) loadResults(symbol);
   if (page === 'watchlist' && renderWatchlist) renderWatchlist();

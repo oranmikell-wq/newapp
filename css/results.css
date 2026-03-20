@@ -57,9 +57,22 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 28px 16px 16px;
-  background: var(--bg-2);
-  border-bottom: 1px solid var(--border);
+  padding: 32px 20px 24px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  gap: 4px;
+}
+
+/* Eyebrow label above score */
+.gauge-section-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin: 0 0 8px;
 }
 
 .gauge-wrap {
@@ -68,37 +81,32 @@
   align-items: center;
 }
 
-#gauge-canvas {
-  display: block;
-}
-
 .gauge-score-wrap {
-  margin-top: 8px;
   text-align: center;
   white-space: nowrap;
 }
 
 .gauge-score {
   display: block;
-  font-size: 44px;
+  font-size: 72px;
   font-weight: 800;
   line-height: 1;
   color: var(--text);
-  letter-spacing: -2px;
+  letter-spacing: -4px;
 }
 
 .gauge-label {
-  display: block;
-  font-size: 14px;
+  display: inline-block;
+  font-size: 13px;
   font-weight: 700;
-  margin-top: 4px;
-  padding: 3px 12px;
+  margin-top: 10px;
+  padding: 4px 16px;
   border-radius: 20px;
 }
 
-.badge-buy.gauge-label   { background: var(--green-bg); }
-.badge-wait.gauge-label  { background: var(--yellow-bg); }
-.badge-sell.gauge-label  { background: var(--red-bg); }
+.badge-buy.gauge-label   { background: var(--green-bg);  color: var(--green); }
+.badge-wait.gauge-label  { background: var(--yellow-bg); color: var(--yellow); }
+.badge-sell.gauge-label  { background: var(--red-bg);    color: var(--red); }
 
 .partial-warning {
   font-size: 11px;

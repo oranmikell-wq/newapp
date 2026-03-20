@@ -19,10 +19,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
-  <link rel="stylesheet" href="css/main.css?v=7" />
-  <link rel="stylesheet" href="css/home.css?v=7" />
-  <link rel="stylesheet" href="css/results.css?v=7" />
-  <link rel="stylesheet" href="css/compare.css?v=7" />
+  <link rel="stylesheet" href="css/main.css?v=8" />
+  <link rel="stylesheet" href="css/home.css?v=8" />
+  <link rel="stylesheet" href="css/results.css?v=8" />
+  <link rel="stylesheet" href="css/compare.css?v=8" />
 </head>
 <body class="theme-light">
 
@@ -35,7 +35,8 @@
         <rect y="13.5" width="20" height="2.5" rx="1.25" fill="currentColor"/>
       </svg>
     </button>
-    <div class="top-bar-titles">
+    <!-- Brand — shown only on home page -->
+    <div class="top-bar-titles" id="topbar-brand">
       <a class="top-bar-brand-row top-bar-home-btn" href="#" onclick="navigateTo('home'); return false;">
         <div class="top-bar-text">
           <span class="top-bar-brand">Bull Therapy</span>
@@ -44,6 +45,25 @@
         <img src="logo2.png" alt="Bull Therapy logo" class="top-bar-logo" />
       </a>
     </div>
+
+    <!-- Mini search — shown on all non-home pages -->
+    <div class="topbar-search-mini" id="topbar-search-mini">
+      <input
+        id="topbar-search-input"
+        type="text"
+        placeholder="Search symbol…"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="Search stocks"
+      />
+      <button class="topbar-search-btn" id="topbar-search-btn" aria-label="Search">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="9" cy="9" r="6.5" stroke="currentColor" stroke-width="2"/>
+          <path d="M14 14L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
     <button id="btn-wl-sidebar" class="wl-sidebar-btn" aria-label="Watchlist" onclick="window.openWatchlistSidebar()">
       ☆
       <span id="wl-count-badge" class="wl-count-badge" style="display:none">0</span>
@@ -125,14 +145,12 @@
 
       <div class="results-layout">
         <div class="results-left">
-          <!-- Gauge -->
+          <!-- Professional Score Card (replaces canvas gauge) -->
           <section class="gauge-section">
-            <div class="gauge-wrap">
-              <canvas id="gauge-canvas" width="280" height="160"></canvas>
-              <div class="gauge-score-wrap">
-                <span id="gauge-score" class="gauge-score">--</span>
-                <span id="gauge-label" class="gauge-label"></span>
-              </div>
+            <p class="gauge-section-eyebrow" data-i18n="fundamentalScore">Fundamental Score</p>
+            <div class="gauge-score-wrap">
+              <span id="gauge-score" class="gauge-score">--</span>
+              <span id="gauge-label" class="gauge-label"></span>
             </div>
             <p id="partial-data-warning" class="partial-warning hidden" data-i18n="partialData">⚠️ נתונים חלקיים</p>
           </section>
