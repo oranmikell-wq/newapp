@@ -6,7 +6,6 @@ import { calcScore } from './utils/scoring.js';
 import { calcSummaryScore, renderSummaryGauge } from './components/SummaryGauge.js';
 
 import { renderCriteriaTable } from './components/CriteriaTable.js';
-import { renderStrategyChecklist } from './components/StrategyChecklist.js';
 import { renderNews, renderAIInsight } from './components/NewsRenderer.js';
 import { renderTrendingList, loadTrending } from './components/TrendingList.js';
 import { showAutocomplete, hideAutocomplete, selectAutocomplete, confirmAutocomplete, showRecentSearches, initAutocomplete } from './components/Autocomplete.js';
@@ -193,18 +192,7 @@ async function loadResults(symbol) {
     updateWatchlistBtn(symbol);
     updateCompareBtn(symbol);
 
-    // Strategy Checklist — async, fills SPY row after initial render
-    const checklistContainer = document.getElementById('strategy-checklist-container');
-    if (checklistContainer) {
-      renderStrategyChecklist(
-        checklistContainer,
-        data,
-        fullStockData?.history ?? [],
-        fullStockData?.indicators ?? null,
-      );
-    }
-
-    // AI Insight — runs async, silently hides itself on error
+// AI Insight — runs async, silently hides itself on error
     renderAIInsight(data.newsItems, symbol);
 
     autoRefreshTimer = setInterval(() => loadResults(symbol), 15 * 60 * 1000);
