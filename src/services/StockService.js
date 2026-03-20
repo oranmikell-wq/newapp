@@ -7,7 +7,7 @@ function getTwelveKey() { return localStorage.getItem('bon-twelve-key') || 'demo
 // ── CORS Proxy configuration ─────────────────────────────────
 // Our own Cloudflare Worker proxy — set after deploying cloudflare-worker/worker.js
 // Replace the URL below with your actual Worker URL from Cloudflare dashboard
-const CF_WORKER = localStorage.getItem('bon-proxy-url') || 'https://bulltherapy-proxy.oranmikell-wq.workers.dev';
+const CF_WORKER = localStorage.getItem('bon-proxy-url') || 'https://bulltherapy-proxy.oranmikell.workers.dev';
 
 // Build proxy URL: Worker expects ?url=<encoded>
 function proxyUrl(target) {
