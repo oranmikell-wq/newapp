@@ -534,12 +534,12 @@ body {
   background: #000000;
   color: rgba(255,255,255,0.45);
   text-align: center;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 14px 20px;
-  padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  font-size: 10px;
+  font-weight: 400;
+  padding: 10px 20px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid rgba(255,255,255,0.08);
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
   display: flex;
   flex-direction: column;
   align-items: center;
