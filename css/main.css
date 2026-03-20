@@ -315,9 +315,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(9,9,11,0.72);
-  backdrop-filter: blur(12px) saturate(160%);
-  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  background: #000;
   border-bottom: 1px solid rgba(255,255,255,0.07);
   padding: 10px 16px;
   display: flex;
@@ -326,7 +324,7 @@ body {
 }
 
 .theme-light .top-bar {
-  background: rgba(15,15,20,0.82);
+  background: #000;
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
