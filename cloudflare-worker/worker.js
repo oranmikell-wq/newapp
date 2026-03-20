@@ -126,7 +126,9 @@ async function handleYahooQuotePage(url, origin) {
 }
 
 function corsHeaders(origin) {
-  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  const isAllowed = ALLOWED_ORIGINS.includes(origin)
+    || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+  const allowedOrigin = isAllowed ? origin : ALLOWED_ORIGINS[0];
   return {
     'Access-Control-Allow-Origin': allowedOrigin,
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
