@@ -9,7 +9,7 @@ import { drawGauge } from './components/Gauge.js';
 import { renderCriteriaTable } from './components/CriteriaTable.js';
 import { renderNews } from './components/NewsRenderer.js';
 import { renderTrendingList, loadTrending } from './components/TrendingList.js';
-import { showAutocomplete, hideAutocomplete, selectAutocomplete, initAutocomplete } from './components/Autocomplete.js';
+import { showAutocomplete, hideAutocomplete, selectAutocomplete, confirmAutocomplete, showRecentSearches, initAutocomplete } from './components/Autocomplete.js';
 import { initChart, loadChart, updateChartTheme, initCompareChart } from './components/Chart.js';
 import {
   getWatchlist, saveWatchlist, isInWatchlist,
@@ -25,6 +25,11 @@ import {
   updateCompareBtn,
   renderCompare as _renderCompare,
 } from './components/Compare.js';
+
+import {
+  initWatchlistSidebar, openWatchlistSidebar, closeWatchlistSidebar,
+  renderWatchlistSidebar, updateSidebarCount,
+} from './components/WatchlistSidebar.js';
 
 import { applyTheme, toggleTheme as _toggleTheme } from './hooks/useTheme.js';
 import { navigateTo as _navigateTo, getCurrentPage } from './hooks/useNavigation.js';
@@ -71,6 +76,7 @@ function navigateTo(page, symbol = null) {
 
 function removeFromWatchlistBound(symbol) {
   _removeFromWatchlist(symbol, showNotification, updateWatchlistBtn, renderWatchlist);
+  updateSidebarCount();
 }
 
 function removeFromCompareBound(symbol) {
@@ -101,6 +107,9 @@ window.removeHistory = removeHistoryBound;
 window.removeFromWatchlist = removeFromWatchlistBound;
 
 window.removeFromCompare = removeFromCompareBound;
+
+window.openWatchlistSidebar  = openWatchlistSidebar;
+window.closeWatchlistSidebar = closeWatchlistSidebar;
 
 // ── Lang change callback ────────────────────────────────
 window.__onLangChange = function() {
@@ -276,8 +285,12 @@ function bindEvents() {
 
   if (input) {
     input.addEventListener('input', () => showAutocomplete(input.value));
+    input.addEventListener('focus', () => { if (!input.value.trim()) showRecentSearches(); });
     input.addEventListener('keydown', e => {
-      if (e.key === 'Enter') doSearch(input.value);
+      if (e.key === 'Enter') {
+        // If an autocomplete item is highlighted, confirm it; else do search
+        if (!confirmAutocomplete()) doSearch(input.value);
+      }
       if (e.key === 'ArrowDown') selectAutocomplete(1);
       if (e.key === 'ArrowUp')   selectAutocomplete(-1);
       if (e.key === 'Escape')    hideAutocomplete();
@@ -312,6 +325,7 @@ function bindEvents() {
   document.getElementById('btn-watchlist-toggle')?.addEventListener('click', () => {
     if (!currentStock) return;
     _toggleWatchlist(currentStock.symbol, currentStock.name, currentStock.rating, showNotification, updateWatchlistBtn, renderWatchlist);
+    updateSidebarCount();
   });
 
   // Share
@@ -357,6 +371,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const footer = document.querySelector('.app-footer');
   const initPage = document.querySelector('.page.active');
   if (footer && initPage) initPage.appendChild(footer);
+
+  // Init WatchlistSidebar with callbacks
+  initWatchlistSidebar(navigateTo, showNotification, updateWatchlistBtn, renderWatchlist);
+  updateSidebarCount();
 
   checkURLParam();
   loadTrending(navigateTo);
