@@ -1080,12 +1080,6 @@ body.theme-dark .sg-svg {
   color: var(--text-3);
 }
 
-.sc-icon {
-  width: 13px;
-  height: 13px;
-  flex-shrink: 0;
-  stroke: currentColor;
-}
 
 .sc-insight {
   padding: 14px 16px;

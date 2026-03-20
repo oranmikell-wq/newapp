@@ -4,11 +4,6 @@ import { calcSMA, yahooChart } from '../services/StockService.js';
 import { getSectorKey } from '../utils/scoring.js';
 import { t } from '../utils/i18n.js';
 
-// ── Inline Lucide-style SVG icons ──────────────────────
-const ICON_CHECK = `<svg class="sc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
-const ICON_X     = `<svg class="sc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
-const ICON_WARN  = `<svg class="sc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
-
 // Industry average P/E ratios (realistic market consensus)
 const INDUSTRY_PE_AVG = {
   technology:    28,
@@ -27,14 +22,14 @@ const INDUSTRY_PE_AVG = {
 // ── Helpers ────────────────────────────────────────────
 function statusCell(type, label) {
   const map = {
-    YES:     { cls: 'sc-yes',     icon: ICON_CHECK },
-    NO:      { cls: 'sc-no',      icon: ICON_X     },
-    NEUTRAL: { cls: 'sc-neutral', icon: ICON_WARN  },
-    NA:      { cls: 'sc-na',      icon: ICON_WARN  },
+    YES:     { cls: 'sc-yes'     },
+    NO:      { cls: 'sc-no'      },
+    NEUTRAL: { cls: 'sc-neutral' },
+    NA:      { cls: 'sc-na'      },
   };
   const s = map[type] || map.NA;
   const fallback = type === 'YES' ? t('sc_yes') : type === 'NO' ? t('sc_no') : type === 'NEUTRAL' ? t('sc_neutral') : t('sc_na');
-  return `<span class="sc-status ${s.cls}">${s.icon}<span>${label ?? fallback}</span></span>`;
+  return `<span class="sc-status ${s.cls}">${label ?? fallback}</span>`;
 }
 
 function row(criteria, statusType, statusLabel, insight) {
