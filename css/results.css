@@ -1100,6 +1100,65 @@ body.theme-dark .sg-svg {
   font-style: italic;
 }
 
+/* ── Mobile card layout (< 640px) ── */
+@media (max-width: 639px) {
+  /* Remove horizontal scroll wrapper clipping */
+  .sc-wrap { overflow-x: visible; border-radius: var(--radius-lg); }
+
+  /* Hide the table header row */
+  .sc-table thead { display: none; }
+
+  /* Block-stack every element */
+  .sc-table,
+  .sc-table tbody,
+  .sc-table tr,
+  .sc-table td { display: block; width: 100%; box-sizing: border-box; }
+
+  /* Group header rows — full-width label */
+  .sc-group-header td {
+    padding: 12px 14px 4px;
+    font-size: 11px;
+  }
+
+  /* Each data row becomes a card */
+  .sc-row {
+    padding: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Line 1: criteria name — full width, bold */
+  .sc-criteria {
+    padding: 12px 14px 4px;
+    font-size: 13px;
+    font-weight: 600;
+    min-width: unset;
+    border: none;
+  }
+
+  /* Line 2: status badge — left-aligned (or right for RTL) */
+  .sc-status-cell {
+    padding: 2px 14px 6px;
+    min-width: unset;
+    white-space: normal;
+    border: none;
+  }
+
+  /* Line 3: insight text — full width, muted, smaller */
+  .sc-insight {
+    padding: 0 14px 12px;
+    font-size: 12px;
+    color: var(--text-3);
+    line-height: 1.5;
+    border: none;
+  }
+
+  /* RTL alignment */
+  [dir="rtl"] .sc-criteria,
+  [dir="rtl"] .sc-status-cell,
+  [dir="rtl"] .sc-insight,
+  [dir="rtl"] .sc-group-header td { text-align: right; }
+}
+
 /* ── Desktop ── */
 @media (min-width: 768px) {
   .sc-table { font-size: 14px; }
