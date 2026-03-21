@@ -9,6 +9,7 @@ import { renderCriteriaTable } from './components/CriteriaTable.js';
 import { renderStrategyChecklist, countNewHighs } from './components/StrategyChecklist.js';
 import { renderNews, renderAIInsight } from './components/NewsRenderer.js';
 import { loadFearGreed, loadCryptoFearGreed } from './components/FearGreedGauge.js';
+import { loadTrending, renderTrendingList }   from './components/TrendingList.js';
 import { loadAAII }      from './components/AAIISentiment.js';
 import { showAutocomplete, hideAutocomplete, selectAutocomplete, confirmAutocomplete, showRecentSearches, initAutocomplete } from './components/Autocomplete.js';
 import { initChart, loadChart, updateChartTheme, initCompareChart } from './components/Chart.js';
@@ -140,10 +141,11 @@ window.__onLangChange = function() {
     }
   }
 
-  // 3. Re-render Fear & Greed + AAII labels on lang change
+  // 3. Re-render Fear & Greed + AAII + Trending labels on lang change
   loadFearGreed();
   loadCryptoFearGreed();
   loadAAII();
+  renderTrendingList(navigateTo);
 };
 
 // ── Utility ─────────────────────────────────────────────
@@ -455,6 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadFearGreed();
   loadCryptoFearGreed();
   loadAAII();
+  loadTrending(navigateTo);
   renderHistory();
 
   // FNG toggle: Stocks ↔ Crypto
