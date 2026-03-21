@@ -88,10 +88,10 @@ function buildGaugeSVG(score, activeIdx, label) {
 
   // 6. Score & label (below pivot, clear of needle)
   const scoreText = `
-    <text x="${CX}" y="${CY + 46}" text-anchor="middle"
+    <text x="${CX}" y="${CY + 60}" text-anchor="middle"
       font-size="50" font-weight="900" font-family="Inter,Rubik,sans-serif"
       fill="${activeZone.color}">${score}</text>
-    <text x="${CX}" y="${CY + 64}" text-anchor="middle"
+    <text x="${CX}" y="${CY + 78}" text-anchor="middle"
       font-size="9.5" font-weight="700" font-family="Inter,Rubik,sans-serif"
       fill="${activeZone.color}" letter-spacing="1.2">${label.toUpperCase()}</text>`;
 
@@ -105,7 +105,7 @@ function buildGaugeSVG(score, activeIdx, label) {
       font-size="9" font-weight="600" fill="var(--text-3)" opacity="0.55">100</text>`;
 
   return `
-<svg viewBox="0 0 280 218" fill="none" xmlns="http://www.w3.org/2000/svg" class="fng-svg">
+<svg viewBox="0 0 280 235" fill="none" xmlns="http://www.w3.org/2000/svg" class="fng-svg">
   ${bgTrack}
   ${sectors}
   ${activeRim}
