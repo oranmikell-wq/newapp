@@ -4,7 +4,7 @@
   <!-- Apply RTL immediately to avoid layout flash -->
   <script>
     (function(){
-      var lang = localStorage.getItem('bon-lang') || 'he';
+      var lang = localStorage.getItem('bon-lang') || 'en';
       document.documentElement.lang = lang;
       document.documentElement.dir  = lang === 'he' ? 'rtl' : 'ltr';
     })();
@@ -308,7 +308,7 @@
   <!-- ===== IN-APP NOTIFICATION ===== -->
   <div id="notification" class="notification hidden"></div>
 
-  <script type="module" src="src/main.js?v=7"></script>
+  <script type="module" src="src/main.js?v=8"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(regs => {
