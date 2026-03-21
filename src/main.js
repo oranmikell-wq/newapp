@@ -160,19 +160,29 @@ async function loadMarketIndices() {
   const indices = [
     { id: 'idx-sp500',  symbol: '^GSPC' },
     { id: 'idx-nasdaq', symbol: '^IXIC' },
+    { id: 'idx-vix',    symbol: '^VIX'  },
   ];
   for (const { id, symbol } of indices) {
     const card = document.getElementById(id);
     if (!card) continue;
     const priceEl  = card.querySelector('.market-price');
     const changeEl = card.querySelector('.market-change');
+    const isVix    = id === 'idx-vix';
     try {
       const quote = await fetchIndexQuote(symbol);
       if (quote && quote.price != null) {
-        priceEl.textContent  = quote.price.toLocaleString(undefined, { maximumFractionDigits: 2 });
+        // VIX: show one decimal, no thousands separator; others: normal formatting
+        priceEl.textContent = isVix
+          ? quote.price.toFixed(2)
+          : quote.price.toLocaleString(undefined, { maximumFractionDigits: 2 });
         const sign = (quote.changePct ?? 0) >= 0 ? '+' : '';
         changeEl.textContent = quote.changePct != null ? `${sign}${quote.changePct.toFixed(2)}%` : '--';
-        changeEl.className   = `market-change ${(quote.changePct ?? 0) >= 0 ? 'positive' : 'negative'}`;
+        // VIX: rising = bad for market → show as negative (red); falling = positive (green)
+        const chgPct = quote.changePct ?? 0;
+        const colorClass = isVix
+          ? (chgPct >= 0 ? 'negative' : 'positive')
+          : (chgPct >= 0 ? 'positive' : 'negative');
+        changeEl.className = `market-change ${colorClass}`;
       }
     } catch {
       // silently fail — cards keep showing '--'
