@@ -167,6 +167,52 @@ function formatTimestamp(iso) {
   } catch { return ''; }
 }
 
+// ── Crypto F&G (alternative.me) ────────────────────────
+const CRYPTO_FNG_URL = 'https://api.alternative.me/fng/?limit=30';
+
+function cryptoRatingToKey(classification) {
+  const s = (classification || '').toLowerCase().replace(/\s+/g, '_');
+  return ({ extreme_fear: 'fng_extreme_fear', fear: 'fng_fear', neutral: 'fng_neutral',
+            greed: 'fng_greed', extreme_greed: 'fng_extreme_greed' })[s] || 'fng_neutral';
+}
+
+export async function loadCryptoFearGreed(containerId = 'fng-crypto-container') {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  try {
+    const res  = await fetch(CRYPTO_FNG_URL);
+    const json = await res.json();
+    const data = json?.data;
+    if (!data?.length) throw new Error('no_data');
+
+    const current   = data[0];
+    const score     = parseInt(current.value, 10);
+    const activeIdx = getZoneIndex(score);
+    const labelKey  = cryptoRatingToKey(current.value_classification);
+    const label     = t(labelKey);
+    const ts        = new Date(parseInt(current.timestamp, 10) * 1000).toLocaleString(undefined, {
+      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+    });
+
+    const week  = data[6]  ? parseInt(data[6].value, 10)  : null;
+    const month = data[29] ? parseInt(data[29].value, 10) : null;
+
+    container.innerHTML = `
+      <div class="fng-gauge-wrap">
+        ${buildGaugeSVG(score, activeIdx, label)}
+        ${ts ? `<p class="fng-updated">${ts}</p>` : ''}
+        <div class="fng-compare-rows">
+          ${compareRow('fng_1w_ago', week, score)}
+          ${compareRow('fng_1m_ago', month, score)}
+        </div>
+        <p class="fng-source">${t('fng_crypto_source')}</p>
+      </div>`;
+  } catch {
+    container.innerHTML = `<p class="fng-error">${t('fng_error')}</p>`;
+  }
+}
+
 // ── Public ─────────────────────────────────────────────
 export async function loadFearGreed() {
   const container = document.getElementById('fng-container');

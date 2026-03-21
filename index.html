@@ -29,8 +29,8 @@
   <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
   <script src="https://s3.tradingview.com/tv.js"></script>
   <link rel="stylesheet" href="css/main.css?v=19" />
-  <link rel="stylesheet" href="css/home.css?v=16" />
-  <link rel="stylesheet" href="css/results.css?v=19" />
+  <link rel="stylesheet" href="css/home.css?v=17" />
+  <link rel="stylesheet" href="css/results.css?v=20" />
   <link rel="stylesheet" href="css/compare.css?v=9" />
 </head>
 <body class="theme-light">
@@ -184,17 +184,35 @@
 
       <!-- Chart — standalone block -->
       <section class="chart-section">
-        <div class="chart-ranges">
-          <button class="range-btn" data-range="1D">1D</button>
-          <button class="range-btn" data-range="1W">1W</button>
-          <button class="range-btn active" data-range="1M">1M</button>
-          <button class="range-btn" data-range="3M">3M</button>
-          <button class="range-btn" data-range="6M">6M</button>
-          <button class="range-btn" data-range="1Y">1Y</button>
-          <button class="range-btn" data-range="3Y">3Y</button>
-          <button class="range-btn" data-range="5Y">5Y</button>
+
+        <!-- View toggle -->
+        <div class="chart-view-toggle" dir="ltr">
+          <button class="view-tab active" data-view="chart" data-i18n="chartTab">Chart</button>
+          <button class="view-tab" data-view="fng-crypto" data-i18n="cryptoFngTab">Crypto Fear &amp; Greed</button>
         </div>
-        <div id="chart-container"></div>
+
+        <!-- Price chart view -->
+        <div id="chart-view">
+          <div class="chart-ranges">
+            <button class="range-btn" data-range="1D">1D</button>
+            <button class="range-btn" data-range="1W">1W</button>
+            <button class="range-btn active" data-range="1M">1M</button>
+            <button class="range-btn" data-range="3M">3M</button>
+            <button class="range-btn" data-range="6M">6M</button>
+            <button class="range-btn" data-range="1Y">1Y</button>
+            <button class="range-btn" data-range="3Y">3Y</button>
+            <button class="range-btn" data-range="5Y">5Y</button>
+          </div>
+          <div id="chart-container"></div>
+        </div>
+
+        <!-- Crypto Fear & Greed view -->
+        <div id="fng-crypto-view" class="hidden">
+          <div id="fng-crypto-container" class="fng-container">
+            <div class="fng-skeleton"></div>
+          </div>
+        </div>
+
       </section>
 
       <!-- Criteria table -->
@@ -284,7 +302,7 @@
   <!-- ===== IN-APP NOTIFICATION ===== -->
   <div id="notification" class="notification hidden"></div>
 
-  <script type="module" src="src/main.js?v=5"></script>
+  <script type="module" src="src/main.js?v=6"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(regs => {

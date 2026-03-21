@@ -8,7 +8,7 @@ import { calcSummaryScore, renderSummaryGauge } from './components/SummaryGauge.
 import { renderCriteriaTable } from './components/CriteriaTable.js';
 import { renderStrategyChecklist, countNewHighs } from './components/StrategyChecklist.js';
 import { renderNews, renderAIInsight } from './components/NewsRenderer.js';
-import { loadFearGreed } from './components/FearGreedGauge.js';
+import { loadFearGreed, loadCryptoFearGreed } from './components/FearGreedGauge.js';
 import { loadAAII }      from './components/AAIISentiment.js';
 import { showAutocomplete, hideAutocomplete, selectAutocomplete, confirmAutocomplete, showRecentSearches, initAutocomplete } from './components/Autocomplete.js';
 import { initChart, loadChart, updateChartTheme, initCompareChart } from './components/Chart.js';
@@ -43,6 +43,7 @@ let autoRefreshTimer = null;
 let activeLoadSymbol = null; // tracks the latest requested symbol to cancel stale loads
 let lastFullStockData  = null;   // stored for lang-change re-render
 let lastSummaryScored  = null;   // stored for lang-change re-render
+let cryptoFngLoaded    = false;  // lazy-load flag for Crypto F&G panel
 
 // ── Notification ───────────────────────────────────────
 let notifTimer = null;
@@ -230,6 +231,11 @@ async function loadResults(symbol) {
     }
 
     loadChart(symbol, '1M');
+    // Reset chart/FNG toggle to chart view on each new stock
+    document.getElementById('chart-view')?.classList.remove('hidden');
+    document.getElementById('fng-crypto-view')?.classList.add('hidden');
+    document.querySelectorAll('.view-tab').forEach(b => b.classList.toggle('active', b.dataset.view === 'chart'));
+    cryptoFngLoaded = false;
     updateWatchlistBtn(symbol);
     updateCompareBtn(symbol);
 
@@ -430,6 +436,25 @@ function bindEvents() {
       document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       if (currentStock) loadChart(currentStock.symbol, btn.dataset.range);
+    });
+  });
+
+  // Chart view toggle (Chart ↔ Crypto Fear & Greed)
+  document.querySelectorAll('.view-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.view-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const view    = btn.dataset.view;
+      const chartV  = document.getElementById('chart-view');
+      const fngV    = document.getElementById('fng-crypto-view');
+      if (view === 'chart') {
+        chartV?.classList.remove('hidden');
+        fngV?.classList.add('hidden');
+      } else {
+        chartV?.classList.add('hidden');
+        fngV?.classList.remove('hidden');
+        if (!cryptoFngLoaded) { loadCryptoFearGreed(); cryptoFngLoaded = true; }
+      }
     });
   });
 

@@ -172,6 +172,54 @@
   overflow: hidden;
 }
 
+/* View toggle: Chart | Crypto F&G */
+.chart-view-toggle {
+  display: flex;
+  gap: 0;
+  padding: 10px 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.view-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-bottom: 2.5px solid transparent;
+  padding: 8px 12px 9px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-3);
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.18s, border-color 0.18s;
+  margin-bottom: -1px; /* sit on the section border */
+}
+
+.view-tab:hover { color: var(--text-2); }
+
+.view-tab.active {
+  color: var(--green);
+  border-bottom-color: var(--green);
+}
+
+/* Crypto F&G container inside chart section */
+#fng-crypto-container {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 16px;
+  min-height: 280px;
+}
+
+#fng-crypto-container .fng-gauge-wrap {
+  width: 100%;
+  max-width: 380px;
+}
+
+#fng-crypto-container .fng-compare-rows {
+  margin-top: 8px;
+  padding: 0 16px;
+}
+
 .chart-ranges {
   display: none; /* TradingView widget has its own range/interval selector */
 }
