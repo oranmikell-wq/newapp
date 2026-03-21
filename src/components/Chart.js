@@ -70,7 +70,7 @@ export async function loadChart(symbol, range = '1M') {
     details:            false,
     hotlist:            false,
     calendar:           false,
-    studies:            ['Volume@tv-basicstudies'],
+    studies:            [],
     show_popup_button:  false,
     no_referral_id:     true,
     loading_screen:     { backgroundColor: isDark ? '#111113' : '#ffffff' },
