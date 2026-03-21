@@ -229,10 +229,17 @@ export async function loadFearGreed() {
     const label     = t(labelKey);
     const ts        = formatTimestamp(fg.timestamp);
 
+    const week  = fg.previous_1_week  != null ? Math.round(fg.previous_1_week)  : null;
+    const month = fg.previous_1_month != null ? Math.round(fg.previous_1_month) : null;
+
     container.innerHTML = `
       <div class="fng-gauge-wrap">
         ${buildGaugeSVG(score, activeIdx, label)}
         ${ts ? `<p class="fng-updated">${ts}</p>` : ''}
+        <div class="fng-compare-rows">
+          ${compareRow('fng_1w_ago', week, score)}
+          ${compareRow('fng_1m_ago', month, score)}
+        </div>
         <p class="fng-source">${t('fng_source')}</p>
       </div>`;
   } catch (e) {
