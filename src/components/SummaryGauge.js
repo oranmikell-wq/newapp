@@ -1,8 +1,10 @@
 // SummaryGauge.js
 // Animated SVG gauge with 4-factor scoring:
-//   20% RSI(14) | 30% Moving Averages | 25% Valuation (P/E) | 25% Relative Strength
+//   20% RSI(14) | 30% Moving Averages | 25% Valuation (P/E or P/S) | 25% Relative Strength
+//   Growth/Pre-profit mode: 20% RSI | 30% MA | 15% Valuation (P/S) | 35% RS
 
 import { t } from '../utils/i18n.js';
+import { getSectorKey, SECTOR_PS, normalizeInverse } from '../utils/scoring.js';
 
 // ── SVG geometry constants ────────────────────────────────
 const CX = 150, CY = 158, R = 110;
@@ -43,9 +45,11 @@ export function calcSummaryScore(data, indicators) {
     else                                                       scores.ma = 10;
   }
 
-  // ── 3. Valuation via P/E (25%) ───────────────────────
+  // ── 3. Valuation: P/E primary, P/S vs sector as fallback for unprofitable stocks ──
+  let valuationMetric = null;
   const pe = data?.pe;
   if (pe != null && pe > 0) {
+    valuationMetric = 'pe';
     if      (pe < 10) scores.pe = 92;
     else if (pe < 15) scores.pe = 82;
     else if (pe < 20) scores.pe = 72;
@@ -53,9 +57,13 @@ export function calcSummaryScore(data, indicators) {
     else if (pe < 35) scores.pe = 42;
     else if (pe < 50) scores.pe = 24;
     else              scores.pe = 10;
+  } else if (data?.ps != null && data.ps > 0) {
+    valuationMetric = 'ps';
+    const sectorKey = getSectorKey(data?.sector);
+    scores.pe = Math.round(normalizeInverse(data.ps, SECTOR_PS[sectorKey] || SECTOR_PS.default));
   }
 
-  // ── 4. Relative Strength (25%) ───────────────────────
+  // ── 4. Relative Strength ─────────────────────────────
   // 52-week position (70%) + daily momentum (30%)
   const { price, high52w, low52w, changePct } = data || {};
   if (price != null && high52w != null && low52w != null) {
@@ -67,16 +75,34 @@ export function calcSummaryScore(data, indicators) {
     scores.rs = Math.round(posScore * 0.70 + momScore * 0.30);
   }
 
+  // ── Growth/Pre-profit detection ───────────────────────
+  // A stock is "growth profile" when PE is unavailable or negative
+  const isGrowthProfile = (pe == null || pe <= 0);
+
+  // ── Dynamic weights based on profile ─────────────────
+  let WEIGHTS;
+  if (!isGrowthProfile) {
+    // Normal: P/E available
+    WEIGHTS = { rsi: 0.20, ma: 0.30, pe: 0.25, rs: 0.25 };
+  } else if (valuationMetric === 'ps') {
+    // Growth + P/S available: reduce valuation, boost RS
+    WEIGHTS = { rsi: 0.20, ma: 0.30, pe: 0.15, rs: 0.35 };
+  } else {
+    // Growth + no valuation at all: redistribute 25% equally to MA and RS
+    WEIGHTS = { rsi: 0.20, ma: 0.375, rs: 0.425 };
+  }
+
   // ── Weighted sum (skip missing factors) ──────────────
-  const WEIGHTS = { rsi: 0.20, ma: 0.30, pe: 0.25, rs: 0.25 };
   let totalWeight = 0, weightedSum = 0;
   for (const [key, s] of Object.entries(scores)) {
-    weightedSum += s * WEIGHTS[key];
-    totalWeight += WEIGHTS[key];
+    if (WEIGHTS[key] != null) {
+      weightedSum += s * WEIGHTS[key];
+      totalWeight += WEIGHTS[key];
+    }
   }
 
   const finalScore = totalWeight > 0 ? Math.round(weightedSum / totalWeight) : null;
-  const isPartial  = Object.keys(scores).length < 4;
+  const isPartial  = Object.keys(scores).length < Object.keys(WEIGHTS).length;
 
   let rating = 'wait';
   if (finalScore != null) {
@@ -84,7 +110,7 @@ export function calcSummaryScore(data, indicators) {
     else if (finalScore < 41)  rating = 'sell';
   }
 
-  return { score: finalScore, rating, isPartial, breakdown: scores };
+  return { score: finalScore, rating, isPartial, breakdown: scores, valuationMetric, isGrowthProfile, weights: WEIGHTS };
 }
 
 // ═════════════════════════════════════════════════════════
@@ -283,20 +309,24 @@ function animateGauge(svg, targetScore, duration = 1300) {
 // ═════════════════════════════════════════════════════════
 
 const FACTORS = [
-  { key: 'rsi', i18n: 'factor_rsi', weight: '20%' },
-  { key: 'ma',  i18n: 'factor_ma',  weight: '30%' },
-  { key: 'pe',  i18n: 'factor_valuation', weight: '25%' },
-  { key: 'rs',  i18n: 'factor_rs',  weight: '25%' },
+  { key: 'rsi', i18n: 'factor_rsi' },
+  { key: 'ma',  i18n: 'factor_ma'  },
+  { key: 'pe',  i18n: 'factor_valuation', i18n_ps: 'factor_valuation_ps' },
+  { key: 'rs',  i18n: 'factor_rs'  },
 ];
 
-function buildBreakdown(breakdown) {
+function buildBreakdown(breakdown, valuationMetric, weights) {
   const wrap = document.createElement('div');
   wrap.className = 'sg-breakdown';
 
-  FACTORS.forEach(({ key, i18n, weight }, idx) => {
-    const label = t(i18n);
-    const score = breakdown?.[key] ?? null;
-    const color = score != null ? scoreToColor(score) : '#cbd5e1';
+  // Only show factors that are part of the active weight set
+  const activeFactors = FACTORS.filter(f => weights[f.key] != null);
+
+  activeFactors.forEach(({ key, i18n, i18n_ps }, idx) => {
+    const label  = (key === 'pe' && valuationMetric === 'ps' && i18n_ps) ? t(i18n_ps) : t(i18n);
+    const weight = `${Math.round((weights[key] || 0) * 100)}%`;
+    const score  = breakdown?.[key] ?? null;
+    const color  = score != null ? scoreToColor(score) : '#cbd5e1';
 
     const row = document.createElement('div');
     row.className = 'sg-row';
@@ -345,17 +375,21 @@ export function renderSummaryGauge(container, summaryScored) {
   if (!container) return;
   container.innerHTML = '';
 
-  const { score, rating, isPartial, breakdown } = summaryScored || {};
+  const { score, rating, isPartial, breakdown, valuationMetric, isGrowthProfile, weights } = summaryScored || {};
   const badge = BADGE_META[rating] || BADGE_META.wait;
+  const activeWeights = weights || { rsi: 0.20, ma: 0.30, pe: 0.25, rs: 0.25 };
 
   // Card shell
   const card = document.createElement('div');
   card.className = 'sg-card';
 
-  // Header row
+  // Header row (with optional growth profile note)
+  const growthNote = (isGrowthProfile && valuationMetric === 'ps')
+    ? `<span class="sg-growth-note">${t('growthProfileNote')}</span>` : '';
   card.innerHTML = `
     <div class="sg-header">
       <span class="sg-badge ${badge.cls}">${t(badge.key)}</span>
+      ${growthNote}
     </div>`;
 
   // Body: SVG + breakdown (flex)
@@ -383,7 +417,7 @@ export function renderSummaryGauge(container, summaryScored) {
   }
 
   body.appendChild(svgWrap);
-  body.appendChild(buildBreakdown(breakdown));
+  body.appendChild(buildBreakdown(breakdown, valuationMetric, activeWeights));
   card.appendChild(body);
   container.appendChild(card);
 

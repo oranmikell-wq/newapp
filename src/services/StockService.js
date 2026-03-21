@@ -2,9 +2,126 @@
 
 import { cacheGet, cacheSet, cacheGetStale, fundGet, fundSet, fullCacheGet, fullCacheSet } from './CacheService.js';
 
-function getTwelveKey() { return localStorage.getItem('bon-twelve-key') || 'demo'; }
-function getFmpKey()    { return localStorage.getItem('bon-fmp-key') || ''; }
-function getAvKey()     { return localStorage.getItem('bon-av-key')  || ''; }
+function getTwelveKey()  { return localStorage.getItem('bon-twelve-key')  || '798a2840ddf04904b15da7c1a66fc973'; }
+function getFmpKey()     { return localStorage.getItem('bon-fmp-key')     || ''; }
+function getAvKey()      { return localStorage.getItem('bon-av-key')      || ''; }
+function getFinnhubKey() { return localStorage.getItem('bon-finnhub-key') || 'd6qup2hr01qgdhqcgpbgd6qup2hr01qgdhqcgpc0'; }
+
+// ── SEC EDGAR fundamentals (free, no API key, works from any IP) ──────────────
+// Covers US stocks that file with the SEC (10-K / 20-F).
+// CIK numbers sourced from: https://www.sec.gov/files/company_tickers.json
+const EDGAR_CIK = {
+  AAPL:'320193',MSFT:'789019',GOOGL:'1652044',GOOG:'1652044',AMZN:'1018724',
+  NVDA:'1045810',META:'1326801',TSLA:'1318605',AVGO:'1730168',V:'1403161',
+  MA:'1141391',JPM:'19617',UNH:'731766',LLY:'59478',HD:'354950',MRK:'310158',
+  ABBV:'1551152',COST:'909832',JNJ:'200406',BAC:'70858',WMT:'104169',
+  XOM:'34088',PG:'80424',WFC:'72971',AMD:'2488',ORCL:'1341439',
+  NFLX:'1065280',CRM:'1108524',INTC:'50863',CSCO:'858877',QCOM:'804328',
+  PFE:'78003',TXN:'97476',IBM:'51143',GS:'886982',MS:'895421',
+  DIS:'1001039',KO:'21344',PEP:'77476',CAT:'18230',CVX:'93410',
+  GE:'40533',MCD:'63908',BA:'12927',PYPL:'1633917',UBER:'1543151',
+  ABNB:'1559720',PLTR:'1321655',SNOW:'1640147',T:'732717',VZ:'732712',
+  MRNA:'1682852',MU:'723254',AMAT:'796343',LRCX:'707549',KLAC:'319201',
+  ADI:'6951',MRVL:'1058057',ON:'861284',CDNS:'813672',SNPS:'883241',
+  ENPH:'1463101',FSLR:'1274439',RIVN:'1874178',NIO:'1736541',
+  WBD:'1437491',CMCSA:'1166691',NTNX:'1468174',AMC:'1411579',GME:'1326380',
+  TEVA:'818686',CHWY:'1661181',DASH:'1792789',COIN:'1679788',HOOD:'1783398',
+  SOFI:'1403708',AFRM:'1820175',UPST:'1647639',LCID:'1811210',
+  BP:'313807',CVS:'1547903',WBA:'105378',ABBV:'1551152',
+  ELV:'1156039',CI:'723254',HCA:'860731',MDT:'310764',ABT:'1800',
+  TMO:'97210',DHR:'790070',SYK:'310764',ZTS:'1555280',ISRG:'1035267',
+  REGN:'872589',VRTX:'875320',GILD:'882095',BIIB:'875045',
+  NEE:'753308',DUK:'18978',SO:'92521',AEP:'4904',SRE:'1032975',
+  PLD:'1045609',AMT:'1053507',EQIX:'1101239',PSA:'77890',SPG:'1063761',
+  SBUX:'829224',TGT:'27419',LOW:'60667',NKE:'320187',TJX:'109198',
+  BKNG:'1075531',EXPE:'1324424',MAR:'1048268',HLT:'1466132',H:'313131',
+};
+
+// Fetch one EDGAR concept's latest annual value.
+async function _edgarLatest(cik, concept, unit = 'USD') {
+  const url = `https://data.sec.gov/api/xbrl/companyconcept/CIK${String(cik).padStart(10,'0')}/us-gaap/${concept}.json`;
+  const res = await fetchWithTimeout(proxyUrl(url), 10000);
+  if (!res.ok) return [null, null];
+  const j = await res.json();
+  const arr = (j?.units?.[unit] ?? [])
+    .filter(d => (d.form === '10-K' || d.form === '20-F') && d.val != null)
+    .sort((a, b) => b.end.localeCompare(a.end));
+  return [arr[0]?.val ?? null, arr[1]?.val ?? null]; // [latest, previous annual]
+}
+
+// Returns partial fundamentals from SEC EDGAR (no API key needed).
+// Only covers US stocks in EDGAR_CIK map. Returns null for unknown symbols.
+async function fetchEdgarFundamentals(symbol, price) {
+  const cik = EDGAR_CIK[symbol.toUpperCase()];
+  if (!cik || !price) return null;
+
+  try {
+    // Fetch EPS, Revenue (try two common concept names), Equity, Shares, Debt in parallel
+    const [
+      [eps,    epsPrev],
+      [rev,    revPrev],
+      [rev2,   rev2Prev],
+      [equity, ],
+      [shares, ],
+      [debt,   ],
+      [dps,    ],
+      [dpsCashPaid, ],
+    ] = await Promise.all([
+      _edgarLatest(cik, 'EarningsPerShareDiluted',                              'USD/shares'),
+      _edgarLatest(cik, 'Revenues'),
+      _edgarLatest(cik, 'RevenueFromContractWithCustomerExcludingAssessedTax'),
+      _edgarLatest(cik, 'StockholdersEquity'),
+      _edgarLatest(cik, 'CommonStockSharesOutstanding', 'shares'),
+      _edgarLatest(cik, 'LongTermDebt'),
+      _edgarLatest(cik, 'CommonStockDividendsPerShareDeclared', 'USD/shares'),
+      _edgarLatest(cik, 'CommonStockDividendsPerShareCashPaid', 'USD/shares'),
+    ]);
+    const dpsActual = dps ?? dpsCashPaid;
+
+    const revActual     = rev     ?? rev2;
+    const revPrevActual = revPrev ?? rev2Prev;
+
+    const pe = (eps && eps > 0)                             ? +(price / eps).toFixed(2)                           : null;
+    const pb = (equity && shares && shares > 0)             ? +(price / (equity / shares)).toFixed(2)             : null;
+    const ps = (revActual && shares && shares > 0)          ? +(price / (revActual / shares)).toFixed(2)          : null;
+    const revenueGrowth = (revActual && revPrevActual && revPrevActual !== 0)
+      ? +((revActual - revPrevActual) / Math.abs(revPrevActual) * 100).toFixed(2) : null;
+    const epsGrowth = (eps && epsPrev && epsPrev !== 0)
+      ? +((eps - epsPrev) / Math.abs(epsPrev) * 100).toFixed(2) : null;
+    const debtEquity = (debt != null && equity && equity !== 0)
+      ? +(debt / equity).toFixed(4) : null;
+
+    // Return in v10-compatible shape so parseAllData works unchanged
+    return {
+      summaryDetail: {
+        trailingPE:    pe,
+        priceToBook:   pb,
+        beta:          null,
+        marketCap:     (shares && price) ? shares * price : null,
+        dividendYield: (dpsActual && price && price > 0) ? dpsActual / price : null,
+      },
+      defaultKeyStatistics: {
+        priceToSalesTrailing12Months: ps,
+        heldPercentInstitutions:      null,
+      },
+      financialData: {
+        earningsGrowth:          epsGrowth     != null ? epsGrowth     / 100 : null,
+        revenueGrowth:           revenueGrowth != null ? revenueGrowth / 100 : null,
+        debtToEquity:            debtEquity    != null ? debtEquity    * 100  : null,
+        targetMeanPrice:         null,
+        targetHighPrice:         null,
+        targetLowPrice:          null,
+        recommendationMean:      null,
+        numberOfAnalystOpinions: null,
+      },
+      assetProfile: { longName: null, sector: null, industry: null },
+      calendarEvents: { earnings: { earningsDate: [] } },
+      _edgarSource: true,
+    };
+  } catch {
+    return null;
+  }
+}
 
 // ── Financial Modeling Prep (FMP) fallback ────────────────────────────────────
 // Free tier: 250 req/day. Key stored in localStorage as 'bon-fmp-key'.
@@ -88,6 +205,98 @@ async function fetchFMPFundamentals(symbol) {
     calendarEvents: { earnings: { earningsDate: [] } },
     // Attach raw analystScore so parseAllData can use it
     _fmpAnalystScore: analystScore,
+  };
+}
+
+// ── Finnhub fundamentals ──────────────────────────────────────────────────────
+// Free tier: 60 calls/min. Covers PE, PB, PS, Beta, Dividend, EPS/Revenue growth,
+// Debt/Equity, Earnings calendar, Analyst recommendations.
+// Key stored in localStorage as 'bon-finnhub-key'.
+async function fetchFinnhubFundamentals(symbol) {
+  const key = getFinnhubKey();
+  const base = `https://finnhub.io/api/v1`;
+  const from = new Date().toISOString().slice(0, 10);
+  const to   = new Date(Date.now() + 270 * 86400000).toISOString().slice(0, 10);
+
+  const [profileRaw, metricRaw, earningsRaw, recommendRaw, priceTargetRaw] = await Promise.all([
+    fetchWithTimeout(`${base}/stock/profile2?symbol=${encodeURIComponent(symbol)}&token=${key}`, 8000)
+      .then(r => r.ok ? r.json() : null).catch(() => null),
+    fetchWithTimeout(`${base}/stock/metric?symbol=${encodeURIComponent(symbol)}&metric=all&token=${key}`, 8000)
+      .then(r => r.ok ? r.json() : null).catch(() => null),
+    fetchWithTimeout(`${base}/calendar/earnings?symbol=${encodeURIComponent(symbol)}&from=${from}&to=${to}&token=${key}`, 8000)
+      .then(r => r.ok ? r.json() : null).catch(() => null),
+    fetchWithTimeout(`${base}/stock/recommendation?symbol=${encodeURIComponent(symbol)}&token=${key}`, 8000)
+      .then(r => r.ok ? r.json() : null).catch(() => null),
+    fetchWithTimeout(`${base}/stock/price-target?symbol=${encodeURIComponent(symbol)}&token=${key}`, 8000)
+      .then(r => r.ok ? r.json() : null).catch(() => null),
+  ]);
+
+  const m = metricRaw?.metric || {};
+  if (!m.peBasicExclExtraTTM && !m.peTTM && !profileRaw?.marketCapitalization) return null;
+
+  // Map analyst recommendations
+  let analystScore = null;
+  if (Array.isArray(recommendRaw) && recommendRaw.length > 0) {
+    const latest = recommendRaw[0];
+    const total = (latest.strongBuy || 0) + (latest.buy || 0) + (latest.hold || 0) + (latest.sell || 0) + (latest.strongSell || 0);
+    if (total > 0) {
+      analystScore = {
+        strongBuy: latest.strongBuy || 0,
+        buy:       latest.buy       || 0,
+        hold:      latest.hold      || 0,
+        sell:      (latest.sell || 0) + (latest.strongSell || 0),
+      };
+    }
+  }
+
+  // Earnings date
+  const earningsArr = earningsRaw?.earningsCalendar || [];
+  const nextEarning = earningsArr.find(e => e.date && new Date(e.date) > new Date());
+
+  const pe  = m.peBasicExclExtraTTM ?? m.peTTM ?? null;
+  const pb  = m.pbAnnual ?? m.pbQuarterly ?? null;
+  const ps  = m.psAnnual ?? m.psTTM ?? null;
+  const beta = m.beta ?? null;
+  const divYield = m.dividendYieldIndicatedAnnual != null ? m.dividendYieldIndicatedAnnual / 100 : null;
+  const marketCap = profileRaw?.marketCapitalization != null ? profileRaw.marketCapitalization * 1e6 : null;
+  const epsGrowth = m.epsGrowth3Y ?? m.epsBasicExclExtraItemsTTM ?? null;
+  const revGrowth = m.revenueGrowthTTMYoy ?? m.revenueGrowth3Y ?? null;
+  const debtEq    = m.longTermDebt_equityAnnual ?? m.totalDebt_totalEquityAnnual ?? null;
+  const instPct   = m.institutionalOwnershipPercentage != null ? m.institutionalOwnershipPercentage / 100 : null;
+
+  return {
+    summaryDetail: {
+      trailingPE:    pe,
+      priceToBook:   pb,
+      beta:          beta,
+      marketCap:     marketCap,
+      dividendYield: divYield,
+    },
+    defaultKeyStatistics: {
+      priceToSalesTrailing12Months: ps,
+      heldPercentInstitutions:      instPct,
+    },
+    financialData: {
+      earningsGrowth:          epsGrowth != null ? epsGrowth / 100 : null,
+      revenueGrowth:           revGrowth != null ? revGrowth / 100 : null,
+      debtToEquity:            debtEq != null ? debtEq * 100 : null,
+      targetMeanPrice:         priceTargetRaw?.targetMean   ?? null,
+      targetHighPrice:         priceTargetRaw?.targetHigh   ?? null,
+      targetLowPrice:          priceTargetRaw?.targetLow    ?? null,
+      recommendationMean:      null,
+      numberOfAnalystOpinions: null,
+    },
+    assetProfile: {
+      longName: profileRaw?.name    ?? null,
+      sector:   profileRaw?.finnhubIndustry ?? null,
+    },
+    calendarEvents: {
+      earnings: {
+        earningsDate: nextEarning ? [{ raw: new Date(nextEarning.date).getTime() / 1000 }] : [],
+      },
+    },
+    _finnhubAnalystScore: analystScore,
+    _finnhubSource: true,
   };
 }
 
@@ -291,6 +500,73 @@ export async function tdEarnings(symbol) {
   return tdGet(`earnings?symbol=${encodeURIComponent(symbol)}`);
 }
 
+// Alpha Vantage earnings calendar — no API key required, returns CSV
+async function fetchAvEarnings(symbol) {
+  const url = `https://www.alphavantage.co/query?function=EARNINGS_CALENDAR&symbol=${encodeURIComponent(symbol)}&horizon=3month`;
+  const res = await fetchWithTimeout(proxyUrl(url), 8000);
+  if (!res.ok) return null;
+  const csv = await res.text();
+  // CSV header: symbol,name,reportDate,fiscalDateEnding,estimate,currency
+  const lines = csv.trim().split('\n').slice(1); // skip header
+  const earnings = lines
+    .map(line => {
+      const cols = line.split(',');
+      return cols[2] ? { date: cols[2].trim() } : null;
+    })
+    .filter(e => e && e.date && new Date(e.date) > new Date());
+  return earnings.length > 0 ? { earnings } : null;
+}
+
+// Estimate next earnings date from EDGAR 10-Q/10-K filing history.
+// Large companies announce earnings 3-5 days before their SEC filing,
+// so next_earnings ≈ projected_next_filing - 5 days.
+async function estimateNextEarningsFromEdgar(cik) {
+  if (!cik) return null;
+  const paddedCik = String(cik).padStart(10, '0');
+  const url = `https://data.sec.gov/submissions/CIK${paddedCik}.json`;
+  const res = await fetchWithTimeout(proxyUrl(url), 10000);
+  if (!res.ok) return null;
+  const j = await res.json();
+  const forms = j?.filings?.recent?.form || [];
+  const dates = j?.filings?.recent?.filingDate || [];
+  const filingDates = [];
+  for (let i = 0; i < forms.length && filingDates.length < 5; i++) {
+    if (forms[i] === '10-Q' || forms[i] === '10-K') {
+      filingDates.push(new Date(dates[i]));
+    }
+  }
+  if (filingDates.length < 2) return null;
+  // Average interval between filings (in ms)
+  let totalInterval = 0;
+  for (let i = 0; i < filingDates.length - 1; i++) {
+    totalInterval += filingDates[i] - filingDates[i + 1];
+  }
+  const avgInterval = totalInterval / (filingDates.length - 1);
+  const nextFiling = new Date(filingDates[0].getTime() + avgInterval);
+  // Earnings are announced ~5 days before the 10-Q/10-K filing
+  const estimatedEarnings = new Date(nextFiling.getTime() - 5 * 86400000);
+  // Only return if the estimated date is in the future
+  if (estimatedEarnings <= new Date()) return null;
+  const dateStr = estimatedEarnings.toISOString().slice(0, 10);
+  return { earnings: [{ date: dateStr }] };
+}
+
+// ── Finviz scraping — institutional ownership + target price ─────────────────
+// Finviz is a free financial site with no API key requirement.
+// The Worker handles HTML parsing and returns structured JSON.
+async function fetchFinvizData(symbol) {
+  try {
+    const url = `https://finviz.com/quote.ashx?t=${encodeURIComponent(symbol)}&ty=c&ta=1&p=d`;
+    const res = await fetchWithTimeout(proxyUrl(url), 8000);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data || data.error) return null;
+    // Only return if we got meaningful data
+    if (data.instOwn == null && data.targetPrice == null) return null;
+    return data;
+  } catch { return null; }
+}
+
 const TRENDING_DEFAULTS = ['AAPL', 'TSLA', 'NVDA', 'AMZN', 'MSFT'];
 
 export async function fetchTrending() {
@@ -332,7 +608,7 @@ export function aggregateRatings(ratingsData) {
   return total > 0 ? counts : null;
 }
 
-export function parseAllData({ meta, yfFund, stats, ratings, target, earning, newsResp }, symbol) {
+export function parseAllData({ meta, yfFund, stats, ratings, target, earning, newsResp, finviz }, symbol) {
   const yfSum  = yfFund?.summaryDetail        || {};
   const yfDef  = yfFund?.defaultKeyStatistics || {};
   const yfFin  = yfFund?.financialData        || {};
@@ -401,20 +677,21 @@ export function parseAllData({ meta, yfFund, stats, ratings, target, earning, ne
 
   const yfInstPct = yfDef.heldPercentInstitutions?.raw ?? yfDef.heldPercentInstitutions ?? null;
   const tdInstPct = sst.percent_held_by_institutions ?? null;
-  const instPct   = yfInstPct ?? tdInstPct ?? null;
+  const instPct   = yfInstPct ?? tdInstPct ?? finviz?.instOwn ?? null;
 
   const analystMean  = yfFin.recommendationMean?.raw ?? yfFin.recommendationMean ?? null;
   const analystCount = yfFin.numberOfAnalystOpinions?.raw ?? yfFin.numberOfAnalystOpinions ?? null;
-  // Use FMP analyst score if Yahoo/TwelveData ratings are unavailable
-  const analystScore = aggregateRatings(ratings) ?? yfFund?._fmpAnalystScore ?? null;
+  // Use Finnhub/FMP analyst score if Yahoo/TwelveData ratings are unavailable
+  const analystScore = aggregateRatings(ratings) ?? yfFund?._finnhubAnalystScore ?? yfFund?._fmpAnalystScore ?? null;
 
   const yfTargetMean = yfFin.targetMeanPrice?.raw ?? yfFin.targetMeanPrice ?? null;
   const yfTargetHigh = yfFin.targetHighPrice?.raw ?? yfFin.targetHighPrice ?? null;
   const yfTargetLow  = yfFin.targetLowPrice?.raw  ?? yfFin.targetLowPrice  ?? null;
-  const tdPT = target?.price_target || null;
-  const targetMean = yfTargetMean ?? tdPT?.average ?? null;
-  const targetHigh = yfTargetHigh ?? tdPT?.high    ?? null;
-  const targetLow  = yfTargetLow  ?? tdPT?.low     ?? null;
+  // TwelveData returns { price_target: 123.4 } — a flat number, not object
+  const tdPTVal = typeof target?.price_target === 'number' ? target.price_target : null;
+  const targetMean = yfTargetMean ?? tdPTVal ?? finviz?.targetPrice ?? null;
+  const targetHigh = yfTargetHigh ?? null;
+  const targetLow  = yfTargetLow  ?? null;
 
   let earningsDate = null;
   const yfEarningsDates = yfCal.earnings?.earningsDate;
@@ -486,20 +763,41 @@ export async function fetchAllData(symbol, lite = false) {
       } else {
         yfFund = await yahooFundamentals(symbol);
 
-        // Fallback: FMP or Alpha Vantage when Yahoo scrape fails (e.g. GDPR consent wall)
+        // Fallback cascade when Yahoo Finance is unavailable (GDPR/crumb block from IL IPs)
+        // 1. Finnhub — covers PE, PB, PS, Beta, Dividend, EPS/Rev growth, Earnings calendar, Analyst rec
+        if (!yfFund) {
+          yfFund = await fetchFinnhubFundamentals(symbol).catch(() => null);
+        }
+        // 2. FMP / Alpha Vantage
         if (!yfFund) {
           yfFund = await fetchFMPFundamentals(symbol).catch(() => null)
                 ?? await fetchAVFundamentals(symbol).catch(() => null);
         }
+        // 3. EDGAR — free SEC data for US stocks, no API key required
+        if (!yfFund && !skipFund) {
+          const price = meta.regularMarketPrice ?? null;
+          yfFund = await fetchEdgarFundamentals(symbol, price).catch(() => null);
+        }
 
         if (!lite) {
           if (!yfFund) {
-            stats   = await tdStatistics(symbol).catch(() => null);
-            ratings = await tdAnalystRatings(symbol).catch(() => null);
-            target  = await tdPriceTarget(symbol).catch(() => null);
-            earning = await tdEarnings(symbol).catch(() => null);
-          } else {
-            ratings = await tdAnalystRatings(symbol).catch(() => null);
+            stats = await tdStatistics(symbol).catch(() => null);
+          }
+          // Earnings calendar: Finnhub already embedded in yfFund.calendarEvents when available.
+          // TwelveData/AV/EDGAR estimate as further fallbacks.
+          const [ratingsRes, targetRes, earningRes] = await Promise.all([
+            !yfFund?._finnhubSource ? tdAnalystRatings(symbol).catch(() => null) : Promise.resolve(null),
+            tdPriceTarget(symbol).catch(() => null),
+            !yfFund?._finnhubSource ? tdEarnings(symbol).catch(() => null) : Promise.resolve(null),
+          ]);
+          ratings = ratingsRes;
+          target  = targetRes;
+          // If Finnhub provided earnings in calendarEvents, no need for separate earning fetch
+          if (!yfFund?._finnhubSource) {
+            const edgarCik = EDGAR_CIK[symbol.toUpperCase()];
+            earning = earningRes
+              ?? await fetchAvEarnings(symbol).catch(() => null)
+              ?? await estimateNextEarningsFromEdgar(edgarCik).catch(() => null);
           }
         } else {
           if (!yfFund) {
@@ -511,9 +809,12 @@ export async function fetchAllData(symbol, lite = false) {
       }
     }
 
-    const newsResp = await yahooNewsSearch(symbol).catch(() => null);
+    const [newsResp, finviz] = await Promise.all([
+      yahooNewsSearch(symbol).catch(() => null),
+      (!skipFund) ? fetchFinvizData(symbol).catch(() => null) : Promise.resolve(null),
+    ]);
 
-    const data = parseAllData({ meta, yfFund, stats, ratings, target, earning, newsResp }, symbol);
+    const data = parseAllData({ meta, yfFund, stats, ratings, target, earning, newsResp, finviz }, symbol);
     cacheSet(symbol, data);
     return { data, fromCache: false, offline: false };
 
@@ -571,6 +872,50 @@ export function calcSMA(closes, period) {
   return parseFloat((sum / period).toFixed(4));
 }
 
+/**
+ * Calculate 1-year Beta vs SPY from aligned daily price histories.
+ * stockHistory / spyHistory are arrays of { time (unix seconds), value }.
+ */
+export function calcBeta(stockHistory, spyHistory) {
+  if (!stockHistory?.length || !spyHistory?.length) return null;
+
+  // Build SPY price map by day-aligned timestamp
+  const spyMap = new Map();
+  for (const p of spyHistory) {
+    const day = Math.floor(p.time / 86400) * 86400;
+    spyMap.set(day, p.value);
+  }
+
+  // Align by date
+  const sArr = [], mArr = [];
+  for (const p of stockHistory) {
+    const day = Math.floor(p.time / 86400) * 86400;
+    const sp  = spyMap.get(day);
+    if (sp != null && p.value != null) { sArr.push(p.value); mArr.push(sp); }
+  }
+  if (sArr.length < 30) return null;
+
+  // Daily returns
+  const sRet = [], mRet = [];
+  for (let i = 1; i < sArr.length; i++) {
+    if (!sArr[i-1] || !mArr[i-1]) continue;
+    sRet.push((sArr[i] - sArr[i-1]) / sArr[i-1]);
+    mRet.push((mArr[i] - mArr[i-1]) / mArr[i-1]);
+  }
+  if (sRet.length < 20) return null;
+
+  const n     = sRet.length;
+  const sMean = sRet.reduce((a, b) => a + b, 0) / n;
+  const mMean = mRet.reduce((a, b) => a + b, 0) / n;
+  let cov = 0, varM = 0;
+  for (let i = 0; i < n; i++) {
+    cov  += (sRet[i] - sMean) * (mRet[i] - mMean);
+    varM += (mRet[i] - mMean) ** 2;
+  }
+  if (!varM) return null;
+  return parseFloat((cov / varM).toFixed(2));
+}
+
 // ── fetchStockFullData — unified 5-min cached fetch ────
 /**
  * Fetches everything needed for a full stock view in ONE call:
@@ -603,10 +948,12 @@ export async function fetchStockFullData(symbol) {
     return { ...hit.data, fromCache: true, cacheAgeMs: hit.age };
   }
 
-  // ── 2. Fetch quote + 1Y daily history in parallel ──
-  const [quoteResult, history] = await Promise.all([
+  // ── 2. Fetch quote + 1Y daily history + SPY history in parallel ──
+  const isSpy = symbol.toUpperCase() === 'SPY';
+  const [quoteResult, history, spyHistory] = await Promise.all([
     fetchAllData(symbol),
     _fetch1YDaily(symbol),
+    isSpy ? Promise.resolve([]) : _fetch1YDaily('SPY'),
   ]);
 
   const quote = quoteResult.data;
@@ -621,8 +968,9 @@ export async function fetchStockFullData(symbol) {
   const priceAboveMA50  = (lastPrice != null && ma50  != null) ? lastPrice > ma50  : null;
   const priceAboveMA200 = (lastPrice != null && ma200 != null) ? lastPrice > ma200 : null;
   const goldenCross     = (ma50 != null && ma200 != null) ? ma50 > ma200 : null;
+  const beta            = isSpy ? 1 : calcBeta(history, spyHistory);
 
-  const indicators = { rsi14, ma50, ma200, priceAboveMA50, priceAboveMA200, goldenCross };
+  const indicators = { rsi14, ma50, ma200, priceAboveMA50, priceAboveMA200, goldenCross, beta };
 
   const result = { quote, history, indicators, fromCache: false, cacheAgeMs: 0 };
 

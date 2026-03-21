@@ -25,6 +25,12 @@ const ALLOWED_HOSTS = [
   'production.dataviz.cnn.io',
   'api.stlouisfed.org',
   'www.aaii.com',
+  'data.sec.gov',
+  'www.sec.gov',
+  'www.alphavantage.co',
+  'finnhub.io',
+  'financialmodelingprep.com',
+  'finviz.com',
 ];
 
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
@@ -70,12 +76,19 @@ export default {
       return handleAAIIPage(origin);
     }
 
+    // ── Special case: parse Finviz quote page into JSON ──
+    if (parsedUrl.hostname === 'finviz.com' &&
+        parsedUrl.pathname === '/quote.ashx') {
+      return handleFinvizPage(parsedUrl.toString(), origin);
+    }
+
     // ── Standard proxy ───────────────────────────────────────────────────
     try {
+      const isSEC = parsedUrl.hostname.endsWith('sec.gov');
       const response = await fetch(new Request(targetUrl, {
         method: request.method,
         headers: {
-          'User-Agent': UA,
+          'User-Agent': isSEC ? 'BullTherapy/1.0 info@bulltherapy.com' : UA,
           'Accept': 'application/json, text/plain, */*',
           'Accept-Language': 'en-US,en;q=0.9',
           'Cache-Control': 'no-cache',
@@ -102,14 +115,88 @@ export default {
   },
 };
 
+// ── Finviz quote page → JSON ──────────────────────────────────────────────────
+// Fetches the Finviz snapshot page and extracts key metrics as JSON.
+// Useful for institutional ownership (Inst Own) and target price.
+async function handleFinvizPage(url, origin) {
+  try {
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': UA,
+        'Accept': 'text/html,application/xhtml+xml,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Referer': 'https://finviz.com/',
+      },
+    });
+    if (!res.ok) {
+      return new Response(JSON.stringify({}), { headers: { ...corsHeaders(origin), 'Content-Type': 'application/json' } });
+    }
+    const html = await res.text();
+
+    // Finviz snapshot table: <td class="snapshot-td2-cp">Label</td><td class="snapshot-td2"><b>Value</b></td>
+    const data = {};
+    for (const [, label, value] of html.matchAll(
+      /<td[^>]*class="snapshot-td2-cp"[^>]*>\s*([^<]+?)\s*<\/td>\s*<td[^>]*class="snapshot-td2"[^>]*><b>\s*([^<]*?)\s*<\/b>/g
+    )) {
+      data[label.trim()] = value.trim();
+    }
+
+    const pct  = (s) => (s && s !== '-') ? parseFloat(s) / 100 : null;
+    const num  = (s) => (s && s !== '-') ? parseFloat(s)       : null;
+
+    return new Response(JSON.stringify({
+      instOwn:     pct(data['Inst Own']),
+      insiderOwn:  pct(data['Insider Own']),
+      targetPrice: num(data['Target Price']),
+      shortFloat:  pct(data['Short Float']),
+    }), { headers: { ...corsHeaders(origin), 'Content-Type': 'application/json' } });
+
+  } catch (e) {
+    return new Response(JSON.stringify({}), { headers: { ...corsHeaders(origin), 'Content-Type': 'application/json' } });
+  }
+}
+
+// ── Yahoo Finance consent acceptance ─────────────────────────────────────────
+// When Yahoo Finance serves a GDPR/privacy consent page, parse the form and
+// POST acceptance to guce.yahoo.com to get proper session cookies.
+async function acceptYahooConsent(html, cookiesList) {
+  const get = (name) => {
+    const m = html.match(new RegExp(`name=["']${name}["'][^>]*value=["']([^"']+)["']`)) ||
+              html.match(new RegExp(`value=["']([^"']+)["'][^>]*name=["']${name}["']`));
+    return m?.[1] ?? null;
+  };
+  const sessionId = get('sessionId');
+  if (!sessionId) return null;
+  const csrfToken = get('csrfToken') ?? get('gcrumb') ?? '';
+  const brandType = get('brandType') ?? 'nonEu';
+  const locale    = get('locale')    ?? 'en-US';
+  const cookieStr = cookiesList.map(c => c.split(';')[0]).join('; ');
+  try {
+    const res = await fetch('https://guce.yahoo.com/tcf/v2/accept', {
+      method: 'POST',
+      headers: {
+        'User-Agent': UA,
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'text/html,application/xhtml+xml,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Referer': 'https://guce.yahoo.com/',
+        ...(cookieStr ? { 'Cookie': cookieStr } : {}),
+      },
+      body: new URLSearchParams({ brandType, locale, sessionId, csrfToken }).toString(),
+      redirect: 'follow',
+    });
+    const newCookies = res.headers.getSetCookie?.() ?? [];
+    return [...cookiesList, ...newCookies].map(c => c.split(';')[0]).join('; ');
+  } catch { return null; }
+}
+
 // ── Yahoo Finance crumb+cookie auth helper ───────────────────────────────────
 // Returns { cookieStr, crumb } or null.
-// Strategy: bootstrap cookies from the v8 chart endpoint (no consent needed),
-// then use those to obtain a valid crumb.
 async function getYahooCrumb() {
-  const hdr = { 'User-Agent': UA, 'Accept': 'application/json', 'Accept-Language': 'en-US,en;q=0.9' };
+  const hdr    = { 'User-Agent': UA, 'Accept': 'application/json', 'Accept-Language': 'en-US,en;q=0.9' };
+  const htmlHdr = { 'User-Agent': UA, 'Accept': 'text/html,application/xhtml+xml,*/*;q=0.8', 'Accept-Language': 'en-US,en;q=0.9' };
 
-  // Strategy A: crumb endpoint without cookies (works from non-GDPR IPs)
+  // Strategy A: crumb without cookies (works from non-GDPR IPs)
   try {
     const r = await fetch('https://query1.finance.yahoo.com/v1/test/csrfToken', { headers: hdr });
     if (r.ok) {
@@ -122,8 +209,35 @@ async function getYahooCrumb() {
     }
   } catch {}
 
-  // Strategy B: use v8 chart endpoint (no consent wall) to harvest cookies,
-  // then exchange them for a crumb via the csrfToken endpoint.
+  // Strategy B: initialize Yahoo Finance session (with consent if needed), then get crumb
+  try {
+    const pageRes   = await fetch('https://finance.yahoo.com/', { headers: htmlHdr, redirect: 'follow' });
+    const pageHtml  = await pageRes.text();
+    const pageCookies = pageRes.headers.getSetCookie?.() ?? [];
+    let cookieStr   = pageCookies.map(c => c.split(';')[0]).join('; ');
+
+    if (isConsentPage(pageHtml)) {
+      const accepted = await acceptYahooConsent(pageHtml, pageCookies);
+      if (accepted) cookieStr = accepted;
+    }
+
+    if (cookieStr) {
+      const crumbRes = await fetch('https://query1.finance.yahoo.com/v1/test/csrfToken', {
+        headers: { ...hdr, 'Cookie': cookieStr },
+      });
+      if (crumbRes.ok) {
+        const j  = await crumbRes.json().catch(() => null);
+        const cr = j?.csrfToken ?? j?.crumb ?? null;
+        if (cr) {
+          const moreCookies = crumbRes.headers.getSetCookie?.() ?? [];
+          const allStr = [...pageCookies, ...moreCookies].map(c => c.split(';')[0]).join('; ');
+          return { cookieStr: allStr, crumb: cr };
+        }
+      }
+    }
+  } catch {}
+
+  // Strategy C: v8/chart cookies fallback
   try {
     const chartRes = await fetch(
       'https://query1.finance.yahoo.com/v8/finance/chart/AAPL?range=1d&interval=1d&includePrePost=false',
@@ -131,7 +245,6 @@ async function getYahooCrumb() {
     );
     const rc = chartRes.headers.getSetCookie?.() ?? [];
     const cookieStr = rc.map(c => c.split(';')[0]).join('; ');
-
     if (cookieStr) {
       const crumbRes = await fetch('https://query1.finance.yahoo.com/v1/test/csrfToken', {
         headers: { ...hdr, 'Cookie': cookieStr },
@@ -214,13 +327,21 @@ async function handleYahooQuotePage(url, origin) {
     if (!res.ok) return err(`HTTP ${res.status}`, res.status);
     let html = await res.text();
 
-    // If consent page, retry with guccounter bypass + auth cookies
+    // If consent page, accept consent automatically then retry
     if (isConsentPage(html)) {
-      const auth = await getYahooCrumb();
-      const sep  = url.includes('?') ? '&' : '?';
-      const bypassUrl = `${url}${sep}guccounter=1`;
-      res  = await fetchPage(bypassUrl, auth?.cookieStr ?? '');
-      if (res.ok) html = await res.text();
+      const initialCookies = res.headers.getSetCookie?.() ?? [];
+      const consentCookieStr = await acceptYahooConsent(html, initialCookies).catch(() => null);
+      if (consentCookieStr) {
+        res = await fetchPage(url, consentCookieStr);
+        if (res.ok) html = await res.text();
+      }
+      // Still consent? Try guccounter bypass with crumb cookies
+      if (isConsentPage(html)) {
+        const auth = await getYahooCrumb();
+        const sep  = url.includes('?') ? '&' : '?';
+        res  = await fetchPage(`${url}${sep}guccounter=1`, auth?.cookieStr ?? '');
+        if (res.ok) html = await res.text();
+      }
     }
 
     // Strategy 1: SvelteKit island filtered by quoteSummary in data-url (fast path)
@@ -251,7 +372,6 @@ async function handleYahooQuotePage(url, origin) {
     if (nextM) {
       try {
         const nd = JSON.parse(nextM[1]);
-        // Walk all values looking for a quoteSummary object
         const found = findDeep(nd, 'quoteSummary');
         if (found?.result?.[0]) {
           return new Response(JSON.stringify({ quoteSummary: found }), { status: 200, headers: hdrs });
@@ -259,7 +379,35 @@ async function handleYahooQuotePage(url, origin) {
       } catch {}
     }
 
-    return err('quoteSummary island not found in page');
+    // Strategy 4: Yahoo Finance changed to CSR — fall back to v10 API with crumb auth
+    // Extract symbol from URL: /quote/AAPL/ → AAPL
+    const symbol = new URL(url).pathname.split('/').filter(Boolean)[1];
+    if (symbol) {
+      const auth = await getYahooCrumb();
+      const modules = 'summaryDetail,defaultKeyStatistics,financialData,assetProfile,calendarEvents';
+      for (const host of ['query1', 'query2']) {
+        try {
+          const sep   = auth?.crumb ? '&' : '?';
+          const v10Url = `https://${host}.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=${modules}&formatted=false&corsDomain=finance.yahoo.com${auth?.crumb ? `${sep}crumb=${encodeURIComponent(auth.crumb)}` : ''}`;
+          const fundRes = await fetch(v10Url, {
+            headers: {
+              'User-Agent': UA,
+              'Accept': 'application/json',
+              'Accept-Language': 'en-US,en;q=0.9',
+              ...(auth?.cookieStr ? { 'Cookie': auth.cookieStr } : {}),
+            },
+          });
+          if (fundRes.ok) {
+            const json = await fundRes.json();
+            if (json?.quoteSummary?.result?.[0]) {
+              return new Response(JSON.stringify(json), { status: 200, headers: hdrs });
+            }
+          }
+        } catch {}
+      }
+    }
+
+    return err('quoteSummary not found');
 
   } catch (e) {
     return err(e.message);

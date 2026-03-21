@@ -44,13 +44,6 @@
   padding: 0 0 32px;
 }
 
-/* ===== RESULTS LAYOUT WRAPPERS ===== */
-.results-layout {
-  display: block;
-}
-.results-left, .results-right {
-  display: block;
-}
 
 /* ===== GAUGE ===== */
 .gauge-section {
@@ -116,39 +109,46 @@
 }
 
 /* ===== INFO CARDS ===== */
+/* ── Info Cards: chip grid ───────────────────────────── */
 .info-cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  overflow: visible;
+  padding: 0;
 }
+
+/* Last chip alone on row → span 2 (mobile) */
+.info-card:last-child:nth-child(odd) { grid-column: span 2; }
 
 .info-card {
-  padding: 14px 14px 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 11px 14px 10px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  border-inline-end: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  position: relative;
+  gap: 1px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 
-.info-card:nth-child(3n) { border-inline-end: none; }
-.info-card:nth-last-child(-n+3) { border-bottom: none; }
-
 .info-label {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 600;
   color: var(--text-3);
   text-transform: uppercase;
-  letter-spacing: 0.7px;
+  letter-spacing: 0.8px;
 }
 
 .info-value {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--text);
-  line-height: 1.2;
+  line-height: 1.1;
 }
 
 .info-change {
@@ -156,19 +156,18 @@
   font-weight: 600;
 }
 
-.info-change.positive { color: var(--green); }
-.info-change.negative { color: var(--red); }
+.info-change.positive, .info-value.positive { color: var(--green); }
+.info-change.negative, .info-value.negative { color: var(--red); }
 
 .info-sub {
   font-size: 11px;
   color: var(--text-3);
+  margin-top: 1px;
 }
 
 /* ===== CHART ===== */
 .chart-section {
   padding: 16px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg);
 }
 
 .chart-ranges {
@@ -383,12 +382,6 @@
   line-height: 1.6;
 }
 
-/* ===== MOBILE ADJUSTMENTS ===== */
-@media (max-width: 380px) {
-  .info-cards { grid-template-columns: repeat(2, 1fr); }
-  .info-card:nth-child(3n) { border-inline-end: 1px solid var(--border); }
-  .info-card:nth-child(2n) { border-inline-end: none; }
-}
 
 /* ===================================================================
    DESKTOP LAYOUT (900px+)
@@ -401,59 +394,24 @@
     margin: 0 auto;
   }
 
-  /* 2-column main layout */
-  .results-layout {
-    display: flex;
-    align-items: stretch;
-    border-bottom: 1px solid var(--border);
-    min-height: 560px;
+  /* Info cards: 3-col on desktop — perfect 3×3, no orphan */
+  .info-cards {
+    grid-template-columns: repeat(3, 1fr);
   }
+  .info-card:last-child:nth-child(odd) { grid-column: unset; }
 
-  .results-left {
-    display: flex;
-    flex-direction: column;
-    flex: 0 0 360px;
-    border-inline-end: 1px solid var(--border);
-  }
-
-  .results-right {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* Gauge */
-  .results-left .gauge-section {
-    flex: 1;
-    border-bottom: 1px solid var(--border);
-    padding: 36px 24px 24px;
-  }
-
-  #gauge-canvas { width: 280px !important; height: 160px !important; }
-  .gauge-score  { font-size: 52px; }
-
-  /* Info cards: 2-col grid on left */
-  .results-left .info-cards {
-    grid-template-columns: repeat(2, 1fr);
-    border-bottom: none;
-  }
-  .results-left .info-card:nth-child(2n) { border-inline-end: none; }
-  .results-left .info-card:nth-child(3n) { border-inline-end: 1px solid var(--border); }
-  .results-left .info-card { padding: 16px 18px; }
-  .results-left .info-label { font-size: 10px; }
-  .results-left .info-value { font-size: 16px; }
-
-  /* Chart fills right panel */
-  .results-right .chart-section {
-    flex: 1;
-    border-bottom: none;
-    display: flex;
-    flex-direction: column;
+  /* Chart standalone */
+  .chart-section {
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    background: var(--card-bg);
     padding: 20px;
+    display: flex;
+    flex-direction: column;
   }
 
-  .results-right #chart-container {
+  #chart-container {
     flex: 1;
     height: auto;
     min-height: 440px;
@@ -488,13 +446,7 @@
 }
 
 @media (min-width: 1200px) {
-  .results-left { flex: 0 0 400px; }
-
   .criteria-table { grid-template-columns: repeat(3, 1fr); }
-}
-
-@media (min-width: 1400px) {
-  .results-left { flex: 0 0 440px; }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -541,6 +493,13 @@
 .sg-badge-buy  { background: rgba(22,163,74,0.13);  color: var(--green); }
 .sg-badge-wait { background: rgba(202,138,4,0.13);  color: var(--yellow); }
 .sg-badge-sell { background: rgba(220,38,38,0.13);  color: var(--red); }
+.sg-growth-note {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-3);
+  opacity: 0.8;
+  font-style: italic;
+}
 
 /* ── Body ─────────────────────────────────────────────── */
 .sg-body {
@@ -879,17 +838,15 @@ body.theme-dark .sg-svg {
 }
 
 /* Every major section becomes a floating card */
-.results-layout,
 .criteria-section,
 .news-section,
-.summary-gauge-section {
+.summary-gauge-section,
+.chart-section {
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   overflow: hidden;
   box-shadow: var(--shadow);
   background: var(--card-bg);
-  /* Remove old flush border-bottom (gap replaces it) */
-  border-bottom: 1px solid var(--border);
 }
 
 /* summary-gauge-section: outer card aligns with others, inner sg-card is transparent */
@@ -898,18 +855,12 @@ body.theme-dark .sg-svg {
   border-bottom: none !important;
 }
 
-/* Remove old flush outer border-bottoms — card border + gap replaces them */
-.results-layout  { border-bottom: none !important; }
+/* Remove old flush outer border-bottoms */
 .criteria-section { border-bottom: none !important; }
 .news-section     { border-bottom: none !important; }
 
-/* Keep internal dividers within cards */
-.gauge-section    { border-bottom: 1px solid var(--border) !important; }
-.info-cards       { background: var(--card-bg); border-bottom: none; }
-.chart-section    { background: var(--card-bg); border-bottom: none; }
 
 /* Elevated shadow in dark mode for prominent card lift */
-.theme-dark .results-layout,
 .theme-dark .criteria-section,
 .theme-dark .news-section,
 .theme-dark .summary-gauge-section {
@@ -961,7 +912,6 @@ body.theme-dark .sg-svg {
     gap: 10px;
   }
 
-  .results-layout { border-bottom: none !important; }
 }
 
 /* ================================================================

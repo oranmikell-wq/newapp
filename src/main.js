@@ -6,7 +6,7 @@ import { calcScore } from './utils/scoring.js';
 import { calcSummaryScore, renderSummaryGauge } from './components/SummaryGauge.js';
 
 import { renderCriteriaTable } from './components/CriteriaTable.js';
-import { renderStrategyChecklist } from './components/StrategyChecklist.js';
+import { renderStrategyChecklist, countNewHighs } from './components/StrategyChecklist.js';
 import { renderNews, renderAIInsight } from './components/NewsRenderer.js';
 import { loadFearGreed } from './components/FearGreedGauge.js';
 import { loadAAII }      from './components/AAIISentiment.js';
@@ -124,6 +124,13 @@ window.__onLangChange = function() {
   if (currentStock && document.getElementById('page-results')?.classList.contains('active')) {
     renderResults(currentStock, currentStock);
 
+    // Patch highs1y after lang-change re-render
+    const highs1yElLang = document.getElementById('info-highs1y');
+    if (highs1yElLang) {
+      const closes1y = (lastFullStockData?.history ?? []).map(h => h.value).filter(v => v != null && v > 0);
+      highs1yElLang.textContent = closes1y.length >= 5 ? countNewHighs(closes1y) : (currentStock?.technicals?.highs?.y1 ?? t('noData'));
+    }
+
     // Re-render summary gauge (has translated zone/factor labels)
     const summaryContainer = document.getElementById('summary-gauge-container');
     if (summaryContainer && lastSummaryScored) {
@@ -189,6 +196,20 @@ async function loadResults(symbol) {
     }
 
     renderResults(data, scored);
+
+    // Patch highs1y with rolling 52-week high count from 1Y history
+    const highs1yEl = document.getElementById('info-highs1y');
+    if (highs1yEl) {
+      const closes1y = (fullStockData?.history ?? []).map(h => h.value).filter(v => v != null && v > 0);
+      highs1yEl.textContent = closes1y.length >= 5 ? countNewHighs(closes1y) : (scored.technicals?.highs?.y1 ?? t('noData'));
+    }
+
+    // Patch beta from calculated indicators if Yahoo didn't provide it
+    if (fullStockData?.indicators?.beta != null && !data.beta) {
+      const bEl = document.getElementById('info-beta');
+      if (bEl) bEl.textContent = fullStockData.indicators.beta.toFixed(2);
+    }
+
     saveSearchHistory(symbol, data.name, renderHistory);
 
     document.getElementById('results-loading').style.display = 'none';
@@ -291,6 +312,28 @@ function renderResults(data, scored) {
   } else {
     targetEl.textContent = t('noData');
     targetRangeEl.textContent = '';
+  }
+
+  // ── ATH / Highs / Distance from High ─────────────────
+  const athPrice = scored.technicals?.athPrice;
+  const athEl = document.getElementById('info-ath');
+  if (athEl) athEl.textContent = athPrice != null ? `${currency} ${athPrice.toFixed(2)}` : t('noData');
+
+  const highs1yEl = document.getElementById('info-highs1y');
+  if (highs1yEl) {
+    const y1 = scored.technicals?.highs?.y1;
+    highs1yEl.textContent = y1 != null ? y1 : t('noData');
+  }
+
+  const distHighEl = document.getElementById('info-dist-high');
+  if (distHighEl) {
+    if (data.price != null && data.high52w != null && data.high52w > 0) {
+      const distPct = ((data.high52w - data.price) / data.high52w) * 100;
+      distHighEl.textContent = distPct < 0.1 ? t('atHigh') : `-${distPct.toFixed(1)}%`;
+      distHighEl.className = `info-value ${distPct < 5 ? 'positive' : distPct < 15 ? '' : 'negative'}`;
+    } else {
+      distHighEl.textContent = t('noData');
+    }
   }
 
   renderCriteriaTable(scored, data);

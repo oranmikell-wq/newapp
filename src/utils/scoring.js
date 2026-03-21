@@ -292,7 +292,7 @@ export function calcScore(data, history5y = []) {
     rating,
     isPartial,
     criteria: criteriaScores,
-    technicals: { rsi, macd, highs, ath },
+    technicals: { rsi, macd, highs, ath, athPrice: ath },
     sectorKey,
   };
 }

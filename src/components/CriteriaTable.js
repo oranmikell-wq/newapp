@@ -8,7 +8,11 @@ export function renderCriteriaTable(scored, data) {
 
   const CRITERIA = [
     { key: 'eps',           rawData: () => data.epsGrowth != null ? [`EPS Growth: ${data.epsGrowth.toFixed(1)}%`] : [] },
-    { key: 'multiples',     rawData: () => [data.pe && `P/E: ${data.pe.toFixed(1)}`, data.pb && `P/B: ${data.pb.toFixed(1)}`, data.ps && `P/S: ${data.ps.toFixed(1)}`].filter(Boolean) },
+    { key: 'multiples',     rawData: () => [
+        data.pe != null ? (data.pe > 0 ? `P/E: ${data.pe.toFixed(1)}` : 'P/E: N/A') : null,
+        data.pb && data.pb > 0 ? `P/B: ${data.pb.toFixed(1)}` : null,
+        data.ps && data.ps > 0 ? `P/S: ${data.ps.toFixed(1)}` : null,
+      ].filter(Boolean) },
     { key: 'revenue',       rawData: () => data.revenueGrowth != null ? [`Revenue Growth: ${data.revenueGrowth.toFixed(1)}%`] : [] },
     { key: 'analysts',      rawData: () => {
         if (data.analystMean != null) {
@@ -26,12 +30,6 @@ export function renderCriteriaTable(scored, data) {
     { key: 'institutional', rawData: () => data.instPct != null ? [`Holdings: ${(data.instPct * 100).toFixed(1)}%`] : [] },
     { key: 'debt',          rawData: () => data.debtEquity != null ? [`D/E: ${data.debtEquity.toFixed(2)}`] : [] },
     { key: 'technical',     rawData: () => [scored.technicals?.rsi != null && `RSI: ${scored.technicals.rsi.toFixed(1)}`, scored.technicals?.macd != null && `MACD: ${scored.technicals.macd.toFixed(2)}`].filter(Boolean) },
-    { key: 'ath',           rawData: () => {
-        if (data.price == null || data.high52w == null) return [];
-        const distPct = Math.max(0, ((data.high52w - data.price) / data.high52w) * 100);
-        return [distPct < 0.1 ? 'At 52w High' : `+${distPct.toFixed(1)}% to 52w High`];
-      }},
-    { key: 'highs',         rawData: () => scored.technicals?.highs ? [`1Y: ${scored.technicals.highs.y1}`, `3Y: ${scored.technicals.highs.y3}`, `5Y: ${scored.technicals.highs.y5}`] : [] },
   ];
 
   container.innerHTML = CRITERIA.map(c => {

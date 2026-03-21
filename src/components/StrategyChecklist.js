@@ -1,8 +1,23 @@
 // StrategyChecklist.js — Advanced pattern recognition & strategy table
 
 import { calcSMA, yahooChart } from '../services/StockService.js';
-import { getSectorKey } from '../utils/scoring.js';
+import { getSectorKey, SECTOR_PS } from '../utils/scoring.js';
 import { t } from '../utils/i18n.js';
+
+// Industry average P/S ratios (midpoint of sector benchmarks)
+const INDUSTRY_PS_AVG = {
+  technology:    5,
+  financials:    2,
+  energy:        1,
+  healthcare:    3,
+  real_estate:   6,
+  consumer:      0.8,
+  industrials:   1,
+  communication: 3,
+  utilities:     2,
+  materials:     1,
+  default:       3,
+};
 
 // Industry average P/E ratios (realistic market consensus)
 const INDUSTRY_PE_AVG = {
@@ -50,7 +65,7 @@ function groupHeader(title) {
 /**
  * Count how many times the close made a new rolling 52-week high.
  */
-function countNewHighs(closes) {
+export function countNewHighs(closes) {
   if (!closes || closes.length < 5) return 0;
   let count = 0;
   for (let i = 1; i < closes.length; i++) {
@@ -266,6 +281,22 @@ export async function renderStrategyChecklist(container, data, history1Y, indica
       vInsight = t('sc_i_pe_expensive', { pe: data.pe.toFixed(1), pct: ((ratio - 1) * 100).toFixed(0), sector: sectorLabel, avg: industryAvgPE });
     }
     rows += row(t('sc_pe_vs_sector'), vType, vLabel, vInsight);
+  } else if (data.ps != null && data.ps > 0) {
+    // PE is N/A (negative earnings) — use P/S vs sector average instead
+    const industryAvgPS = INDUSTRY_PS_AVG[sectorKey] || INDUSTRY_PS_AVG.default;
+    const ratio = data.ps / industryAvgPS;
+    let vType, vLabel, vInsight;
+    if (ratio <= 0.8) {
+      vType = 'YES'; vLabel = t('sc_cheap');
+      vInsight = t('sc_i_ps_cheap', { ps: data.ps.toFixed(1), pct: ((1 - ratio) * 100).toFixed(0), sector: sectorLabel, avg: industryAvgPS });
+    } else if (ratio <= 1.2) {
+      vType = 'NEUTRAL'; vLabel = t('sc_fair');
+      vInsight = t('sc_i_ps_fair', { ps: data.ps.toFixed(1), sector: sectorLabel, avg: industryAvgPS });
+    } else {
+      vType = 'NO'; vLabel = t('sc_expensive');
+      vInsight = t('sc_i_ps_expensive', { ps: data.ps.toFixed(1), pct: ((ratio - 1) * 100).toFixed(0), sector: sectorLabel, avg: industryAvgPS });
+    }
+    rows += row(t('sc_ps_vs_sector'), vType, vLabel, vInsight);
   } else {
     rows += row(t('sc_pe_vs_sector'), 'NA', null, t('sc_i_pe_nodata'));
   }
