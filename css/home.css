@@ -223,12 +223,14 @@
 /* ===== FEAR & GREED INDEX ===== */
 .fng-section { width: 100%; }
 
-/* Tab toggle */
+/* Tab toggle — inside the card */
 .fng-toggle {
   display: flex;
   gap: 0;
-  margin-bottom: 8px;
+  margin: -16px -16px 12px;   /* bleed to card edges */
   border-bottom: 1px solid var(--border);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  overflow: hidden;
 }
 
 .fng-tab {
