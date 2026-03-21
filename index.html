@@ -88,9 +88,16 @@
     <main class="home-main">
       <div class="sentiment-row">
         <section class="fng-section">
-          <h2 class="section-title" data-i18n="fng_title">מדד פחד וחמדנות</h2>
+          <!-- Toggle -->
+          <div class="fng-toggle" dir="ltr">
+            <button class="fng-tab active" data-fng="stocks" data-i18n="fng_title">Fear &amp; Greed</button>
+            <button class="fng-tab" data-fng="crypto" data-i18n="cryptoFngTab">Crypto</button>
+          </div>
           <div class="fng-card">
             <div id="fng-container" class="fng-container">
+              <div class="fng-skeleton"></div>
+            </div>
+            <div id="fng-crypto-container" class="fng-container hidden">
               <div class="fng-skeleton"></div>
             </div>
           </div>
@@ -101,15 +108,6 @@
           <div class="aaii-card">
             <div id="aaii-container" class="aaii-container">
               <div class="aaii-skeleton"></div>
-            </div>
-          </div>
-        </section>
-
-        <section class="fng-section">
-          <h2 class="section-title" data-i18n="cryptoFngTab">Crypto Fear &amp; Greed</h2>
-          <div class="fng-card">
-            <div id="fng-crypto-container" class="fng-container">
-              <div class="fng-skeleton"></div>
             </div>
           </div>
         </section>

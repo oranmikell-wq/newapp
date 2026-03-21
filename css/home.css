@@ -223,6 +223,36 @@
 /* ===== FEAR & GREED INDEX ===== */
 .fng-section { width: 100%; }
 
+/* Tab toggle */
+.fng-toggle {
+  display: flex;
+  gap: 0;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.fng-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-bottom: 2.5px solid transparent;
+  padding: 7px 12px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-3);
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.18s, border-color 0.18s;
+  margin-bottom: -1px;
+}
+
+.fng-tab:hover { color: var(--text-2); }
+
+.fng-tab.active {
+  color: var(--green);
+  border-bottom-color: var(--green);
+}
+
 .fng-card {
   background: var(--card-bg);
   border: 1px solid var(--border);

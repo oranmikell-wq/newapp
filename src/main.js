@@ -457,6 +457,18 @@ document.addEventListener('DOMContentLoaded', () => {
   loadAAII();
   renderHistory();
 
+  // FNG toggle: Stocks ↔ Crypto
+  let cryptoFngLoaded = true; // already loaded above
+  document.querySelectorAll('.fng-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.fng-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const isStocks = btn.dataset.fng === 'stocks';
+      document.getElementById('fng-container')?.classList.toggle('hidden', !isStocks);
+      document.getElementById('fng-crypto-container')?.classList.toggle('hidden', isStocks);
+    });
+  });
+
   setInterval(() => checkWatchlistAlerts(showNotification), 15 * 60 * 1000);
 
   // Service Worker
