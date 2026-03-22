@@ -412,6 +412,7 @@ function renderResults(data, scored) {
   }
 
   renderCriteriaTable(scored, data);
+  initInfoButtons(document.getElementById('criteria-table'));
   renderNews(data.newsItems);
 }
 

@@ -239,6 +239,24 @@ export const TRANSLATIONS = {
     info_title_distHigh:    'מרחק מהשיא (52W)',
     info_body_distHigh:     'כמה אחוזים המחיר הנוכחי רחוק מהשיא של 52 השבועות האחרונים. קרוב ל-0% = קרוב לשיא. ערך גבוה = ירד משמעותית מהשיא האחרון.',
 
+    // ── Criteria popup info (HE) ───────────────────────────────
+    info_title_crit_eps:           'צמיחת רווחים — EPS',
+    info_body_crit_eps:            'EPS (Earnings Per Share) = רווח נקי ÷ מספר מניות. אם EPS גדל משנה לשנה, החברה הופכת רווחית יותר. זהו אחד הפרדיקטורים החזקים ביותר לביצועי מניה לטווח ארוך.',
+    info_title_crit_multiples:     'מכפילים — P/E, P/B, P/S',
+    info_body_crit_multiples:      'P/E = מחיר מניה ÷ רווח למניה. כמה שנות רווח משלמים עבור המניה. P/B = מחיר ÷ ערך ספרים (נכסים). P/S = מחיר ÷ הכנסות. ערכים נמוכים ביחס לסקטור = מניה "זולה" יחסית.',
+    info_title_crit_revenue:       'צמיחת הכנסות',
+    info_body_crit_revenue:        'הכנסות = כמה כסף החברה מביאה לפני הוצאות. צמיחה עקבית בהכנסות מעידה על ביקוש גובר למוצרים/שירותים. חברות צמיחה גבוהה (>20% לשנה) נחשבות ל-High Growth.',
+    info_title_crit_analysts:      'המלצות אנליסטים',
+    info_body_crit_analysts:       'אנליסטים ממוסדות גדולים (Goldman, Morgan Stanley וכד׳) מפרסמים המלצות: Strong Buy, Buy, Hold, Underperform, Sell. הציון מחושב מממוצע ההמלצות. Strong Buy = 1, Sell = 5.',
+    info_title_crit_momentum:      'מומנטום מחיר',
+    info_body_crit_momentum:       'מניות שבמגמת עלייה נוטות להמשיך לעלות בטווח הקצר-בינוני. מומנטום נמדד לפי שינוי % ביחס ל-52W High ולביצועים השוטפים. "Trend is your friend".',
+    info_title_crit_institutional: 'אחזקות מוסדיים',
+    info_body_crit_institutional:  'כמה מהמניות מוחזקות על ידי קרנות גידור, קרנות פנסיה ובנקים גדולים. "כסף חכם" — כשמוסדיים קונים זה אינדיקציה חיובית. מעל 70% = ביקוש מוסדי גבוה.',
+    info_title_crit_debt:          'חוב — Debt/Equity',
+    info_body_crit_debt:           'D/E = סך חובות ÷ הון עצמי. מדד לבריאות הפיננסית. D/E נמוך = חברה יציבה. D/E גבוה = הרבה מינוף, סיכון גבוה יותר. בענפים שונים (בנקים, נדל"ן) D/E גבוה הוא נורמה.',
+    info_title_crit_technical:     'אינדיקטורים טכניים',
+    info_body_crit_technical:      'RSI (14): מדד תנע בין 0-100. מעל 70 = קנוי יתר (Overbought). מתחת ל-30 = מכור יתר (Oversold). 40-60 = אזור ניטרלי. MACD: מודד את ההפרש בין ממוצעים נעים (12 ו-26 ימים). מעל אפס = מגמת עלייה, מתחת = ירידה.',
+
     // Movers tabs
     topGainers: 'עולות',
     topLosers: 'יורדות',
@@ -545,6 +563,24 @@ export const TRANSLATIONS = {
     info_body_highs1y:      'How many times the stock has set a new 52-week high over the past year. A high count signals a consistent and strong uptrend throughout the year.',
     info_title_distHigh:    'Distance from 52W High',
     info_body_distHigh:     'How far (in %) the current price is from its 52-week high. Near 0% = close to the peak. A higher value means the stock has fallen significantly from its recent high.',
+
+    // ── Criteria popup info (EN) ───────────────────────────────
+    info_title_crit_eps:           'Earnings Growth — EPS',
+    info_body_crit_eps:            'EPS (Earnings Per Share) = Net Income ÷ Shares Outstanding. Growing EPS year-over-year means the company is becoming more profitable — one of the strongest long-term predictors of stock performance.',
+    info_title_crit_multiples:     'Valuation — P/E, P/B, P/S',
+    info_body_crit_multiples:      'P/E = Price ÷ Earnings per share. How many years of earnings you\'re paying for. P/B = Price ÷ Book value (assets). P/S = Price ÷ Revenue. Lower multiples vs. sector peers = relatively "cheap" stock.',
+    info_title_crit_revenue:       'Revenue Growth',
+    info_body_crit_revenue:        'Revenue = total money the company brings in before expenses. Consistent revenue growth signals rising demand for its products/services. High-growth companies (>20%/yr) are often priced at a premium.',
+    info_title_crit_analysts:      'Analyst Recommendations',
+    info_body_crit_analysts:       'Analysts at major institutions (Goldman, Morgan Stanley, etc.) publish ratings: Strong Buy, Buy, Hold, Underperform, Sell. The score is the average rating. Strong Buy = 1, Sell = 5.',
+    info_title_crit_momentum:      'Price Momentum',
+    info_body_crit_momentum:       'Stocks in an uptrend tend to keep rising short-to-medium term. Momentum is measured by % change relative to the 52W high and recent performance. "Trend is your friend."',
+    info_title_crit_institutional: 'Institutional Holdings',
+    info_body_crit_institutional:  'The % of shares held by hedge funds, pension funds, and large banks. "Smart money" — high institutional ownership is a positive signal. Above 70% = strong institutional demand.',
+    info_title_crit_debt:          'Debt — Debt/Equity',
+    info_body_crit_debt:           'D/E = Total Debt ÷ Shareholders\' Equity. A measure of financial health. Low D/E = stable company. High D/E = high leverage, higher risk. Note: in some sectors (banks, real estate) a high D/E is normal.',
+    info_title_crit_technical:     'Technical Indicators',
+    info_body_crit_technical:      'RSI (14): Momentum oscillator from 0–100. Above 70 = Overbought. Below 30 = Oversold. 40–60 = Neutral zone. MACD: Measures the gap between moving averages (12 & 26 days). Above zero = uptrend, below = downtrend.',
 
     // Movers tabs
     topGainers: 'Top Gainers',

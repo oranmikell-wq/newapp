@@ -45,6 +45,7 @@ export function renderCriteriaTable(scored, data) {
       <div class="criteria-row" onclick="this.classList.toggle('expanded')">
         <div class="criteria-row-header">
           <span class="criteria-name">${t('criteria_' + c.key)}</span>
+          <button class="info-icon-btn" data-info="crit_${c.key}" onclick="event.stopPropagation()" aria-label="info">i</button>
           <span class="criteria-score-badge ${badgeClass}">${scoreDisplay}</span>
         </div>
         <div class="criteria-bar-wrap">
