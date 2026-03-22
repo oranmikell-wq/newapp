@@ -30,7 +30,7 @@
   <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
   <script src="https://s3.tradingview.com/tv.js"></script>
   <link rel="stylesheet" href="css/main.css?v=30" />
-  <link rel="stylesheet" href="css/home.css?v=36" />
+  <link rel="stylesheet" href="css/home.css?v=37" />
   <link rel="stylesheet" href="css/results.css?v=20" />
   <link rel="stylesheet" href="css/compare.css?v=9" />
 </head>
@@ -144,9 +144,31 @@
         </div>
       </div>
 
+      <!-- Gainers & Losers -->
+      <section class="movers-section">
+        <div class="movers-header">
+          <button class="movers-tab active" data-tab="gainers">🟢 Top Gainers</button>
+          <button class="movers-tab" data-tab="losers">🔴 Top Losers</button>
+        </div>
+        <div id="gainers-container" class="movers-list"><div class="macro-skeleton"></div></div>
+        <div id="losers-container"  class="movers-list hidden"><div class="macro-skeleton"></div></div>
+      </section>
+
+      <!-- Sector Performance -->
+      <section class="sector-section">
+        <h2 class="section-title">SECTOR PERFORMANCE</h2>
+        <div id="sector-container"><div class="macro-skeleton"></div></div>
+      </section>
+
       <div class="sidebar">
         <section class="market-section">
-          <h2 class="section-title" data-i18n="marketOverview">סקירת שוק</h2>
+          <div class="market-section-header">
+            <h2 class="section-title" data-i18n="marketOverview">סקירת שוק</h2>
+            <div class="market-status-wrap">
+              <span id="market-status-dot" class="market-status-dot closed"></span>
+              <span id="market-status-label" class="market-status-label">--</span>
+            </div>
+          </div>
           <div class="market-indices">
             <div class="market-card" id="idx-sp500">
               <span class="market-name">S&amp;P 500</span>
@@ -163,12 +185,22 @@
               <span class="market-price">--</span>
               <span class="market-change">--</span>
             </div>
+            <div class="market-card" id="idx-dxy">
+              <span class="market-name">DXY</span>
+              <span class="market-price">--</span>
+              <span class="market-change">--</span>
+            </div>
           </div>
         </section>
 
         <section class="crypto-prices-section">
           <h2 class="section-title">CRYPTO OVERVIEW</h2>
           <div id="crypto-prices-container"><div class="macro-skeleton"></div></div>
+        </section>
+
+        <section class="commodities-section">
+          <h2 class="section-title">COMMODITIES</h2>
+          <div id="commodities-container" class="market-indices"><div class="macro-skeleton"></div></div>
         </section>
 
         <section class="trending-section">
@@ -454,7 +486,7 @@
   <!-- ===== IN-APP NOTIFICATION ===== -->
   <div id="notification" class="notification hidden"></div>
 
-  <script type="module" src="src/main.js?v=16"></script>
+  <script type="module" src="src/main.js?v=17"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(regs => {

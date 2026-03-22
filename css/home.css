@@ -521,6 +521,135 @@
   line-height: 1;
 }
 
+/* ===== MARKET STATUS ===== */
+.market-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.market-section-header .section-title { margin-bottom: 0; }
+.market-status-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.market-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--text-3);
+}
+.market-status-dot.open   { background: var(--green); box-shadow: 0 0 5px var(--green); }
+.market-status-dot.closed { background: var(--red); }
+.market-status-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-3);
+  letter-spacing: 0.3px;
+}
+
+/* ===== MOVERS (Gainers & Losers) ===== */
+.movers-section {
+  width: 100%;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
+}
+.movers-header {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.movers-tab {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.movers-tab.active {
+  background: var(--bg-2);
+  color: var(--text);
+  border-color: var(--text-3);
+}
+.movers-list { display: flex; flex-direction: column; gap: 6px; }
+.mover-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  background: var(--bg-2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.mover-row:hover { background: var(--bg-3, var(--border)); }
+.mover-left  { display: flex; flex-direction: column; gap: 2px; }
+.mover-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.mover-sym   { font-size: 13px; font-weight: 700; color: var(--text); }
+.mover-name  { font-size: 10px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+.mover-price { font-size: 12px; font-weight: 600; color: var(--text); }
+.mover-pct   { font-size: 12px; font-weight: 700; }
+.mover-pct.positive { color: var(--green); }
+.mover-pct.negative { color: var(--red); }
+
+/* ===== SECTOR PERFORMANCE ===== */
+.sector-section {
+  width: 100%;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
+}
+.sector-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+}
+.sector-name {
+  font-size: 11px;
+  color: var(--text-2);
+  width: 110px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.sector-bar-wrap {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.sector-bar {
+  height: 100%;
+  border-radius: 3px;
+  min-width: 2px;
+  transition: width 0.4s ease;
+}
+.sector-bar.positive { background: var(--green); }
+.sector-bar.negative { background: var(--red); }
+.sector-pct {
+  font-size: 11px;
+  font-weight: 600;
+  width: 52px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.sector-pct.positive { color: var(--green); }
+.sector-pct.negative { color: var(--red); }
+
 /* ===== SIDEBAR (mobile: flex column with gap) ===== */
 .sidebar {
   width: 100%;
@@ -758,10 +887,22 @@
   .fng-gauge-wrap { width: 100%; max-width: 100%; display: block; height: auto; }
   .fng-svg { width: 100%; height: auto; max-height: none; }
 
-  /* Column 3 — Sidebar (Market + Trending + Searches + Economy + Crypto + Events) */
+  /* Row 2 — Movers (col 1) + Sectors (col 2) */
+  .movers-section {
+    grid-column: 1;
+    grid-row: 2;
+    min-width: 0;
+  }
+  .sector-section {
+    grid-column: 2;
+    grid-row: 2;
+    min-width: 0;
+  }
+
+  /* Column 3 — Sidebar spans both rows */
   .sidebar {
     grid-column: 3;
-    grid-row: 1;
+    grid-row: 1 / 3;
     display: flex;
     flex-direction: column;
     gap: 16px;
