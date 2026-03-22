@@ -653,7 +653,6 @@ body {
 .app-footer {
   background: #000000;
   color: rgba(255,255,255,0.45);
-  text-align: center;
   font-size: 10px;
   font-weight: 400;
   padding: 14px 20px;
@@ -661,9 +660,16 @@ body {
   border-top: 1px solid rgba(255,255,255,0.08);
   letter-spacing: 0.2px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.footer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .footer-controls {
