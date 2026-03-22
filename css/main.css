@@ -707,6 +707,20 @@ body {
 }
 .footer-contact:hover { color: rgba(255,255,255,0.7) !important; -webkit-text-fill-color: rgba(255,255,255,0.7); }
 
+/* ===== ADS ===== */
+.ad-banner-wrap {
+  width: 100%;
+  background: var(--bg);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  min-height: 90px; /* prevent layout jump */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Hide ad container when empty (before Google fills it) */
+.ad-banner-wrap:empty { display: none; }
+
 /* ===== HIDDEN UTIL ===== */
 .hidden { display: none !important; }
 
