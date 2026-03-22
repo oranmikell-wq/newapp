@@ -166,9 +166,11 @@ function syncTopbarHeight() {
 // ── Market Indices ──────────────────────────────────────
 async function loadMarketIndices() {
   const indices = [
-    { id: 'idx-sp500',  symbol: '^GSPC' },
-    { id: 'idx-nasdaq', symbol: '^NDX'  },
-    { id: 'idx-vix',    symbol: '^VIX'  },
+    { id: 'idx-sp500',   symbol: '^GSPC'  },
+    { id: 'idx-nasdaq',  symbol: '^NDX'   },
+    { id: 'idx-dow',     symbol: '^DJI'   },
+    { id: 'idx-russell', symbol: '^RUT'   },
+    { id: 'idx-vix',     symbol: '^VIX'   },
   ];
   for (const { id, symbol } of indices) {
     const card = document.getElementById(id);
