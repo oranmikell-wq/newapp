@@ -125,16 +125,25 @@ export async function loadSectorPerformance() {
 
 // ── 5. Gainers & Losers — Yahoo Finance screener ─────────────────────────
 async function fetchScreener(scrId) {
-  const url     = `https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved?scrIds=${scrId}&count=5`;
-  const proxied = `https://corsproxy.io/?${encodeURIComponent(url)}`;
-  const ctrl    = new AbortController();
-  const timer   = setTimeout(() => ctrl.abort(), 8000);
-  try {
-    const res  = await fetch(proxied, { signal: ctrl.signal });
-    clearTimeout(timer);
-    const json = await res.json();
-    return json?.finance?.result?.[0]?.quotes ?? [];
-  } catch { clearTimeout(timer); return []; }
+  const url = `https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved?scrIds=${scrId}&count=5`;
+  const proxies = [
+    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+  ];
+  for (const proxied of proxies) {
+    const ctrl  = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 8000);
+    try {
+      const res  = await fetch(proxied, { signal: ctrl.signal });
+      clearTimeout(timer);
+      let json = await res.json();
+      // allorigins wraps response in { contents: "..." }
+      if (typeof json?.contents === 'string') json = JSON.parse(json.contents);
+      const quotes = json?.finance?.result?.[0]?.quotes ?? [];
+      if (quotes.length) return quotes;
+    } catch { clearTimeout(timer); }
+  }
+  return [];
 }
 
 function renderMoverList(list, el) {
