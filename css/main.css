@@ -679,7 +679,11 @@ body {
   justify-content: space-between;
   gap: 12px;
   direction: ltr; /* always LTR — prevents RTL from flipping footer */
+  text-align: left;
 }
+/* Override RTL text-align cascade inside footer */
+.app-footer span,
+.app-footer a { text-align: left; }
 
 .footer-info {
   display: flex;
