@@ -200,6 +200,30 @@ async function loadMarketIndices() {
   }
 }
 
+// ── Forex (USD/ILS, EUR/ILS) ───────────────────────────
+async function loadForex() {
+  const pairs = [
+    { id: 'fx-usdils', symbol: 'USDILS=X' },
+    { id: 'fx-eurils', symbol: 'EURILS=X' },
+  ];
+  for (const { id, symbol } of pairs) {
+    const card = document.getElementById(id);
+    if (!card) continue;
+    const priceEl  = card.querySelector('.market-price');
+    const changeEl = card.querySelector('.market-change');
+    try {
+      const q = await fetchIndexQuote(symbol);
+      if (q?.price != null) {
+        priceEl.textContent = q.price.toFixed(3);
+        const sign = (q.changePct ?? 0) >= 0 ? '+' : '';
+        changeEl.textContent = q.changePct != null ? `${sign}${q.changePct.toFixed(2)}%` : '--';
+        const cls = (q.changePct ?? 0) >= 0 ? 'positive' : 'negative';
+        changeEl.className = `market-change ${cls}`;
+      }
+    } catch { /* keep -- */ }
+  }
+}
+
 // ── Results ────────────────────────────────────────────
 async function loadResults(symbol) {
   activeLoadSymbol = symbol;
@@ -521,6 +545,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadUpcomingEvents();
   renderMarketStatus();
   loadDXY();
+  loadForex();
   loadCommodities();
   loadSectorPerformance();
   loadMovers();

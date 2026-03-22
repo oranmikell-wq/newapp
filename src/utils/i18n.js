@@ -215,6 +215,7 @@ export const TRANSLATIONS = {
     sectionMarketMovers: 'מניות בתנועה',
     sectionCryptoOverview: 'קריפטו',
     sectionCommodities: 'סחורות',
+    sectionForex: 'שערי מט"ח',
     // Movers tabs
     topGainers: 'עולות',
     topLosers: 'יורדות',
@@ -498,6 +499,7 @@ export const TRANSLATIONS = {
     sectionMarketMovers: 'Market Movers',
     sectionCryptoOverview: 'Crypto Overview',
     sectionCommodities: 'Commodities',
+    sectionForex: 'Forex',
     // Movers tabs
     topGainers: 'Top Gainers',
     topLosers: 'Top Losers',
