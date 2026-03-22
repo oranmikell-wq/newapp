@@ -134,26 +134,28 @@
             </section>
           </div>
 
-          <section class="aaii-section">
-            <h2 class="section-title" data-i18n="aaii_title">סקר סנטימנט AAII</h2>
-            <div class="aaii-card">
-              <div id="aaii-container" class="aaii-container">
-                <div class="aaii-skeleton"></div>
+          <div class="aaii-col">
+            <section class="aaii-section">
+              <h2 class="section-title" data-i18n="aaii_title">סקר סנטימנט AAII</h2>
+              <div class="aaii-card">
+                <div id="aaii-container" class="aaii-container">
+                  <div class="aaii-skeleton"></div>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
+
+            <!-- Gainers & Losers -->
+            <section class="movers-section">
+              <div class="movers-header">
+                <button class="movers-tab active" data-tab="gainers">🟢 Top Gainers</button>
+                <button class="movers-tab" data-tab="losers">🔴 Top Losers</button>
+              </div>
+              <div id="gainers-container" class="movers-list"><div class="macro-skeleton"></div></div>
+              <div id="losers-container"  class="movers-list hidden"><div class="macro-skeleton"></div></div>
+            </section>
+          </div>
         </div>
       </div>
-
-      <!-- Gainers & Losers -->
-      <section class="movers-section">
-        <div class="movers-header">
-          <button class="movers-tab active" data-tab="gainers">🟢 Top Gainers</button>
-          <button class="movers-tab" data-tab="losers">🔴 Top Losers</button>
-        </div>
-        <div id="gainers-container" class="movers-list"><div class="macro-skeleton"></div></div>
-        <div id="losers-container"  class="movers-list hidden"><div class="macro-skeleton"></div></div>
-      </section>
 
       <!-- Sector Performance -->
       <section class="sector-section">
