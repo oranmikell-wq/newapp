@@ -644,6 +644,19 @@ body {
   border-bottom: 1px solid rgba(217,119,6,0.2);
 }
 
+/* ===== LAST UPDATED BAR ===== */
+.last-updated-bar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-3);
+  padding: 6px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+.last-updated-icon { font-size: 12px; }
+
 /* ===== RATING BADGES ===== */
 .badge-buy  { color: var(--green); font-weight: 700; }
 .badge-wait { color: var(--yellow); font-weight: 700; }

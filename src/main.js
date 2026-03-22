@@ -245,6 +245,16 @@ async function loadResults(symbol) {
     document.getElementById('results-loading').style.display = 'none';
     const resultsContent = document.getElementById('results-content');
     resultsContent.classList.remove('hidden');
+
+    // ── Last updated timestamp ──
+    const updatedBar  = document.getElementById('last-updated-bar');
+    const updatedTime = document.getElementById('last-updated-time');
+    if (updatedBar && updatedTime) {
+      const now = new Date();
+      updatedTime.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        + '  ·  ' + now.toLocaleDateString([], { day: '2-digit', month: 'short', year: 'numeric' });
+      updatedBar.classList.remove('hidden');
+    }
     // Trigger staggered fade-in-up animations on all sections
     resultsContent.classList.remove('did-animate');
     void resultsContent.offsetWidth; // force reflow to restart animations

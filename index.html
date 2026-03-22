@@ -29,7 +29,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
   <script src="https://s3.tradingview.com/tv.js"></script>
-  <link rel="stylesheet" href="css/main.css?v=29" />
+  <link rel="stylesheet" href="css/main.css?v=30" />
   <link rel="stylesheet" href="css/home.css?v=36" />
   <link rel="stylesheet" href="css/results.css?v=20" />
   <link rel="stylesheet" href="css/compare.css?v=9" />
@@ -225,6 +225,13 @@
       <!-- Offline banner -->
       <div id="offline-banner" class="offline-banner hidden">
         <span data-i18n="offlineData">נתונים מ-</span><span id="offline-date"></span>
+      </div>
+
+      <!-- Last updated timestamp -->
+      <div id="last-updated-bar" class="last-updated-bar hidden">
+        <span class="last-updated-icon">🕐</span>
+        <span data-i18n="lastUpdated">עודכן לאחרונה:</span>
+        <span id="last-updated-time">--</span>
       </div>
 
       <!-- ===== SUMMARY GAUGE (prominent, full-width) ===== -->
@@ -447,7 +454,7 @@
   <!-- ===== IN-APP NOTIFICATION ===== -->
   <div id="notification" class="notification hidden"></div>
 
-  <script type="module" src="src/main.js?v=15"></script>
+  <script type="module" src="src/main.js?v=16"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(regs => {
