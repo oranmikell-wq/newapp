@@ -216,8 +216,8 @@ export const TRANSLATIONS = {
     sectionCryptoOverview: 'קריפטו',
     sectionCommodities: 'סחורות',
     sectionForex: 'שערי מט"ח',
-    fxUsdIls: 'דולר / ₪',
-    fxEurIls: 'יורו / ₪',
+    fxUsdIls: 'USD/ILS',
+    fxEurIls: 'EUR/ILS',
     // Movers tabs
     topGainers: 'עולות',
     topLosers: 'יורדות',
@@ -502,8 +502,8 @@ export const TRANSLATIONS = {
     sectionCryptoOverview: 'Crypto Overview',
     sectionCommodities: 'Commodities',
     sectionForex: 'Exchange Rates',
-    fxUsdIls: 'USD / ₪',
-    fxEurIls: 'EUR / ₪',
+    fxUsdIls: 'USD/ILS',
+    fxEurIls: 'EUR/ILS',
     // Movers tabs
     topGainers: 'Top Gainers',
     topLosers: 'Top Losers',
