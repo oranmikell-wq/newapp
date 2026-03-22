@@ -17,6 +17,7 @@
   margin: 0 auto;
   width: 100%;
   direction: ltr; /* always LTR — prevents RTL from flipping the grid */
+  text-align: left; /* reset inherited text-align:right from [dir=rtl] body */
 }
 
 /* ===== SECTION TITLE — base style (all breakpoints) ===== */
@@ -627,6 +628,11 @@
 .mover-name  { font-size: 10px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
 .mover-price { font-size: 12px; font-weight: 600; color: var(--text); }
 .mover-pct   { font-size: 12px; font-weight: 700; }
+/* Override RTL text-align on mover spans — needs higher specificity than [dir=rtl] span */
+.mover-left .mover-sym,
+.mover-left .mover-name  { text-align: left; }
+.mover-right .mover-price,
+.mover-right .mover-pct  { text-align: right; }
 .mover-pct.positive { color: var(--green); }
 .mover-pct.negative { color: var(--red); }
 
