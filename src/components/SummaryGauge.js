@@ -334,8 +334,10 @@ function buildBreakdown(breakdown, valuationMetric, weights) {
     row.className = 'sg-row';
     row.innerHTML = `
       <div class="sg-row-meta">
-        <span class="sg-factor-name">${label}</span>
-        ${btn}
+        <span class="sg-name-btn">
+          <span class="sg-factor-name">${label}</span>
+          ${btn}
+        </span>
         <span class="sg-factor-weight">${weight}</span>
       </div>
       <div class="sg-bar-track">

@@ -219,6 +219,12 @@ export const TRANSLATIONS = {
     fxUsdIls: 'USD/ILS',
     fxEurIls: 'EUR/ILS',
 
+    // ── Company card (HE) ──────────────────────────────────────
+    cc_employees: 'עובדים',
+    cc_website:   'אתר',
+    cc_more:      'קרא עוד',
+    cc_less:      'פחות',
+
     // ── Quick Score widget (HE) ────────────────────────────────
     qs_title:     'ניתוח מהיר',
     qs_rsi:       'RSI (14)',
@@ -567,6 +573,12 @@ export const TRANSLATIONS = {
     sectionForex: 'Exchange Rates',
     fxUsdIls: 'USD/ILS',
     fxEurIls: 'EUR/ILS',
+
+    // ── Company card (EN) ──────────────────────────────────────
+    cc_employees: 'Employees',
+    cc_website:   'Website',
+    cc_more:      'Read more',
+    cc_less:      'Less',
 
     // ── Quick Score widget (EN) ────────────────────────────────
     qs_title:     'Quick Analysis',

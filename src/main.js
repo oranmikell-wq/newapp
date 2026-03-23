@@ -14,6 +14,7 @@ import { loadAAII }      from './components/AAIISentiment.js';
 import { loadMacroData, loadCryptoPrices, loadUpcomingEvents } from './components/MacroCrypto.js?v=7';
 import { renderMarketStatus, loadDXY, loadCommodities, loadSectorPerformance, loadMovers } from './components/MarketMovers.js?v=1';
 import { initInfoButtons } from './components/InfoPopup.js';
+import { renderCompanyCard } from './components/CompanyCard.js';
 import { showAutocomplete, hideAutocomplete, selectAutocomplete, confirmAutocomplete, showRecentSearches, initAutocomplete } from './components/Autocomplete.js';
 import { initChart, loadChart, updateChartTheme, initCompareChart } from './components/Chart.js';
 import {
@@ -411,6 +412,7 @@ function renderResults(data, scored) {
     }
   }
 
+  renderCompanyCard(document.getElementById('company-card-container'), data);
   renderCriteriaTable(scored, data);
   initInfoButtons(document.getElementById('criteria-table'));
   renderNews(data.newsItems);

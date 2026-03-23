@@ -669,7 +669,12 @@ export function parseAllData({ meta, yfFund, stats, ratings, target, earning, ne
   const name   = yfProf.longName ?? yfPrice.longName?.raw ?? yfPrice.longName
                ?? stats?.meta?.name ?? meta.longName ?? meta.shortName ?? symbol;
   const sectorFromSearch = newsResp?.quotes?.find(q => q.symbol === symbol)?.sector || null;
-  const sector = yfProf.sector ?? sectorFromSearch ?? null;
+  const sector      = yfProf.sector ?? sectorFromSearch ?? null;
+  const industry    = yfProf.industry ?? null;
+  const description = yfProf.longBusinessSummary ?? null;
+  const employees   = yfProf.fullTimeEmployees ?? null;
+  const website     = yfProf.website ?? null;
+  const country     = yfProf.country ?? null;
 
   const marketCap = yfSum.marketCap?.raw ?? yfSum.marketCap
                  ?? yfPrice.marketCap?.raw ?? yfPrice.marketCap
@@ -749,7 +754,8 @@ export function parseAllData({ meta, yfFund, stats, ratings, target, earning, ne
   }));
 
   return {
-    symbol, name, sector, exchange, currency, isTASE, isCrypto, marketState,
+    symbol, name, sector, industry, description, employees, website, country,
+    exchange, currency, isTASE, isCrypto, marketState,
     price, prevClose, change, changePct,
     pe, pb, ps, marketCap, beta, dividend,
     high52w, low52w,
