@@ -56,10 +56,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
   <script src="https://s3.tradingview.com/tv.js"></script>
-  <link rel="stylesheet" href="css/main.css?v=30" />
-  <link rel="stylesheet" href="css/home.css?v=37" />
-  <link rel="stylesheet" href="css/results.css?v=20" />
-  <link rel="stylesheet" href="css/compare.css?v=9" />
+  <link rel="stylesheet" href="css/main.css?v=33" />
+  <link rel="stylesheet" href="css/home.css?v=40" />
+  <link rel="stylesheet" href="css/results.css?v=26" />
+  <link rel="stylesheet" href="css/compare.css?v=12" />
 </head>
 <body class="theme-light">
 
@@ -347,16 +347,14 @@
         <span id="last-updated-time">--</span>
       </div>
 
-      <!-- ===== SUMMARY GAUGE (prominent, full-width) ===== -->
-      <section class="summary-gauge-section">
-        <div id="summary-gauge-container"></div>
-      </section>
+      <!-- ===== GAUGE + INFO CARDS side-by-side on desktop ===== -->
+      <div class="gauge-info-row">
+        <section class="summary-gauge-section">
+          <div id="summary-gauge-container"></div>
+        </section>
 
-      <!-- Company overview card -->
-      <div id="company-card-container"></div>
-
-      <!-- Info cards — standalone block -->
-      <section class="info-cards">
+        <!-- Info cards — right of gauge on desktop -->
+        <section class="info-cards">
         <div class="info-card">
           <div class="info-label-row">
             <span class="info-label" data-i18n="price">מחיר</span>
@@ -424,6 +422,10 @@
           <span id="info-dist-high" class="info-value">--</span>
         </div>
       </section>
+      </div><!-- /.gauge-info-row -->
+
+      <!-- Company overview card -->
+      <div id="company-card-container"></div>
 
       <!-- Chart — standalone block -->
       <section class="chart-section">
@@ -452,16 +454,11 @@
       </div>
       -->
 
-      <!-- Criteria table -->
-      <section class="criteria-section">
-        <h2 class="section-title" data-i18n="analysis">ניתוח מפורט</h2>
-        <div id="criteria-table" class="criteria-table"></div>
-      </section>
-
-      <!-- Strategy Checklist -->
-      <section class="strategy-checklist-section">
-        <div id="strategy-checklist-container"></div>
-      </section>
+      <!-- Fundamental + Technical side by side -->
+      <div class="analysis-row">
+        <section class="criteria-section" id="analysis-fundamental-section"></section>
+        <section class="strategy-checklist-section" id="analysis-technical-section"></section>
+      </div>
 
       <!-- News -->
       <section class="news-section">
@@ -486,19 +483,6 @@
     <div id="watchlist-content" class="watchlist-content"></div>
   </div>
 
-  <!-- ===== ABOUT PAGE ===== -->
-  <div id="page-about" class="page">
-    <button id="btn-back-about" class="icon-btn back-btn page-back-btn">←</button>
-    <div class="about-content">
-      <div class="about-logo" data-i18n="aboutTitle">About Us</div>
-      <div class="about-section">
-        <p class="about-text" data-i18n="aboutBody1">Getting started with investing can feel overwhelming, especially when you're not sure about the timing or the assets.</p>
-        <p class="about-text" data-i18n="aboutBody2">Remember, it's your capital at stake — potential rewards always go hand-in-hand with risks.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== PRIVACY POLICY PAGE ===== -->
   <!-- ===== ABOUT US PAGE ===== -->
   <div id="page-about" class="page">
     <button id="btn-back-about" class="icon-btn back-btn page-back-btn">←</button>
@@ -638,7 +622,7 @@
   <!-- ===== IN-APP NOTIFICATION ===== -->
   <div id="notification" class="notification hidden"></div>
 
-  <script type="module" src="src/main.js?v=17"></script>
+  <script type="module" src="src/main.js?v=22"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(regs => {

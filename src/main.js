@@ -7,6 +7,7 @@ import { calcSummaryScore, renderSummaryGauge } from './components/SummaryGauge.
 
 import { renderCriteriaTable } from './components/CriteriaTable.js';
 import { renderStrategyChecklist, countNewHighs } from './components/StrategyChecklist.js';
+import { renderAnalysisTables } from './components/AnalysisTables.js';
 import { renderNews, renderAIInsight } from './components/NewsRenderer.js';
 import { loadFearGreed, loadCryptoFearGreed } from './components/FearGreedGauge.js?v=2';
 import { loadTrending, renderTrendingList }   from './components/TrendingList.js';
@@ -133,11 +134,14 @@ window.__onLangChange = function() {
       renderSummaryGauge(summaryContainer, lastSummaryScored);
     }
 
-    // Re-render strategy checklist (all text via t())
-    const checklistContainer = document.getElementById('strategy-checklist-container');
-    if (checklistContainer && lastFullStockData !== undefined) {
-      renderStrategyChecklist(
-        checklistContainer,
+    // Re-render analysis tables on language change
+    const fundamentalEl = document.getElementById('analysis-fundamental-section');
+    const technicalEl   = document.getElementById('analysis-technical-section');
+    if ((fundamentalEl || technicalEl) && lastFullStockData !== undefined && lastSummaryScored) {
+      renderAnalysisTables(
+        fundamentalEl,
+        technicalEl,
+        lastSummaryScored,
         currentStock,
         lastFullStockData?.history ?? [],
         lastFullStockData?.indicators ?? null,
@@ -309,11 +313,14 @@ async function loadResults(symbol) {
     updateWatchlistBtn(symbol);
     updateCompareBtn(symbol);
 
-    // Strategy Checklist — async, fills SPY row after initial render
-    const checklistContainer = document.getElementById('strategy-checklist-container');
-    if (checklistContainer) {
-      renderStrategyChecklist(
-        checklistContainer,
+    // Analysis Tables (Fundamental + Technical) — async, fills SPY row after initial render
+    const fundamentalEl = document.getElementById('analysis-fundamental-section');
+    const technicalEl   = document.getElementById('analysis-technical-section');
+    if (fundamentalEl || technicalEl) {
+      renderAnalysisTables(
+        fundamentalEl,
+        technicalEl,
+        scored,
         data,
         fullStockData?.history ?? [],
         fullStockData?.indicators ?? null,
@@ -413,8 +420,6 @@ function renderResults(data, scored) {
   }
 
   renderCompanyCard(document.getElementById('company-card-container'), data);
-  renderCriteriaTable(scored, data);
-  initInfoButtons(document.getElementById('criteria-table'));
   renderNews(data.newsItems);
 }
 
@@ -523,7 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
   syncTopbarHeight();
   window.addEventListener('resize', syncTopbarHeight);
   bindEvents();
-  initInfoButtons();
+  initInfoButtons(document.body);
 
   // Mark home as active in top-bar nav
   const homeBtn = document.querySelector('.tb-nav-btn[data-page="home"]');
