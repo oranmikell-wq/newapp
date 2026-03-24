@@ -455,49 +455,58 @@
 .trending-item {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
-  background: var(--card-bg);
+  background: var(--bg-2);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 10px 14px;
+  padding: 9px 14px;
   cursor: pointer;
-  transition: background var(--transition), border-color var(--transition);
+  transition: background var(--transition), border-color var(--transition), transform 0.15s;
 }
 
 .trending-item:hover {
   background: var(--bg-3);
-  border-color: var(--border-2);
+  border-color: var(--green);
+  transform: translateY(-1px);
 }
 
-.trending-rank {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text-3);
-  width: 16px;
-  flex-shrink: 0;
+.trending-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .trending-symbol {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--text);
-  min-width: 52px;
-  flex-shrink: 0;
+  line-height: 1.2;
 }
 
 .trending-name {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-3);
-  flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 120px;
+}
+
+.trending-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .trending-change {
   font-size: 12px;
   font-weight: 600;
   flex-shrink: 0;
+  min-width: 44px;
+  text-align: end;
 }
 
 .trending-badge {
@@ -646,21 +655,23 @@
 .mover-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
-  background: var(--card-bg);
+  background: var(--bg-2);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 10px 14px;
+  padding: 9px 14px;
   cursor: pointer;
-  transition: background var(--transition), border-color var(--transition);
+  transition: background var(--transition), border-color var(--transition), transform 0.15s;
 }
-.mover-row:hover { background: var(--bg-3); border-color: var(--border-2); }
+.mover-row:hover { background: var(--bg-3); border-color: var(--green); transform: translateY(-1px); }
 .mover-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-.mover-rank  { font-size: 11px; font-weight: 700; color: var(--text-3); width: 16px; flex-shrink: 0; text-align: left; }
-.mover-sym   { font-size: 14px; font-weight: 700; color: var(--text); min-width: 52px; flex-shrink: 0; text-align: left; }
-.mover-name  { font-size: 12px; color: var(--text-3); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; }
-.mover-price { font-size: 12px; font-weight: 600; color: var(--text); flex-shrink: 0; text-align: left; }
-.mover-pct   { font-size: 12px; font-weight: 700; flex-shrink: 0; text-align: left; }
+.mover-left  { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mover-sym   { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.2; }
+.mover-name  { font-size: 11px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+.mover-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.mover-price { font-size: 12px; font-weight: 600; color: var(--text); }
+.mover-pct   { font-size: 12px; font-weight: 700; min-width: 52px; text-align: end; }
 .mover-pct.positive { color: var(--green); }
 .mover-pct.negative { color: var(--red); }
 

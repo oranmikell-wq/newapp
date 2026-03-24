@@ -159,11 +159,14 @@ function renderMoverList(list, el) {
     const sign = pct >= 0 ? '+' : '';
     const price = (q.regularMarketPrice ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2 });
     return `<div class="mover-row" role="button" tabindex="0" onclick="window.navigateTo && navigateTo('results', '${q.symbol}')" title="View ${q.symbol}">
-      <span class="mover-rank">${i + 1}</span>
-      <span class="mover-sym">${q.symbol}</span>
-      <span class="mover-name">${q.shortName ?? ''}</span>
-      <span class="mover-price">$${price}</span>
-      <span class="mover-pct ${cls}">${sign}${pct.toFixed(2)}%</span>
+      <div class="mover-left">
+        <span class="mover-sym">${q.symbol}</span>
+        <span class="mover-name">${q.shortName ?? ''}</span>
+      </div>
+      <div class="mover-right">
+        <span class="mover-price">$${price}</span>
+        <span class="mover-pct ${cls}">${sign}${pct.toFixed(2)}%</span>
+      </div>
     </div>`;
   }).join('');
 }

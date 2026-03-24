@@ -24,11 +24,14 @@ export function renderTrendingList(onNavigate) {
     const changePct = stock.changePct != null ? `${stock.changePct > 0 ? '+' : ''}${stock.changePct.toFixed(1)}%` : '';
     return `
       <div class="trending-item" data-symbol="${stock.symbol}">
-        <span class="trending-rank">${i + 1}</span>
-        <span class="trending-symbol">${stock.symbol}</span>
-        <span class="trending-name">${stock.name}</span>
-        <span class="trending-change ${stock.changePct >= 0 ? 'badge-buy' : 'badge-sell'}">${changePct}</span>
-        <span class="trending-badge ${badgeClass}">${t(ratingKey)}</span>
+        <div class="trending-left">
+          <span class="trending-symbol">${stock.symbol}</span>
+          <span class="trending-name">${stock.name}</span>
+        </div>
+        <div class="trending-right">
+          <span class="trending-change ${stock.changePct != null ? (stock.changePct >= 0 ? 'hwl-change--pos' : 'hwl-change--neg') : 'hwl-change--loading'}">${changePct}</span>
+          <span class="trending-badge ${badgeClass}">${t(ratingKey)}</span>
+        </div>
       </div>`;
   }).join('');
   container.querySelectorAll('.trending-item').forEach(el => {
