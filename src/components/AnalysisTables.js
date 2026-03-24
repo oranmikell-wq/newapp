@@ -2,7 +2,7 @@
 // Renders two unified analysis tables: Fundamental + Technical
 // Each row shows: name + ⓘ | score (0–100) or status (YES/NO/NEUTRAL) | expandable description
 
-import { t } from '../utils/i18n.js?v=2';
+import { t } from '../utils/i18n.js?v=4';
 import { calcSMA, yahooChart } from '../services/StockService.js';
 import { getSectorKey } from '../utils/scoring.js';
 import { initInfoButtons } from './InfoPopup.js';
@@ -19,18 +19,84 @@ const INDUSTRY_PS_AVG = {
   utilities: 2, materials: 1, default: 3,
 };
 
+// ── Contextual description builder ──────────────────────────────
+
+function buildContextualDesc(key, score, dataItems, data) {
+  const vals = dataItems.length ? dataItems.join(' · ') : null;
+  let ctx = '';
+
+  switch (key) {
+    case 'eps':
+      ctx = score == null ? '' : score >= 66 ? t('ctxStrongEPS') : score >= 41 ? t('ctxMidEPS') : t('ctxWeakEPS');
+      break;
+    case 'revenue':
+      ctx = score == null ? '' : score >= 66 ? t('ctxStrongRevenue') : score >= 41 ? t('ctxMidRevenue') : t('ctxWeakRevenue');
+      break;
+    case 'multiples':
+      ctx = score == null ? '' : score >= 66 ? t('ctxValuationLow') : score >= 41 ? t('ctxValuationFair') : t('ctxValuationHigh');
+      break;
+    case 'analysts':
+      ctx = score == null ? '' : score >= 66 ? t('ctxBullishConsensus') : score >= 41 ? t('ctxNeutralConsensus') : t('ctxBearishConsensus');
+      break;
+    case 'momentum':
+      ctx = score == null ? '' : score >= 66 ? t('ctxHighMomentum') : score >= 41 ? t('ctxMidMomentum') : t('ctxLowMomentum');
+      break;
+    case 'institutional':
+      ctx = score == null ? '' : score >= 66 ? t('ctxHighInstitutional') : score >= 41 ? t('ctxMidInstitutional') : t('ctxLowInstitutional');
+      break;
+    case 'debt':
+      ctx = score == null ? '' : score >= 66 ? t('ctxLowDebt') : score >= 41 ? t('ctxMidDebt') : t('ctxHighDebt');
+      break;
+    case 'technical': {
+      const rsiMatch = vals?.match(/RSI[:\s]+(\d+\.?\d*)/);
+      const rsi = rsiMatch ? parseFloat(rsiMatch[1]) : null;
+      ctx = rsi != null ? (rsi > 70 ? t('ctxRSIOverbought') : rsi < 30 ? t('ctxRSIOversold') : t('ctxRSINeutral'))
+          : score == null ? '' : score >= 66 ? t('ctxHighMomentum') : score >= 41 ? t('ctxRSINeutral') : t('ctxLowMomentum');
+      break;
+    }
+    case 'ath':
+      ctx = score == null ? '' : score >= 66 ? t('ctxNearHigh') : t('ctxFarFromHigh');
+      break;
+    case 'highs':
+      ctx = score == null ? '' : score >= 66 ? t('ctxManyHighs') : t('ctxFewHighs');
+      break;
+    case 'peg':
+      if (data?.peg != null) ctx = data.peg < 1 ? t('ctxPEGCheap') : data.peg <= 2 ? t('ctxPEGFair') : t('ctxPEGExpensive');
+      break;
+    case 'currentRatio':
+      if (data?.currentRatio != null) {
+        const cr = data.currentRatio;
+        ctx = cr >= 2 ? t('ctxCRExcellent') : cr >= 1.5 ? t('ctxCRGood') : cr >= 1 ? t('ctxCROk') : t('ctxCRRisk');
+      }
+      break;
+    case 'roe':
+      if (data?.roe != null) ctx = data.roe >= 20 ? t('ctxROEHigh') : data.roe >= 15 ? t('ctxROEGood') : data.roe >= 10 ? t('ctxROEMid') : t('ctxROELow');
+      break;
+    case 'fcf':
+      if (data?.fcf != null) ctx = data.fcf >= 0 ? t('ctxFCFPositive') : t('ctxFCFNegative');
+      break;
+    default:
+      ctx = '';
+  }
+
+  if (vals && ctx) return `${vals} — ${ctx}`;
+  if (vals) return vals;
+  if (ctx) return ctx;
+  return t('criteria_' + key + '_desc');
+}
+
 // ── Row builders ────────────────────────────────────────────────
 
 /**
  * Scored row: Indicator | Score | Status | Explanation
  */
-function criteriaRow(key, score, descText, dataItems = []) {
+function criteriaRow(key, score, descText, dataItems = [], data = null) {
   const hasData    = score != null;
   const scoreNum   = hasData ? Math.round(score) : '—';
   const statusCls  = !hasData ? 'score-none' : score >= 66 ? 'score-high' : score >= 41 ? 'score-mid' : 'score-low';
   const statusText = !hasData ? t('noData') : score >= 66 ? t('statusHigh') : score >= 41 ? t('statusMid') : t('statusLow');
   const barColor   = !hasData ? 'var(--border)' : score >= 66 ? 'var(--green)' : score >= 41 ? 'var(--yellow)' : 'var(--red)';
-  const descLine   = dataItems.length ? dataItems.join(' · ') : '—';
+  const descLine   = buildContextualDesc(key, score, dataItems, data);
   return `
     <tr class="at-tr">
       <td class="at-td-name">
@@ -180,7 +246,7 @@ export async function renderAnalysisTables(fundamentalEl, technicalEl, scored, d
 
   for (const key of FUNDAMENTAL_CRITERIA) {
     const score = scored.criteria[key];
-    fundRows += criteriaRow(key, score, t('criteria_' + key + '_desc'), rawDataFor(key, scored, data));
+    fundRows += criteriaRow(key, score, '', rawDataFor(key, scored, data), data);
   }
 
   // P/E vs Sector (checklist item → Fundamental)
@@ -226,7 +292,7 @@ export async function renderAnalysisTables(fundamentalEl, technicalEl, scored, d
 
   for (const key of TECHNICAL_CRITERIA) {
     const score = scored.criteria[key];
-    techRows += criteriaRow(key, score, t('criteria_' + key + '_desc'), rawDataFor(key, scored, data));
+    techRows += criteriaRow(key, score, '', rawDataFor(key, scored, data), data);
   }
 
   // MA150

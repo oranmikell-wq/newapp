@@ -57,7 +57,7 @@
   <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
   <script src="https://s3.tradingview.com/tv.js"></script>
   <link rel="stylesheet" href="css/main.css?v=33" />
-  <link rel="stylesheet" href="css/home.css?v=46" />
+  <link rel="stylesheet" href="css/home.css?v=48" />
   <link rel="stylesheet" href="css/results.css?v=27" />
   <link rel="stylesheet" href="css/compare.css?v=12" />
 </head>
@@ -221,6 +221,19 @@
           </div>
         </div>
       </div>
+
+      <!-- Home Market News -->
+      <section class="home-news-section">
+        <h2 class="section-title" data-i18n="sectionHomeNews">חדשות שוק</h2>
+        <div class="sidebar-card home-news-card">
+          <div class="home-news-tabs">
+            <button class="home-news-tab active" data-tab="global" data-i18n="newsGlobal">עולמי</button>
+            <button class="home-news-tab" data-tab="local" data-i18n="newsLocal">מקומי</button>
+          </div>
+          <div id="home-news-global" class="home-news-list"><div class="macro-skeleton"></div></div>
+          <div id="home-news-local" class="home-news-list" style="display:none"><div class="macro-skeleton"></div></div>
+        </div>
+      </section>
 
       <div class="sidebar">
         <section class="market-section">
@@ -629,7 +642,7 @@
   <!-- ===== IN-APP NOTIFICATION ===== -->
   <div id="notification" class="notification hidden"></div>
 
-  <script type="module" src="src/main.js?v=27"></script>
+  <script type="module" src="src/main.js?v=31"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(regs => {

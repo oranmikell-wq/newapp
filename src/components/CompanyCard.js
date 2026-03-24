@@ -1,6 +1,6 @@
 // CompanyCard.js — Company overview block between gauge and info cards
 
-import { t } from '../utils/i18n.js?v=2';
+import { t } from '../utils/i18n.js?v=4';
 
 function fmtEmployees(n) {
   if (n == null) return null;

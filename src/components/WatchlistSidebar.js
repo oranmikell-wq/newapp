@@ -2,7 +2,7 @@
 
 import { fetchAllData, fetchHistory } from '../services/StockService.js';
 import { getWatchlist, removeFromWatchlist, isInWatchlist } from './Watchlist.js';
-import { t } from '../utils/i18n.js?v=2';
+import { t } from '../utils/i18n.js?v=4';
 
 let _onNavigate = null;
 let _showNotification = null;

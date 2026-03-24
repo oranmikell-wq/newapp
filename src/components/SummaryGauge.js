@@ -3,7 +3,7 @@
 //   20% RSI(14) | 30% Moving Averages | 25% Valuation (P/E or P/S) | 25% Relative Strength
 //   Growth/Pre-profit mode: 20% RSI | 30% MA | 15% Valuation (P/S) | 35% RS
 
-import { t } from '../utils/i18n.js?v=2';
+import { t } from '../utils/i18n.js?v=4';
 import { getSectorKey, SECTOR_PS, normalizeInverse } from '../utils/scoring.js';
 import { initInfoButtons } from './InfoPopup.js';
 

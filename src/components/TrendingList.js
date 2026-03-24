@@ -2,7 +2,7 @@
 
 import { fetchStockFullData, fetchTrending } from '../services/StockService.js';
 import { calcSummaryScore } from './SummaryGauge.js';
-import { t } from '../utils/i18n.js?v=2';
+import { t } from '../utils/i18n.js?v=4';
 
 const TRENDING_NAMES = {
   AAPL: 'Apple Inc.',

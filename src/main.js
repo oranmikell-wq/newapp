@@ -1,7 +1,7 @@
 // main.js — entry point, orchestrates all modules
 
-import { applyTranslations, toggleLang, t } from './utils/i18n.js?v=2';
-import { fetchAllData, fetchHistory, fetchStockFullData, fetchIndexQuote } from './services/StockService.js';
+import { applyTranslations, toggleLang, t } from './utils/i18n.js?v=4';
+import { fetchAllData, fetchHistory, fetchStockFullData, fetchIndexQuote, fetchProxy } from './services/StockService.js';
 import { calcScore } from './utils/scoring.js';
 import { calcSummaryScore, renderSummaryGauge } from './components/SummaryGauge.js';
 
@@ -120,6 +120,83 @@ function renderHomeWatchlist() {
   });
 }
 
+// ── Home News ────────────────────────────────────────────
+let _homeNewsLoaded = false;
+
+async function loadHomeNews() {
+  if (_homeNewsLoaded) return;
+  _homeNewsLoaded = true;
+
+  const globalList = document.getElementById('home-news-global');
+  const localList  = document.getElementById('home-news-local');
+  if (!globalList || !localList) return;
+
+  // Tab switching
+  document.querySelectorAll('.home-news-tab').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      document.querySelectorAll('.home-news-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const isGlobal = btn.dataset.tab === 'global';
+      globalList.style.display = isGlobal ? '' : 'none';
+      localList.style.display  = isGlobal ? 'none' : '';
+      if (!isGlobal && !localList.dataset.loaded) {
+        localList.dataset.loaded = '1';
+        await _fetchLocalNews(localList);
+      }
+    });
+  });
+
+  // Load global news immediately
+  await _fetchGlobalNews(globalList);
+}
+
+async function _fetchGlobalNews(container) {
+  try {
+    const key  = localStorage.getItem('bon-finnhub-key') || 'd6qup2hr01qgdhqcgpbgd6qup2hr01qgdhqcgpc0';
+    const data = await fetchProxy(`https://finnhub.io/api/v1/news?category=general&token=${key}`);
+    _renderHomeNewsItems(container, (data || []).slice(0, 8).map(n => ({
+      headline: n.headline,
+      url:      n.url,
+      image:    n.image,
+      source:   n.source,
+      datetime: n.datetime * 1000,
+    })));
+  } catch {
+    container.innerHTML = `<p style="color:var(--text-3);font-size:13px;padding:12px 14px">${t('noData')}</p>`;
+  }
+}
+
+async function _fetchLocalNews(container) {
+  try {
+    const data  = await fetchProxy(`https://query1.finance.yahoo.com/v1/finance/search?q=TA35.TA&newsCount=8&enableNavLinks=false`);
+    const items = (data?.news || []).map(n => ({
+      headline: n.title,
+      url:      n.link,
+      image:    n.thumbnail?.resolutions?.[0]?.url || null,
+      source:   n.publisher,
+      datetime: (n.providerPublishTime || 0) * 1000,
+    }));
+    _renderHomeNewsItems(container, items);
+  } catch {
+    container.innerHTML = `<p style="color:var(--text-3);font-size:13px;padding:12px 14px">${t('noData')}</p>`;
+  }
+}
+
+function _renderHomeNewsItems(container, items) {
+  if (!items?.length) {
+    container.innerHTML = `<p style="color:var(--text-3);font-size:13px;padding:12px 14px">${t('noData')}</p>`;
+    return;
+  }
+  container.innerHTML = items.map(n => `
+    <a class="home-news-item" href="${n.url}" target="_blank" rel="noopener">
+      ${n.image ? `<img class="home-news-thumb" src="${n.image}" alt="" loading="lazy" onerror="this.style.display='none'">` : ''}
+      <div class="home-news-body">
+        <div class="home-news-headline">${n.headline}</div>
+        <div class="home-news-meta">${n.source} · ${new Date(n.datetime).toLocaleDateString()}</div>
+      </div>
+    </a>`).join('');
+}
+
 function renderCompare() {
   _renderCompare(showNotification);
 }
@@ -199,6 +276,7 @@ window.__onLangChange = function() {
         lastFullStockData?.history ?? [],
         lastFullStockData?.indicators ?? null,
       );
+      initInfoButtons(document.getElementById('page-results'));
     }
   }
 
@@ -378,6 +456,7 @@ async function loadResults(symbol) {
         fullStockData?.history ?? [],
         fullStockData?.indicators ?? null,
       );
+      initInfoButtons(document.getElementById('page-results'));
     }
 
     // AI Insight — runs async, silently hides itself on error
@@ -613,6 +692,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadCommodities();
   loadSectorPerformance();
   loadMovers();
+  loadHomeNews();
 
   // FNG toggle: Stocks ↔ Crypto
   let cryptoFngLoaded = true; // already loaded above

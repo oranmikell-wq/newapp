@@ -1,7 +1,7 @@
 // MarketMovers.js — Market Status, Commodities, Sectors, Gainers/Losers
 
 import { fetchIndexQuote } from '../services/StockService.js';
-import { t } from '../utils/i18n.js?v=2';
+import { t } from '../utils/i18n.js?v=4';
 
 // ── 1. Market Status (calculated from ET clock, no API) ──────────────────
 export function renderMarketStatus() {
