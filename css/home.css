@@ -1195,3 +1195,41 @@
 [dir="rtl"] .aaii-row    { flex-direction: row-reverse; }
 [dir="rtl"] .aaii-legend { flex-direction: row-reverse; }
 [dir="rtl"] .aaii-bar-annot { padding-left: 0; padding-right: 8px; }
+
+/* ── Home Watchlist Block ─────────────────────────────── */
+.home-watchlist-section { margin-top: 12px; }
+
+.home-watchlist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hwl-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background var(--transition);
+  border-bottom: 1px solid var(--border);
+}
+.hwl-item:last-child { border-bottom: none; }
+.hwl-item:hover { background: var(--bg-3); }
+
+.hwl-symbol {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  min-width: 52px;
+}
+
+.hwl-name {
+  font-size: 12px;
+  color: var(--text-2);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -66,6 +66,29 @@ function showNotification(msg) {
 
 function renderWatchlist() {
   _renderWatchlist(navigateTo, showNotification);
+  renderHomeWatchlist();
+}
+
+function renderHomeWatchlist() {
+  const section = document.getElementById('home-watchlist-section');
+  const list    = document.getElementById('home-watchlist-list');
+  if (!section || !list) return;
+  const items = getWatchlist();
+  if (!items.length) { section.style.display = 'none'; return; }
+  section.style.display = '';
+  list.innerHTML = items.map(item => {
+    const ratingKey  = item.rating === 'buy' ? 'buy' : item.rating === 'wait' ? 'wait' : 'sell';
+    const badgeCls   = item.rating === 'buy' ? 'badge-buy-bg' : item.rating === 'wait' ? 'badge-wait-bg' : 'badge-sell-bg';
+    return `
+      <div class="hwl-item" data-symbol="${item.symbol}">
+        <span class="hwl-symbol">${item.symbol}</span>
+        <span class="hwl-name">${item.name || ''}</span>
+        <span class="wl-badge ${badgeCls}">${t(ratingKey)}</span>
+      </div>`;
+  }).join('');
+  list.querySelectorAll('.hwl-item').forEach(el => {
+    el.addEventListener('click', () => navigateTo('results', el.dataset.symbol));
+  });
 }
 
 function renderCompare() {
@@ -82,6 +105,7 @@ function navigateTo(page, symbol = null) {
     renderWatchlist,
     renderCompare,
   });
+  if (page === 'home') renderHomeWatchlist();
 }
 
 function removeFromWatchlistBound(symbol) {
@@ -550,6 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadMarketIndices();
   loadTrending(navigateTo);
   renderHistory();
+  renderHomeWatchlist();
   loadMacroData();
   loadCryptoPrices();
   loadUpcomingEvents();

@@ -57,7 +57,7 @@
   <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
   <script src="https://s3.tradingview.com/tv.js"></script>
   <link rel="stylesheet" href="css/main.css?v=33" />
-  <link rel="stylesheet" href="css/home.css?v=40" />
+  <link rel="stylesheet" href="css/home.css?v=41" />
   <link rel="stylesheet" href="css/results.css?v=27" />
   <link rel="stylesheet" href="css/compare.css?v=12" />
 </head>
@@ -207,6 +207,13 @@
                   <h2 class="section-title" data-i18n="recentSearches">חיפושים אחרונים</h2>
                   <div class="sidebar-card">
                     <div id="history-list" class="history-list"></div>
+                  </div>
+                </section>
+                <!-- Watchlist block on home page -->
+                <section class="home-watchlist-section" id="home-watchlist-section" style="display:none">
+                  <h2 class="section-title" data-i18n="watchlist">רשימת מעקב</h2>
+                  <div class="sidebar-card">
+                    <div id="home-watchlist-list" class="home-watchlist-list"></div>
                   </div>
                 </section>
               </div>
@@ -622,7 +629,7 @@
   <!-- ===== IN-APP NOTIFICATION ===== -->
   <div id="notification" class="notification hidden"></div>
 
-  <script type="module" src="src/main.js?v=24"></script>
+  <script type="module" src="src/main.js?v=25"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(regs => {
