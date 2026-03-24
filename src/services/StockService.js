@@ -192,7 +192,7 @@ async function fetchFMPFundamentals(symbol) {
       earningsGrowth:          growth?.growthEPS      != null ? growth.growthEPS      : null,
       revenueGrowth:           growth?.growthRevenue  != null ? growth.growthRevenue  : null,
       debtToEquity:            metrics?.debtToEquityTTM != null ? metrics.debtToEquityTTM * 100 : null,
-      returnOnEquity:          metrics?.returnOnEquityTTM != null ? metrics.returnOnEquityTTM * 100 : null,
+      returnOnEquity:          metrics?.returnOnEquityTTM ?? null,
       currentRatio:            metrics?.currentRatioTTM  ?? null,
       freeCashflow:            metrics?.freeCashFlowTTM  ?? null,
       targetMeanPrice:         targetRaw?.targetConsensus  ?? null,
@@ -267,7 +267,7 @@ async function fetchFinnhubFundamentals(symbol) {
   const revGrowth = m.revenueGrowthTTMYoy ?? m.revenueGrowth3Y ?? null;
   const debtEq    = m.longTermDebt_equityAnnual ?? m.totalDebt_totalEquityAnnual ?? null;
   const instPct   = m.institutionalOwnershipPercentage != null ? m.institutionalOwnershipPercentage / 100 : null;
-  const roe          = m.roeTTM          ?? null;   // already %
+  const roe          = m.roeTTM != null ? m.roeTTM / 100 : null;   // convert % → decimal
   const currentRatio = m.currentRatioAnnual ?? m.currentRatioQuarterly ?? null;
 
   return {
@@ -289,7 +289,7 @@ async function fetchFinnhubFundamentals(symbol) {
       debtToEquity:            debtEq != null ? debtEq * 100 : null,
       returnOnEquity:          roe,
       currentRatio:            currentRatio,
-      freeCashflow:            null,        // not in Finnhub metric=all
+      freeCashflow:            m.freeCashFlowTTM != null ? m.freeCashFlowTTM * 1e6 : null,
       targetMeanPrice:         priceTargetRaw?.targetMean   ?? null,
       targetHighPrice:         priceTargetRaw?.targetHigh   ?? null,
       targetLowPrice:          priceTargetRaw?.targetLow    ?? null,

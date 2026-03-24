@@ -28,7 +28,7 @@ export function cacheGet(symbol) {
     const raw = localStorage.getItem(`bon-cache-${symbol}`);
     if (!raw) return null;
     const { data, ts } = JSON.parse(raw);
-    if (Date.now() - ts < 15 * 60 * 1000) return data;
+    if (Date.now() - ts < PRICE_CACHE_TTL) return data;
     return null;
   } catch { return null; }
 }
@@ -53,7 +53,7 @@ export function fundGet(symbol) {
     const raw = localStorage.getItem(`bon-fund-${symbol}`);
     if (!raw) return null;
     const { data, ts } = JSON.parse(raw);
-    if (Date.now() - ts < 24 * 60 * 60 * 1000) return data;
+    if (Date.now() - ts < FUND_CACHE_TTL) return data;
     return null;
   } catch { return null; }
 }
