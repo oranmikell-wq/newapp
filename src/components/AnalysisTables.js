@@ -41,9 +41,17 @@ function buildContextualDesc(key, score, dataItems, data) {
     case 'peg':
       if (data?.peg != null) ctx = data.peg < 1 ? t('ctxPEGCheap') : data.peg <= 2 ? t('ctxPEGFair') : t('ctxPEGExpensive');
       break;
-    case 'fcf':
-      if (data?.fcf != null) ctx = data.fcf >= 0 ? t('ctxFCFPositive') : t('ctxFCFNegative');
+    case 'fcf': {
+      if (data?.fcf != null) {
+        const yieldPct = (data.marketCap > 0 && data.fcf != null)
+          ? (data.fcf / data.marketCap * 100).toFixed(1) : null;
+        const yieldStr = yieldPct != null ? ` · Yield: ${yieldPct}%` : '';
+        ctx = data.fcf >= 0
+          ? t('ctxFCFPositive') + yieldStr
+          : t('ctxFCFNegative') + yieldStr;
+      }
       break;
+    }
     case 'multiples':
     case 'peOnly':
       ctx = score == null ? '' : score >= 66 ? t('ctxValuationLow') : score >= 41 ? t('ctxValuationFair') : t('ctxValuationHigh');

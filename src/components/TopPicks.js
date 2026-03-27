@@ -10,9 +10,11 @@ import { cacheGet } from '../services/CacheService.js';
 
 // ── Curated universe (30 well-known S&P 500 stocks across sectors) ──────────
 const UNIVERSE = [
-  'AAPL','MSFT','GOOGL','NVDA','META','AMZN','TSLA','V','MA','JPM',
-  'UNH','LLY','JNJ','COST','WMT','XOM','PG','KO','MCD','HD',
-  'NFLX','AMD','CRM','AVGO','ORCL','CAT','GS','BAC','NEE','ADBE',
+  'AAPL','MSFT','NVDA','GOOGL','META',   // Tech
+  'JPM','V','GS',                         // Financials
+  'JNJ','UNH','LLY',                      // Healthcare
+  'KO','WMT','MCD',                       // Consumer
+  'XOM','NEE','CAT',                      // Energy / Utilities / Industrial
 ];
 
 // ── Cache key & TTL (1 hour) ─────────────────────────────────────────────────
