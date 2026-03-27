@@ -507,13 +507,12 @@ async function loadResults(symbol) {
     void resultsContent.offsetWidth; // force reflow to restart animations
     resultsContent.classList.add('did-animate');
 
-    // ── SummaryGauge — 4-factor technical score (the primary score) ──
+    // ── SummaryGauge — 4-family weighted score ──
     const summaryContainer = document.getElementById('summary-gauge-container');
     if (summaryContainer) {
-      const indicators    = fullStockData?.indicators ?? null;
-      lastSummaryScored   = calcSummaryScore(data, indicators);
-      lastFullStockData   = fullStockData;
-      renderSummaryGauge(summaryContainer, lastSummaryScored);
+      lastSummaryScored = scored;   // use the 4-family calcScore result
+      lastFullStockData = fullStockData;
+      renderSummaryGauge(summaryContainer, scored);
     }
 
     loadChart(symbol, '1M');

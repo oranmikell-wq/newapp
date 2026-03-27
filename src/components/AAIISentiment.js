@@ -1,6 +1,6 @@
 // AAIISentiment.js — AAII Investor Sentiment Survey (stacked bar chart)
 
-import { t } from '../utils/i18n.js?v=4';
+import { t } from '../utils/i18n.js?v=5';
 import { fetchProxy } from '../services/StockService.js';
 
 const AAII_URL = 'https://www.aaii.com/sentimentsurvey';

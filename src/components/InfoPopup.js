@@ -1,6 +1,6 @@
 // InfoPopup.js — ⓘ info buttons + popup for financial terms
 
-import { t } from '../utils/i18n.js?v=4';
+import { t } from '../utils/i18n.js?v=5';
 
 let overlay = null;
 

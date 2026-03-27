@@ -3,7 +3,7 @@
 //   20% RSI(14) | 30% Moving Averages | 25% Valuation (P/E or P/S) | 25% Relative Strength
 //   Growth/Pre-profit mode: 20% RSI | 30% MA | 15% Valuation (P/S) | 35% RS
 
-import { t } from '../utils/i18n.js?v=4';
+import { t } from '../utils/i18n.js?v=5';
 import { getSectorKey, SECTOR_PS, normalizeInverse } from '../utils/scoring.js';
 import { initInfoButtons } from './InfoPopup.js';
 
@@ -176,8 +176,8 @@ function buildGaugeSVG() {
     'stroke-linecap': 'round',
   }));
 
-  // ── Zone separators at 41 and 66 ──
-  for (const tick of [41, 66]) {
+  // ── Zone separators at 45 and 70 ──
+  for (const tick of [45, 70]) {
     const inner = pointOnArc(tick, R - 13);
     const outer = pointOnArc(tick, R + 12);
     svg.appendChild(el('line', {
@@ -309,26 +309,23 @@ function animateGauge(svg, targetScore, duration = 1300) {
 // BREAKDOWN BARS
 // ═════════════════════════════════════════════════════════
 
-const FACTORS = [
-  { key: 'rsi', i18n: 'factor_rsi',        infoKey: 'crit_technical' },
-  { key: 'ma',  i18n: 'factor_ma',          infoKey: 'sc_ma200'       },
-  { key: 'pe',  i18n: 'factor_valuation', i18n_ps: 'factor_valuation_ps', infoKey: 'crit_multiples' },
-  { key: 'rs',  i18n: 'factor_rs',          infoKey: 'crit_momentum'  },
+// 4-family breakdown factors
+const FAMILY_FACTORS = [
+  { key: 'growth',    i18n: 'analysisFamilyGrowth',    weight: 0.35 },
+  { key: 'valuation', i18n: 'analysisFamilyValuation',  weight: 0.25 },
+  { key: 'quality',   i18n: 'analysisFamilyQuality',    weight: 0.20 },
+  { key: 'technical', i18n: 'analysisFamilyTechnical',  weight: 0.20 },
 ];
 
-function buildBreakdown(breakdown, valuationMetric, weights) {
+function buildBreakdown(families) {
   const wrap = document.createElement('div');
   wrap.className = 'sg-breakdown';
 
-  // Only show factors that are part of the active weight set
-  const activeFactors = FACTORS.filter(f => weights[f.key] != null);
-
-  activeFactors.forEach(({ key, i18n, i18n_ps, infoKey }, idx) => {
-    const label  = (key === 'pe' && valuationMetric === 'ps' && i18n_ps) ? t(i18n_ps) : t(i18n);
-    const weight = `${Math.round((weights[key] || 0) * 100)}%`;
-    const score  = breakdown?.[key] ?? null;
+  FAMILY_FACTORS.forEach(({ key, i18n, weight }, idx) => {
+    const label  = t(i18n);
+    const wLabel = `${Math.round(weight * 100)}%`;
+    const score  = families?.[key] != null ? Math.round(families[key]) : null;
     const color  = score != null ? scoreToColor(score) : '#cbd5e1';
-    const btn    = infoKey ? `<button class="info-icon-btn" data-info="${infoKey}">i</button>` : '';
 
     const row = document.createElement('div');
     row.className = 'sg-row';
@@ -336,9 +333,8 @@ function buildBreakdown(breakdown, valuationMetric, weights) {
       <div class="sg-row-meta">
         <span class="sg-name-btn">
           <span class="sg-factor-name">${label}</span>
-          ${btn}
         </span>
-        <span class="sg-factor-weight">${weight}</span>
+        <span class="sg-factor-weight">${wLabel}</span>
       </div>
       <div class="sg-bar-track">
         <div class="sg-bar-fill" style="width:0%;background:${color}" data-target="${score ?? 0}"></div>
@@ -347,7 +343,6 @@ function buildBreakdown(breakdown, valuationMetric, weights) {
 
     wrap.appendChild(row);
 
-    // Animate bar with staggered delay
     if (score != null) {
       const bar = row.querySelector('.sg-bar-fill');
       setTimeout(() => {
@@ -372,29 +367,25 @@ const BADGE_META = {
 
 /**
  * Render the animated SummaryGauge into `container`.
+ * Accepts the scored object from calcScore (4-family model).
  *
  * @param {HTMLElement} container
- * @param {{ score, rating, isPartial, breakdown }} summaryScored
+ * @param {{ score, rating, isPartial, families }} scored
  */
-export function renderSummaryGauge(container, summaryScored) {
+export function renderSummaryGauge(container, scored) {
   if (!container) return;
   container.innerHTML = '';
 
-  const { score, rating, isPartial, breakdown, valuationMetric, isGrowthProfile, weights } = summaryScored || {};
+  const { score, rating, isPartial, families } = scored || {};
   const badge = BADGE_META[rating] || BADGE_META.wait;
-  const activeWeights = weights || { rsi: 0.20, ma: 0.30, pe: 0.25, rs: 0.25 };
 
   // Card shell
   const card = document.createElement('div');
   card.className = 'sg-card';
 
-  // Header row (with optional growth profile note)
-  const growthNote = (isGrowthProfile && valuationMetric === 'ps')
-    ? `<span class="sg-growth-note">${t('growthProfileNote')}</span>` : '';
   card.innerHTML = `
     <div class="sg-header">
       <span class="sg-badge ${badge.cls}">${t(badge.key)}</span>
-      ${growthNote}
     </div>`;
 
   // Body: SVG + breakdown (flex)
@@ -422,11 +413,10 @@ export function renderSummaryGauge(container, summaryScored) {
   }
 
   body.appendChild(svgWrap);
-  body.appendChild(buildBreakdown(breakdown, valuationMetric, activeWeights));
+  body.appendChild(buildBreakdown(families));
   card.appendChild(body);
   container.appendChild(card);
 
-  // Kick off animation on the next paint (element must be in the DOM)
   requestAnimationFrame(() => animateGauge(svg, score ?? 0));
 
   initInfoButtons(card);
