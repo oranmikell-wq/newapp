@@ -1361,16 +1361,21 @@
 
 /* ===== MARKET ANALYSIS PAGE ===== */
 .market-main {
-  max-width: 1100px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 24px 20px 40px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
 }
-.market-page-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text);
-  margin: 0;
+.market-blocks-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.market-blocks-row .fng-section,
+.market-blocks-row .sector-section,
+.market-blocks-row .aaii-section {
+  flex: 1;
+  min-width: 0;
+}
+@media (max-width: 900px) {
+  .market-blocks-row { flex-direction: column; }
 }

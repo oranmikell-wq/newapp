@@ -57,7 +57,7 @@
   <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
   <script src="https://s3.tradingview.com/tv.js"></script>
   <link rel="stylesheet" href="css/main.css?v=33" />
-  <link rel="stylesheet" href="css/home.css?v=49" />
+  <link rel="stylesheet" href="css/home.css?v=50" />
   <link rel="stylesheet" href="css/results.css?v=27" />
   <link rel="stylesheet" href="css/compare.css?v=12" />
 </head>
@@ -300,10 +300,8 @@
   <!-- ===== MARKET ANALYSIS PAGE ===== -->
   <div id="page-market" class="page">
     <main class="market-main">
-      <h1 class="section-title market-page-title" data-i18n="sectionMarketAnalysis">ניתוח שוק</h1>
-
-      <!-- Fear & Greed + Sector Performance side by side -->
-      <div class="fng-sector-row">
+      <!-- All three blocks side by side -->
+      <div class="market-blocks-row">
         <section class="fng-section">
           <h2 class="section-title" data-i18n="sectionFearGreed">Fear &amp; Greed</h2>
           <div class="fng-card">
@@ -322,15 +320,14 @@
             <div id="sector-container"><div class="macro-skeleton"></div></div>
           </div>
         </section>
-      </div>
 
-      <!-- AAII Sentiment Survey -->
-      <section class="aaii-section">
-        <h2 class="section-title" data-i18n="aaii_title">סקר סנטימנט AAII</h2>
-        <div class="aaii-card">
-          <div id="aaii-container" class="aaii-container"><div class="aaii-skeleton"></div></div>
-        </div>
-      </section>
+        <section class="aaii-section">
+          <h2 class="section-title" data-i18n="aaii_title">סקר סנטימנט AAII</h2>
+          <div class="aaii-card">
+            <div id="aaii-container" class="aaii-container"><div class="aaii-skeleton"></div></div>
+          </div>
+        </section>
+      </div>
     </main>
   </div>
 
