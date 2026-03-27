@@ -1410,10 +1410,6 @@
   color: var(--text-3);
 }
 
-.tp-card {
-  padding: 0;
-}
-
 .tp-list {
   display: flex;
   gap: 10px;
