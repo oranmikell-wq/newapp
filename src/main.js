@@ -205,13 +205,12 @@ async function _fetchRSS(rssUrl, sourceName) {
 async function _fetchLocalNews(container) {
   // Israeli financial RSS feeds via rss2json.com
   const rssSources = [
-    { url: 'https://www.globes.co.il/webservice/rss/rssfeeder.asmx/GetFeed?iID=1111', name: 'גלובס' },
-    { url: 'https://www.globes.co.il/webservice/rss/rssfeeder.asmx/GetFeed?iID=1010', name: 'גלובס שוק' },
-    { url: 'https://www.themarker.com/rss/cmlink/1.4530584',                           name: 'TheMarker' },
-    { url: 'https://www.themarker.com/rss/',                                           name: 'TheMarker' },
-    { url: 'https://www.calcalist.co.il/rss/AjaxPage,7340,L-3684,00.xml',             name: 'כלכליסט' },
-    { url: 'https://www.calcalist.co.il/rss/',                                         name: 'כלכליסט' },
-    { url: 'https://www.bizportal.co.il/rss/feed',                                    name: 'Bizportal' },
+    { url: 'https://www.bizportal.co.il/rss/feed',                                      name: 'ביזפורטל' },
+    { url: 'https://www.globes.co.il/webservice/rss/rssfeeder.asmx/GetFeed?iID=1111',   name: 'גלובס' },
+    { url: 'https://www.globes.co.il/webservice/rss/rssfeeder.asmx/GetFeed?iID=1010',   name: 'גלובס' },
+    { url: 'https://www.ynet.co.il/Integration/StoryRss3084.xml',                       name: 'ynet כלכלה' },
+    { url: 'https://rss.walla.co.il/feed/22',                                           name: 'וואלה כלכלה' },
+    { url: 'https://www.maariv.co.il/rss/rss.aspx?Zone=104',                            name: 'מעריב כלכלה' },
   ];
 
   const results = await Promise.all(rssSources.map(src => _fetchRSS(src.url, src.name)));
