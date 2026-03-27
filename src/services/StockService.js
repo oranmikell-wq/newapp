@@ -61,25 +61,33 @@ async function fetchEdgarFundamentals(symbol, price) {
       [eps,    epsPrev],
       [rev,    revPrev],
       [rev2,   rev2Prev],
+      [rev3,   ],
       [equity, ],
       [shares, ],
       [debt,   ],
       [dps,    ],
       [dpsCashPaid, ],
+      [operatingCF, ],
+      [capex,       ],
+      [operatingIncome, ],
     ] = await Promise.all([
       _edgarLatest(cik, 'EarningsPerShareDiluted',                              'USD/shares'),
       _edgarLatest(cik, 'Revenues'),
       _edgarLatest(cik, 'RevenueFromContractWithCustomerExcludingAssessedTax'),
+      _edgarLatest(cik, 'RevenuesNetOfInterestExpense'),  // banks
       _edgarLatest(cik, 'StockholdersEquity'),
       _edgarLatest(cik, 'CommonStockSharesOutstanding', 'shares'),
       _edgarLatest(cik, 'LongTermDebt'),
       _edgarLatest(cik, 'CommonStockDividendsPerShareDeclared', 'USD/shares'),
       _edgarLatest(cik, 'CommonStockDividendsPerShareCashPaid', 'USD/shares'),
+      _edgarLatest(cik, 'NetCashProvidedByUsedInOperatingActivities'),
+      _edgarLatest(cik, 'PaymentsToAcquirePropertyPlantAndEquipment'),
+      _edgarLatest(cik, 'OperatingIncomeLoss'),
     ]);
     const dpsActual = dps ?? dpsCashPaid;
 
-    const revActual     = rev     ?? rev2;
-    const revPrevActual = revPrev ?? rev2Prev;
+    const revActual     = rev     ?? rev2     ?? rev3;
+    const revPrevActual = revPrev ?? rev2Prev ?? null;
 
     const pe = (eps && eps > 0)                             ? +(price / eps).toFixed(2)                           : null;
     const pb = (equity && shares && shares > 0)             ? +(price / (equity / shares)).toFixed(2)             : null;
@@ -90,6 +98,12 @@ async function fetchEdgarFundamentals(symbol, price) {
       ? +((eps - epsPrev) / Math.abs(epsPrev) * 100).toFixed(2) : null;
     const debtEquity = (debt != null && equity && equity !== 0)
       ? +(debt / equity).toFixed(4) : null;
+    // FCF = Operating Cash Flow − CapEx
+    const fcfEdgar = (operatingCF != null && capex != null) ? operatingCF - capex
+                   : operatingCF != null ? operatingCF : null;
+    // Operating Margin = Operating Income / Revenue
+    const opMarginEdgar = (operatingIncome != null && revActual && revActual !== 0)
+      ? (operatingIncome / revActual) : null; // decimal, e.g. 0.30 for 30%
 
     // Return in v10-compatible shape so parseAllData works unchanged
     return {
@@ -108,6 +122,8 @@ async function fetchEdgarFundamentals(symbol, price) {
         earningsGrowth:          epsGrowth     != null ? epsGrowth     / 100 : null,
         revenueGrowth:           revenueGrowth != null ? revenueGrowth / 100 : null,
         debtToEquity:            debtEquity    != null ? debtEquity    * 100  : null,
+        freeCashflow:            fcfEdgar,
+        operatingMargins:        opMarginEdgar,
         targetMeanPrice:         null,
         targetHighPrice:         null,
         targetLowPrice:          null,
@@ -267,13 +283,19 @@ async function fetchFinnhubFundamentals(symbol) {
   const marketCap = profileRaw?.marketCapitalization != null ? profileRaw.marketCapitalization * 1e6 : null;
   const epsGrowth = m.epsGrowth3Y ?? m.epsBasicExclExtraItemsTTM ?? null;
   const revGrowth = m.revenueGrowthTTMYoy ?? m.revenueGrowth3Y ?? null;
-  const debtEq    = m.longTermDebt_equityAnnual ?? m.totalDebt_totalEquityAnnual ?? null;
+  // Note: Finnhub metric keys use '/' not '_' as separator
+  const debtEq    = m['longTermDebt/equityAnnual'] ?? m['totalDebt/totalEquityAnnual'] ?? null;
   const instPct      = m.institutionalOwnershipPercentage != null ? m.institutionalOwnershipPercentage / 100 : null;
   const roe          = m.roeTTM != null ? m.roeTTM / 100 : null;   // convert % → decimal
   const currentRatio = m.currentRatioAnnual ?? m.currentRatioQuarterly ?? null;
-  // New fields for 4-family model
-  const operatingMarginFinnhub = m.operatingProfitMarginTTM ?? m.operatingProfitMarginAnnual ?? null; // already in %
+  // New fields for 4-family model — correct Finnhub key names
+  const operatingMarginFinnhub = m.operatingMarginTTM ?? m.operatingMarginAnnual ?? null; // already in %
   const insiderPctFinnhub      = m.insiderOwnershipPercentage != null ? m.insiderOwnershipPercentage / 100 : null;
+  // FCF: Finnhub provides P/FCF (pfcfShareTTM) but not absolute FCF.
+  // Compute synthetic FCF = marketCap / pfcfShareTTM (≈ absolute FCF in $).
+  const pfcfTTM = m.pfcfShareTTM ?? m.pfcfShareAnnual ?? null;
+  const syntheticFCF = (pfcfTTM != null && pfcfTTM > 0 && marketCap != null)
+    ? marketCap / pfcfTTM : null;
   // EPS Surprise: most recent quarter with both actual + estimate
   const epsHistArr  = Array.isArray(epsHistRaw) ? epsHistRaw : [];
   const latestEPS   = epsHistArr.find(e => e.actual != null && e.estimate != null && e.estimate !== 0);
@@ -301,7 +323,7 @@ async function fetchFinnhubFundamentals(symbol) {
       debtToEquity:            debtEq != null ? debtEq * 100 : null,
       returnOnEquity:          roe,
       currentRatio:            currentRatio,
-      freeCashflow:            m.freeCashFlowTTM != null ? m.freeCashFlowTTM * 1e6 : null,
+      freeCashflow:            syntheticFCF,
       operatingMargins:        operatingMarginFinnhub != null ? operatingMarginFinnhub / 100 : null,
       targetMeanPrice:         priceTargetRaw?.targetMean   ?? null,
       targetHighPrice:         priceTargetRaw?.targetHigh   ?? null,

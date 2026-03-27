@@ -121,9 +121,9 @@ export function scoreEPSSurprise(pct) {
 export function scorePEG(peg) {
   if (peg == null || peg <= 0) return null;
   if (peg <= 0.5) return 100;
-  if (peg <= 1.0) return normalizeLinear(1.0 - peg, 0, 0.5) * 20 + 80;
-  if (peg <= 2.0) return normalizeLinear(2.0 - peg, 0, 1.0) * 40 + 40;
-  if (peg <= 4.0) return normalizeLinear(4.0 - peg, 0, 2.0) * 35 + 5;
+  if (peg <= 1.0) return normalizeLinear(1.0 - peg, 0, 0.5) / 100 * 20 + 80;
+  if (peg <= 2.0) return normalizeLinear(2.0 - peg, 0, 1.0) / 100 * 40 + 40;
+  if (peg <= 4.0) return normalizeLinear(4.0 - peg, 0, 2.0) / 100 * 35 + 5;
   return 5;
 }
 
@@ -446,5 +446,6 @@ export function calcScore(data, history5y = [], indicators = {}) {
     },
     technicals: { rsi, macd, highs, ath, athPrice: ath },
     sectorKey,
+    _ma200: indicators?.ma200 ?? null,
   };
 }
