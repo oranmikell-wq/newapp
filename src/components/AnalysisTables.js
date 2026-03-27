@@ -285,8 +285,6 @@ export async function renderAnalysisTables(fundamentalEl, technicalEl, scored, d
   for (const key of growthCriteria) {
     growthRows += criteriaRow(key, scored.criteria[key], rawDataFor(key, scored, data), data);
   }
-  // Bonus display row moved from Quality
-  growthRows += criteriaRow('institutional', scored.criteria.institutional, rawDataFor('institutional', scored, data), data);
 
   // ── VALUATION rows ───────────────────────────────────────────
   let valRows = '';
@@ -316,8 +314,6 @@ export async function renderAnalysisTables(fundamentalEl, technicalEl, scored, d
     else                   { vType = 'NO';      vLabel = t('sc_expensive'); vInsight = t('sc_i_ps_expensive',  { ps: data.ps.toFixed(1), pct: ((ratio - 1) * 100).toFixed(0), sector: sectorLabel, avg: industryAvgPS }); }
     valRows += checklistRow(t('sc_ps_vs_sector'), 'sc_pe_sector', vType, vLabel, vInsight);
   }
-  // Bonus display row moved from Quality
-  valRows += criteriaRow('debt', scored.criteria.debt, rawDataFor('debt', scored, data), data);
 
   // ── QUALITY rows ─────────────────────────────────────────────
   let qualRows = '';
@@ -325,6 +321,9 @@ export async function renderAnalysisTables(fundamentalEl, technicalEl, scored, d
   for (const key of qualityCriteria) {
     qualRows += criteriaRow(key, scored.criteria[key], rawDataFor(key, scored, data), data);
   }
+  // Bonus display rows (not in scoring model but informative)
+  qualRows += criteriaRow('debt',        scored.criteria.debt,        rawDataFor('debt',        scored, data), data);
+  qualRows += criteriaRow('institutional', scored.criteria.institutional, rawDataFor('institutional', scored, data), data);
 
   // ── TECHNICAL rows ───────────────────────────────────────────
   let techRows = '';
