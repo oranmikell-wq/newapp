@@ -1212,6 +1212,11 @@
   .aaii-seg-txt    { font-size: 9px; padding: 0 3px; }
 }
 
+/* Market page — AAII block is 1/3 width, reduce text to fit */
+.market-blocks-row .aaii-seg     { overflow: visible; position: relative; }
+.market-blocks-row .aaii-seg-txt { font-size: 9px; padding: 0 2px; }
+.market-blocks-row .aaii-row-label { flex: 0 0 90px; font-size: 10.5px; }
+
 /* RTL */
 [dir="rtl"] .aaii-row    { flex-direction: row-reverse; }
 [dir="rtl"] .aaii-legend { flex-direction: row-reverse; }
