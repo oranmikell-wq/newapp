@@ -334,7 +334,6 @@ function buildBreakdown(families) {
         <span class="sg-name-btn">
           <span class="sg-factor-name">${label}</span>
         </span>
-        <span class="sg-factor-weight">${wLabel}</span>
       </div>
       <div class="sg-bar-track">
         <div class="sg-bar-fill" style="width:0%;background:${color}" data-target="${score ?? 0}"></div>
