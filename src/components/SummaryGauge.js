@@ -125,12 +125,18 @@ function lerpColor(hex1, hex2, t) {
   return `rgb(${Math.round(r1+(r2-r1)*t)},${Math.round(g1+(g2-g1)*t)},${Math.round(b1+(b2-b1)*t)})`;
 }
 
-/** Returns an interpolated color for scores 0 → 100 (red → amber → green) */
+/** Returns a zone color for scores 0 → 100 (5-color: deep-red / orange / amber / green / deep-green) */
 function scoreToColor(score) {
   const s = Math.max(0, Math.min(100, score ?? 0));
-  if (s < 41) return lerpColor('#dc2626', '#f59e0b', s / 40);
-  if (s < 66) return lerpColor('#f59e0b', '#22c55e', (s - 40) / 25);
-  return lerpColor('#22c55e', '#16a34a', (s - 65) / 35);
+  if (s < 18) return '#dc2626';                                          // deep red
+  if (s < 22) return lerpColor('#dc2626', '#f97316', (s - 18) / 4);     // red → orange
+  if (s < 39) return '#f97316';                                          // orange
+  if (s < 43) return lerpColor('#f97316', '#f59e0b', (s - 39) / 4);     // orange → amber
+  if (s < 64) return '#f59e0b';                                          // amber
+  if (s < 68) return lerpColor('#f59e0b', '#22c55e', (s - 64) / 4);     // amber → green
+  if (s < 79) return '#22c55e';                                          // light green
+  if (s < 83) return lerpColor('#22c55e', '#16a34a', (s - 79) / 4);     // green → deep green
+  return '#16a34a';                                                       // deep green
 }
 
 // ═════════════════════════════════════════════════════════
@@ -163,7 +169,10 @@ function buildGaugeSVG() {
     </filter>
     <linearGradient id="sg-grad" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%"   stop-color="#dc2626"/>
-      <stop offset="40%"  stop-color="#f59e0b"/>
+      <stop offset="20%"  stop-color="#f97316"/>
+      <stop offset="41%"  stop-color="#f59e0b"/>
+      <stop offset="66%"  stop-color="#22c55e"/>
+      <stop offset="81%"  stop-color="#16a34a"/>
       <stop offset="100%" stop-color="#16a34a"/>
     </linearGradient>`;
   svg.appendChild(defs);
@@ -177,7 +186,7 @@ function buildGaugeSVG() {
   }));
 
   // ── Zone separators at 45 and 70 ──
-  for (const tick of [45, 70]) {
+  for (const tick of [41, 66]) {
     const inner = pointOnArc(tick, R - 13);
     const outer = pointOnArc(tick, R + 12);
     svg.appendChild(el('line', {
@@ -292,12 +301,11 @@ function animateGauge(svg, targetScore, duration = 1300) {
     scoreText.textContent = Math.round(current);
     scoreText.setAttribute('fill', color);
 
-    // Dynamic glow: intensity grows with score, color matches arc
-    const glowSize    = Math.round(4 + eased * 20);
-    const glowOpacity = (0.25 + eased * 0.55).toFixed(2);
-    // Convert rgb(...) → rgba(..., opacity) for the glow
+    // Subtle glow that doesn't overwhelm the zone color
+    const glowSize    = Math.round(3 + eased * 6);
+    const glowOpacity = (0.15 + eased * 0.20).toFixed(2);
     const glowColor   = color.replace('rgb(', 'rgba(').replace(')', `,${glowOpacity})`);
-    arc.style.filter  = `drop-shadow(0 0 ${glowSize}px ${glowColor}) drop-shadow(0 0 ${glowSize * 2}px ${glowColor})`;
+    arc.style.filter  = `drop-shadow(0 0 ${glowSize}px ${glowColor})`;
 
     if (progress < 1) requestAnimationFrame(frame);
   }

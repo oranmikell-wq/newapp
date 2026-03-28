@@ -429,8 +429,8 @@ export function calcScore(data, history5y = [], indicators = {}) {
 
   let rating = 'wait';
   if (finalScore != null) {
-    if (finalScore >= 70) rating = 'buy';
-    else if (finalScore < 45) rating = 'sell';
+    if (finalScore >= 66) rating = 'buy';
+    else if (finalScore < 41) rating = 'sell';
   }
 
   return {
