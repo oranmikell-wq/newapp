@@ -452,7 +452,11 @@ async function loadResults(symbol, isRefresh = false) {
     const scored = calcScore(data, h5, fullStockData?.indicators ?? {});
     currentStock = { ...data, ...scored };
     // Cache score for Top Picks display
-    try { localStorage.setItem(`bon-score-${symbol.toUpperCase()}`, JSON.stringify({ score: scored.score, rating: scored.rating, ts: Date.now() })); } catch {}
+    try {
+      localStorage.setItem(`bon-score-${symbol.toUpperCase()}`, JSON.stringify({ score: scored.score, rating: scored.rating, ts: Date.now() }));
+      // Invalidate Top Picks cache so it picks up the fresh score on next home visit
+      localStorage.removeItem('bon-toppicks-v4');
+    } catch {}
 
     if (offline && cacheDate) {
       document.getElementById('offline-banner').classList.remove('hidden');
