@@ -469,6 +469,8 @@ async function loadResults(symbol, isRefresh = false) {
 
     const scored = calcScore(data, h5, fullStockData?.indicators ?? {});
     currentStock = { ...data, ...scored };
+    // Cache score for Top Picks display
+    try { localStorage.setItem(`bon-score-${symbol.toUpperCase()}`, JSON.stringify({ score: scored.score, rating: scored.rating, ts: Date.now() })); } catch {}
 
     if (offline && cacheDate) {
       document.getElementById('offline-banner').classList.remove('hidden');

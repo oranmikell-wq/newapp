@@ -1,25 +1,22 @@
 // TopPicks.js — "Top 5 by Indicator" block for the home page
-// Scans a curated universe of stocks using Yahoo Finance data,
-// scores each with calcScore (partial — no history/indicators),
-// and displays the top 5 sorted by score descending.
+// Uses scores saved by the results page (exact speedometer scores).
+// Falls back to fetchAllData for stocks not yet visited.
 
 import { t } from '../utils/i18n.js?v=5';
 import { calcScore } from '../utils/scoring.js';
-import { yahooFundamentals, yahooChart, parseAllData, fetchHistory } from '../services/StockService.js';
-import { cacheGet } from '../services/CacheService.js';
+import { fetchAllData, fetchHistory } from '../services/StockService.js';
 
-// ── Curated universe (30 well-known S&P 500 stocks across sectors) ──────────
 const UNIVERSE = [
-  'AAPL','MSFT','NVDA','GOOGL','META',   // Tech
-  'JPM','V','GS',                         // Financials
-  'JNJ','UNH','LLY',                      // Healthcare
-  'KO','WMT','MCD',                       // Consumer
-  'XOM','NEE','CAT',                      // Energy / Utilities / Industrial
+  'AAPL','MSFT','NVDA','GOOGL','META',
+  'JPM','V','GS',
+  'JNJ','UNH','LLY',
+  'KO','WMT','MCD',
+  'XOM','NEE','CAT',
 ];
 
-// ── Cache key & TTL (1 hour) ─────────────────────────────────────────────────
-const PICKS_KEY = 'bon-toppicks-v2'; // v2: includes 5Y history for accurate scoring
+const PICKS_KEY = 'bon-toppicks-v4';
 const PICKS_TTL = 60 * 60 * 1000; // 1 hour
+const SCORE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
 function picksFromCache() {
   try {
@@ -32,84 +29,63 @@ function picksFromCache() {
 }
 
 function picksToCache(picks) {
+  try { localStorage.setItem(PICKS_KEY, JSON.stringify({ picks, ts: Date.now() })); } catch {}
+}
+
+// Read score saved by the results page speedometer
+function getCachedScore(symbol) {
   try {
-    localStorage.setItem(PICKS_KEY, JSON.stringify({ picks, ts: Date.now() }));
-  } catch {}
+    const raw = localStorage.getItem(`bon-score-${symbol.toUpperCase()}`);
+    if (!raw) return null;
+    const { score, rating, ts } = JSON.parse(raw);
+    if (Date.now() - ts < SCORE_TTL) return { score, rating };
+    return null;
+  } catch { return null; }
 }
 
-// ── Fetch minimal data for one symbol ────────────────────────────────────────
-async function fetchQuick(symbol) {
-  // 1. Use existing 15-min price cache if available
-  const cached = cacheGet(symbol);
-  const cachedData = cached || null;
-
-  let data = cachedData;
-  if (!data) {
-    // Fetch Yahoo chart + fundamentals in parallel
-    const [chartRaw, yfFund] = await Promise.allSettled([
-      yahooChart(symbol, '1d', '1d'),
-      yahooFundamentals(symbol),
-    ]);
-
-    const meta = chartRaw.status === 'fulfilled'
-      ? chartRaw.value?.chart?.result?.[0]?.meta
-      : null;
-    if (!meta?.regularMarketPrice) return null;
-
-    const fund = yfFund.status === 'fulfilled' ? yfFund.value : null;
-    data = parseAllData({ meta, yfFund: fund, stats: null, ratings: null, target: null, earning: null, newsResp: null, finviz: null }, symbol);
-  }
-
-  // 2. Fetch 5Y price history for accurate scoring (same as results page)
-  const history = await fetchHistory(symbol, '5Y').catch(() => []);
-  return { data, history };
-}
-
-// ── Score all stocks in batches of 5 ─────────────────────────────────────────
 async function scoreUniverse() {
   const BATCH = 5;
   const results = [];
 
   for (let i = 0; i < UNIVERSE.length; i += BATCH) {
     const batch = UNIVERSE.slice(i, i + BATCH);
-    const settled = await Promise.allSettled(batch.map(sym => fetchQuick(sym)));
+    const settled = await Promise.allSettled(batch.map(async sym => {
+      // Use exact score from results page if available
+      const cached = getCachedScore(sym);
+      if (cached) {
+        // Still need price/name — use fetchAllData (hits 15-min cache)
+        const { data } = await fetchAllData(sym, true);
+        if (!data) return null;
+        return { symbol: sym, name: data.name ?? sym, score: cached.score, rating: cached.rating, price: data.price, changePct: data.changePct };
+      }
 
-    settled.forEach((res, idx) => {
-      const sym = batch[idx];
-      if (res.status !== 'fulfilled' || !res.value) return;
-      const { data, history } = res.value;
-      try {
-        const scored = calcScore(data, history ?? [], {});
-        if (scored.score != null) {
-          results.push({
-            symbol: sym,
-            name: data.name ?? sym,
-            score: scored.score,
-            rating: scored.rating,
-            price: data.price,
-            changePct: data.changePct,
-          });
-        }
-      } catch {}
+      // Fallback: compute from scratch (same as results page)
+      const [{ data }, history] = await Promise.all([
+        fetchAllData(sym, true),
+        fetchHistory(sym, '5Y').catch(() => []),
+      ]);
+      if (!data) return null;
+      const scored = calcScore(data, history ?? [], {});
+      if (scored.score == null) return null;
+      return { symbol: sym, name: data.name ?? sym, score: scored.score, rating: scored.rating, price: data.price, changePct: data.changePct };
+    }));
+
+    settled.forEach(res => {
+      if (res.status === 'fulfilled' && res.value) results.push(res.value);
     });
 
-    // Small pause between batches to be kind to the API
-    if (i + BATCH < UNIVERSE.length) {
-      await new Promise(r => setTimeout(r, 300));
-    }
+    if (i + BATCH < UNIVERSE.length) await new Promise(r => setTimeout(r, 300));
   }
 
   return results.sort((a, b) => b.score - a.score).slice(0, 5);
 }
 
-// ── Rating → CSS class & emoji ────────────────────────────────────────────────
 const BADGE = {
-  buy:  { cls: 'tp-badge-buy',  emoji: '🟢' },
-  wait: { cls: 'tp-badge-wait', emoji: '🟡' },
-  sell: { cls: 'tp-badge-sell', emoji: '🔴' },
+  buy:  { cls: 'tp-badge-buy' },
+  wait: { cls: 'tp-badge-wait' },
+  sell: { cls: 'tp-badge-sell' },
 };
 
-// ── Render one stock chip ─────────────────────────────────────────────────────
 function renderChip(pick) {
   const b = BADGE[pick.rating] || BADGE.wait;
   const sign = pick.changePct >= 0 ? '+' : '';
@@ -137,11 +113,9 @@ function renderChip(pick) {
   return chip;
 }
 
-// ── Main render ───────────────────────────────────────────────────────────────
 export async function renderTopPicks(container) {
   if (!container) return;
 
-  // ── Section shell ──
   container.innerHTML = `
     <h2 class="section-title">${t('topPicksTitle')}</h2>
     <div class="sidebar-card tp-card">
@@ -155,9 +129,7 @@ export async function renderTopPicks(container) {
   const list = container.querySelector('#tp-list');
 
   try {
-    // Try cache first
     let picks = picksFromCache();
-
     if (!picks) {
       picks = await scoreUniverse();
       if (picks.length > 0) picksToCache(picks);
@@ -182,7 +154,6 @@ export async function renderTopPicks(container) {
       });
       list.appendChild(chip);
     });
-
   } catch {
     list.innerHTML = `<p class="tp-no-data">${t('noData')}</p>`;
   }
