@@ -1,9 +1,7 @@
-// Chart.js — TradingView Advanced Chart widget (main) + Lightweight Charts (compare)
-// tv.js loaded from CDN in index.html; LightweightCharts global used for compare only
+// Chart.js — TradingView Advanced Chart widget
 
 import { fetchHistory } from '../services/StockService.js';
 
-let compareChart = null;
 let currentSymbol = null;
 let currentRange   = '1M';
 
@@ -82,29 +80,3 @@ export function updateChartTheme(isDark) {
   loadChart(currentSymbol, currentRange);
 }
 
-export async function initCompareChart(symbols) {
-  const container = document.getElementById('compare-chart');
-  if (!container) return;
-  if (compareChart) { compareChart.remove(); compareChart = null; }
-  const isDark  = document.body.classList.contains('theme-dark');
-  const COLORS  = ['#16a34a', '#2563eb', '#dc2626'];
-  compareChart  = LightweightCharts.createChart(container, {
-    width:  container.clientWidth,
-    height: 220,
-    layout: { background: { color: isDark ? '#0a0a0a' : '#ffffff' }, textColor: isDark ? '#94a3b8' : '#475569' },
-    grid:   { vertLines: { color: isDark ? '#1a1a1a' : '#f1f5f9' }, horzLines: { color: isDark ? '#1a1a1a' : '#f1f5f9' } },
-    rightPriceScale: { borderColor: isDark ? '#2a2a2a' : '#e2e8f0' },
-    timeScale:       { borderColor: isDark ? '#2a2a2a' : '#e2e8f0', timeVisible: true },
-  });
-  for (let i = 0; i < symbols.length; i++) {
-    try {
-      const data = await fetchHistory(symbols[i], '1Y');
-      if (!data.length) continue;
-      const base    = data[0].value;
-      const relData = data.map(p => ({ time: p.time, value: ((p.value - base) / base) * 100 }));
-      const series  = compareChart.addSeries(LightweightCharts.LineSeries, { color: COLORS[i % COLORS.length], lineWidth: 2, title: symbols[i] });
-      series.setData(relData);
-    } catch {}
-  }
-  compareChart.timeScale().fitContent();
-}

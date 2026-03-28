@@ -1112,9 +1112,6 @@ body {
 #results-content.did-animate .news-section {
   animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.28s both;
 }
-#results-content.did-animate .compare-bar {
-  animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.33s both;
-}
 #results-content.did-animate .disclaimer {
   animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.36s both;
 }

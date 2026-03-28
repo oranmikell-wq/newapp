@@ -18,7 +18,7 @@ import { renderMarketStatus, loadDXY, loadCommodities, loadSectorPerformance, lo
 import { initInfoButtons } from './components/InfoPopup.js';
 import { renderCompanyCard } from './components/CompanyCard.js';
 import { showAutocomplete, hideAutocomplete, selectAutocomplete, confirmAutocomplete, showRecentSearches, initAutocomplete } from './components/Autocomplete.js';
-import { initChart, loadChart, updateChartTheme, initCompareChart } from './components/Chart.js';
+import { initChart, loadChart, updateChartTheme } from './components/Chart.js';
 import {
   getWatchlist, saveWatchlist, isInWatchlist,
   addToWatchlist, removeFromWatchlist as _removeFromWatchlist,
@@ -26,13 +26,6 @@ import {
   updateWatchlistBtn, checkWatchlistAlerts,
   renderWatchlist as _renderWatchlist,
 } from './components/Watchlist.js';
-import {
-  getCompareList,
-  addToCompare as _addToCompare,
-  removeFromCompare as _removeFromCompare,
-  updateCompareBtn,
-  renderCompare as _renderCompare,
-} from './components/Compare.js';
 
 import {
   initWatchlistSidebar, openWatchlistSidebar, closeWatchlistSidebar,
@@ -265,10 +258,6 @@ function _renderHomeNewsItems(container, items) {
     </a>`).join('');
 }
 
-function renderCompare() {
-  _renderCompare(showNotification);
-}
-
 function renderHistory() {
   _renderHistory(navigateTo);
 }
@@ -278,7 +267,6 @@ let _marketDataLoaded = false;
 function navigateTo(page, symbol = null) {
   _navigateTo(page, symbol, {
     loadResults,
-    renderCompare,
   });
   if (page === 'home') renderHomeWatchlist();
   if (page === 'market' && !_marketDataLoaded) {
@@ -296,10 +284,6 @@ function removeFromWatchlistBound(symbol) {
   updateSidebarCount();
 }
 
-function removeFromCompareBound(symbol) {
-  _removeFromCompare(symbol, updateCompareBtn, renderCompare);
-}
-
 function removeHistoryBound(symbol) {
   _removeHistory(symbol, renderHistory);
 }
@@ -313,8 +297,6 @@ window.navigateTo = navigateTo;
 window.removeHistory = removeHistoryBound;
 
 window.removeFromWatchlist = removeFromWatchlistBound;
-
-window.removeFromCompare = removeFromCompareBound;
 
 window.openWatchlistSidebar  = openWatchlistSidebar;
 window.closeWatchlistSidebar = closeWatchlistSidebar;
@@ -522,7 +504,6 @@ async function loadResults(symbol, isRefresh = false) {
 
     loadChart(symbol, '1M');
     updateWatchlistBtn(symbol);
-    updateCompareBtn(symbol);
 
     // Analysis Tables (Fundamental + Technical) — async, fills SPY row after initial render
     const fundamentalEl = document.getElementById('analysis-fundamental-section');
@@ -692,7 +673,6 @@ function bindEvents() {
   // Back buttons
   document.getElementById('btn-back')?.addEventListener('click', () => navigateTo('home'));
   document.getElementById('btn-back-err')?.addEventListener('click', () => navigateTo('home'));
-  document.getElementById('btn-back-compare')?.addEventListener('click', () => navigateTo('home'));
   document.getElementById('btn-back-about')?.addEventListener('click', () => navigateTo('home'));
 
   // Top-bar nav items
@@ -729,11 +709,6 @@ function bindEvents() {
     });
   });
 
-  // Add to compare
-  document.getElementById('btn-add-compare')?.addEventListener('click', () => {
-    if (!currentStock) return;
-    _addToCompare(currentStock.symbol, currentStock.name, showNotification, updateCompareBtn);
-  });
 }
 
 // ── DOMContentLoaded ───────────────────────────────────

@@ -8,7 +8,7 @@ function closeDrawer() {
   document.getElementById('nav-drawer')?.setAttribute('aria-hidden', 'true');
 }
 
-export function navigateTo(page, symbol = null, { loadResults, renderCompare } = {}) {
+export function navigateTo(page, symbol = null, { loadResults } = {}) {
   closeDrawer();
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const activePage = document.getElementById(`page-${page}`);
@@ -39,7 +39,6 @@ export function navigateTo(page, symbol = null, { loadResults, renderCompare } =
     if (loading)  loading.style.display = 'flex';
     if (loadResults) loadResults(symbol);
   }
-  if (page === 'compare' && renderCompare) renderCompare();
 }
 
 export function getCurrentPage() {

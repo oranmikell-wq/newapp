@@ -607,12 +607,6 @@
   margin-top: 5px;
 }
 
-/* ===== COMPARE BAR ===== */
-.compare-bar {
-  padding: 16px;
-  text-align: center;
-}
-
 /* ===== DISCLAIMER ===== */
 .disclaimer {
   text-align: center;
@@ -688,7 +682,6 @@
   .res-symbol { font-size: 22px; }
   .res-name   { font-size: 13px; }
 
-  .compare-bar { padding: 20px 32px; }
   .disclaimer  { padding: 0 32px 16px; }
 }
 
@@ -1159,13 +1152,6 @@ body.theme-dark .sg-svg {
   margin-bottom: 12px;
 }
 
-/* Compare bar card-style */
-.compare-bar {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-}
 
 /* Desktop: maintain 2-col card layout */
 @media (min-width: 900px) {
