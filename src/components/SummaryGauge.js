@@ -175,6 +175,15 @@ function animateGauge(svg, targetScore, duration = 1300) {
   let startTime = null;
 
   function frame(ts) {
+    // If tab is hidden, pause and resume when visible to avoid throttled RAF
+    if (document.hidden) {
+      startTime = null;
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) requestAnimationFrame(frame);
+      }, { once: true });
+      return;
+    }
+
     if (!startTime) startTime = ts;
     const progress = Math.min(1, (ts - startTime) / duration);
     const eased    = easeOutCubic(progress);
